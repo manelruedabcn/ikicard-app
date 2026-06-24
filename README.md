@@ -1,0 +1,1 @@
+# IKICARD App — app.ikigaier.com
