@@ -1,4 +1,4 @@
-// Cartas jugables del mazo IKICARD (77 total)
+// Cartas jugables del mazo IKICARD (68 total)
 const range = (prefix: string, from: number, to: number) =>
   Array.from({ length: to - from + 1 }, (_, i) => {
     const n = from + i
@@ -6,9 +6,9 @@ const range = (prefix: string, from: number, to: number) =>
   })
 
 export const PLAYABLE_CARDS: string[] = [
-  ...range('D', 1, 18), // Despertar
-  ...range('E', 1, 18), // Descender
-  ...range('A', 1, 18), // Atravesar
+  ...range('D', 1, 15), // Despertar
+  ...range('E', 1, 15), // Descender
+  ...range('A', 1, 15), // Atravesar
   ...range('R', 1, 15), // Retornar
   'X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7', 'X8', // Wildcards
 ]
