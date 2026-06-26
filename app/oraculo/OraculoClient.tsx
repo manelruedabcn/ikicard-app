@@ -84,7 +84,7 @@ export default function OraculoClient({ userId, todaySessions, history, allPlaye
           Tu carta de hoy
         </p>
 
-        <div className="relative w-full aspect-[2/3] rounded-sm overflow-hidden shadow-md mb-6">
+        <div className="relative w-full aspect-[2/3] rounded-xl overflow-hidden shadow-md mb-6">
           <Image
             src={`/cards/${selectedCard}.png`}
             alt={selectedCard}
@@ -135,7 +135,7 @@ export default function OraculoClient({ userId, todaySessions, history, allPlaye
           <div className="flex flex-col gap-3">
             {history.map((s, i) => (
               <div key={i} className="flex items-center gap-4 border-b border-[#272727]/10 pb-3">
-                <div className="relative w-12 h-16 flex-shrink-0 rounded-sm overflow-hidden">
+                <div className="relative w-12 h-16 flex-shrink-0 rounded-lg overflow-hidden">
                   <Image
                     src={`/cards/${s.card_code}.png`}
                     alt={s.card_code}
