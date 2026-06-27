@@ -141,7 +141,7 @@ export default function OraculoClient({ userId, locale, todaySessions, history, 
 
         <div className="relative w-full aspect-[2/3] rounded-xl overflow-hidden shadow-md mb-6">
           <Image
-            src={`/cards/${selectedCard}.png`}
+            src={`/cards/${locale}/${selectedCard}.png`}
             alt={selectedCard}
             fill
             className="object-cover"
@@ -199,7 +199,7 @@ export default function OraculoClient({ userId, locale, todaySessions, history, 
               <div key={i} className="flex items-center gap-4 border-b border-[#272727]/10 pb-3">
                 <div className="relative w-12 h-16 flex-shrink-0 rounded-lg overflow-hidden">
                   <Image
-                    src={`/cards/${s.card_code}.png`}
+                    src={`/cards/${locale}/${s.card_code}.png`}
                     alt={s.card_code}
                     fill
                     className="object-cover"
