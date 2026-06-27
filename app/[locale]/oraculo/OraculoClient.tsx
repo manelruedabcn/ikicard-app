@@ -49,8 +49,6 @@ export default function OraculoClient({ userId, locale, todaySessions, history, 
   const languages = [
     { code: 'en', label: 'EN' },
     { code: 'es', label: 'ES' },
-    { code: 'ca', label: 'CA' },
-    { code: 'pt', label: 'PT' },
   ]
 
   async function handleSave() {
