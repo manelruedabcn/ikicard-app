@@ -57,6 +57,19 @@ export default function OraculoClient({ userId, todaySessions, history, allPlaye
     setSaving(false)
   }
 
+  async function handleShare() {
+    const cardText = selectedCard
+    if (navigator.share) {
+      await navigator.share({
+        title: 'Mi carta IKICARD de hoy',
+        text: `Mi pregunta de hoy: ${cardText}\n\nikigaier.com`,
+      })
+    } else {
+      await navigator.clipboard.writeText(cardText)
+      alert('Copiado al portapapeles')
+    }
+  }
+
   async function handleLogout() {
     const supabase = createClient()
     await supabase.auth.signOut()
@@ -97,6 +110,13 @@ export default function OraculoClient({ userId, todaySessions, history, allPlaye
         <p className="text-center font-[family-name:var(--font-cormorant)] text-lg text-[#272727]/60 mb-6">
           {selectedCard}
         </p>
+
+        <button
+          onClick={handleShare}
+          className="w-full py-3 border border-[#272727]/30 text-[#272727]/60 text-xs tracking-widest hover:border-[#c2866b] hover:text-[#c2866b] transition-colors mb-6"
+        >
+          COMPARTIR
+        </button>
 
         {/* Sello */}
         {saved ? (
