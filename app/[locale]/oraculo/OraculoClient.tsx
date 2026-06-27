@@ -44,8 +44,6 @@ export default function OraculoClient({ userId, locale, todaySessions, history, 
   const [saved, setSaved] = useState(alreadyPlayedToday)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const [copied, setCopied] = useState(false)
-
   const languages = [
     { code: 'en', label: 'EN' },
     { code: 'es', label: 'ES' },
@@ -77,29 +75,17 @@ export default function OraculoClient({ userId, locale, todaySessions, history, 
     window.location.href = `/${locale}/login`
   }
 
-  async function handleShare() {
-    const cardQuestion = selectedCard
-    const shareText = `${cardQuestion}\n\nikigaier.com`
-
+  const handleShare = async () => {
+    const shareData = {
+      title: 'IKICARD',
+      text: `Mi carta de hoy — app.ikigaier.com`,
+      url: 'https://app.ikigaier.com',
+    }
     if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'IKICARD',
-          text: shareText,
-        })
-      } catch {
-        // Usuario canceló — no hacer nada
-      }
+      await navigator.share(shareData)
     } else {
-      // Fallback: copiar al portapapeles
-      try {
-        await navigator.clipboard.writeText(shareText)
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
-      } catch {
-        // Fallback final: alert
-        alert(shareText)
-      }
+      await navigator.clipboard.writeText('https://app.ikigaier.com')
+      alert('Enlace copiado')
     }
   }
 
@@ -157,7 +143,7 @@ export default function OraculoClient({ userId, locale, todaySessions, history, 
           onClick={handleShare}
           className="w-full py-3 border border-[#272727]/30 text-[#272727]/60 text-xs tracking-widest hover:border-[#c2866b] hover:text-[#c2866b] transition-colors mb-6"
         >
-          {copied ? '✓ COPIADO' : t('share_button')}
+          {t('share_button')}
         </button>
 
         {/* Sello */}
