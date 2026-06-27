@@ -44,6 +44,7 @@ export default function OraculoClient({ userId, locale, todaySessions, history, 
   const [saved, setSaved] = useState(alreadyPlayedToday)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [copied, setCopied] = useState(false)
 
   const languages = [
     { code: 'en', label: 'EN' },
@@ -79,15 +80,28 @@ export default function OraculoClient({ userId, locale, todaySessions, history, 
   }
 
   async function handleShare() {
-    const cardText = selectedCard
+    const cardQuestion = selectedCard
+    const shareText = `${cardQuestion}\n\nikigaier.com`
+
     if (navigator.share) {
-      await navigator.share({
-        title: 'Mi carta IKICARD de hoy',
-        text: `Mi carta de hoy: ${cardText}\n\nikigaier.com`,
-      })
+      try {
+        await navigator.share({
+          title: 'IKICARD',
+          text: shareText,
+        })
+      } catch {
+        // Usuario canceló — no hacer nada
+      }
     } else {
-      await navigator.clipboard.writeText(cardText)
-      alert('Copiado al portapapeles')
+      // Fallback: copiar al portapapeles
+      try {
+        await navigator.clipboard.writeText(shareText)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      } catch {
+        // Fallback final: alert
+        alert(shareText)
+      }
     }
   }
 
@@ -145,7 +159,7 @@ export default function OraculoClient({ userId, locale, todaySessions, history, 
           onClick={handleShare}
           className="w-full py-3 border border-[#272727]/30 text-[#272727]/60 text-xs tracking-widest hover:border-[#c2866b] hover:text-[#c2866b] transition-colors mb-6"
         >
-          {t('share_button')}
+          {copied ? '✓ COPIADO' : t('share_button')}
         </button>
 
         {/* Sello */}
