@@ -9,18 +9,25 @@ const intlMiddleware = createIntlMiddleware({
 })
 
 export async function middleware(request: NextRequest) {
+  // 1. Siempre pasar por next-intl para negociación de locale
+  const intlResponse = intlMiddleware(request)
+
+  // Si next-intl redirigió (ej. /login → /en/login), seguimos la redirección
+  if (intlResponse && intlResponse.status !== 200) {
+    return intlResponse
+  }
+
   const { pathname } = request.nextUrl
 
-  // Skip Supabase auth for non-protected paths, let next-intl handle them
+  // 2. Solo aplicar auth en rutas protegidas
   const isProtected = pathname.match(new RegExp('^/(en|es)?/?oraculo'))
   const isLogin = pathname.match(new RegExp('^/(en|es)?/?login/?$'))
 
   if (!isProtected && !isLogin) {
-    return intlMiddleware(request)
+    return intlResponse ?? NextResponse.next()
   }
 
-  let supabaseResponse = NextResponse.next({ request })
-
+  // 3. Auth con Supabase
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -30,10 +37,8 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({ request })
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            intlResponse?.cookies.set(name, value, options)
           )
         },
       },
@@ -54,7 +59,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(`/${locale}/oraculo`, request.url))
   }
 
-  return supabaseResponse
+  return intlResponse ?? NextResponse.next()
 }
 
 export const config = {
