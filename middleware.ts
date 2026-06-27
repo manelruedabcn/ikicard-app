@@ -1,7 +1,24 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import createIntlMiddleware from 'next-intl/middleware'
+
+const intlMiddleware = createIntlMiddleware({
+  locales: ['en', 'es', 'ca', 'pt', 'fr', 'de'],
+  defaultLocale: 'en',
+  localeDetection: true,
+})
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  // Skip Supabase auth for non-protected paths, let next-intl handle them
+  const isProtected = pathname.match(/^\/(en|es|ca|pt|fr|de)?\/?oraculo/)
+  const isLogin = pathname.match(/^\/(en|es|ca|pt|fr|de)?\/?login\/?$/)
+
+  if (!isProtected && !isLogin) {
+    return intlMiddleware(request)
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -25,21 +42,21 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { pathname } = request.nextUrl
-
   // Rutas protegidas
-  if (!user && pathname.startsWith('/oraculo')) {
-    return NextResponse.redirect(new URL('/login', request.url))
+  if (!user && isProtected) {
+    const locale = pathname.match(/^\/(en|es|ca|pt|fr|de)/)?.[1] || 'en'
+    return NextResponse.redirect(new URL(`/${locale}/login`, request.url))
   }
 
   // Si ya hay sesión y va a login, redirige al oráculo
-  if (user && pathname === '/login') {
-    return NextResponse.redirect(new URL('/oraculo', request.url))
+  if (user && isLogin) {
+    const locale = pathname.match(/^\/(en|es|ca|pt|fr|de)/)?.[1] || 'en'
+    return NextResponse.redirect(new URL(`/${locale}/oraculo`, request.url))
   }
 
   return supabaseResponse
 }
 
 export const config = {
-  matcher: ['/oraculo/:path*', '/login'],
+  matcher: ['/((?!api|_next|_vercel|.*\\..*).*)'],
 }

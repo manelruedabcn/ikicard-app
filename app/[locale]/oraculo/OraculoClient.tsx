@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
+import { useRouter, usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { PLAYABLE_CARDS } from '@/lib/cards'
 
@@ -13,6 +15,7 @@ interface Session {
 
 interface Props {
   userId: string
+  locale: string
   todaySessions: Session[]
   history: Session[]
   allPlayedCodes: string[]
@@ -24,8 +27,13 @@ function pickCard(allPlayedCodes: string[]): string {
   return pool[Math.floor(Math.random() * pool.length)]
 }
 
-export default function OraculoClient({ userId, todaySessions, history, allPlayedCodes }: Props) {
+export default function OraculoClient({ userId, locale, todaySessions, history, allPlayedCodes }: Props) {
   const supabase = createClient()
+  const router = useRouter()
+  const pathname = usePathname()
+  const t = useTranslations('oraculo')
+  const tn = useTranslations('nav')
+
   const alreadyPlayedToday = todaySessions.length > 0
   const todayCard = alreadyPlayedToday ? todaySessions[0] : null
 
@@ -36,6 +44,13 @@ export default function OraculoClient({ userId, todaySessions, history, allPlaye
   const [saved, setSaved] = useState(alreadyPlayedToday)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+
+  const languages = [
+    { code: 'en', label: 'EN' },
+    { code: 'es', label: 'ES' },
+    { code: 'ca', label: 'CA' },
+    { code: 'pt', label: 'PT' },
+  ]
 
   async function handleSave() {
     if (!sello.trim()) return
@@ -57,15 +72,23 @@ export default function OraculoClient({ userId, todaySessions, history, allPlaye
     setSaving(false)
   }
 
-  function handleShare() {
-    const text = encodeURIComponent(`Mi carta IKICARD de hoy: ${selectedCard}\n\nikigaier.com`)
-    window.open(`https://wa.me/?text=${text}`, '_blank')
-  }
-
   async function handleLogout() {
     const supabase = createClient()
     await supabase.auth.signOut()
-    window.location.href = '/login'
+    window.location.href = `/${locale}/login`
+  }
+
+  async function handleShare() {
+    const cardText = selectedCard
+    if (navigator.share) {
+      await navigator.share({
+        title: 'Mi carta IKICARD de hoy',
+        text: `Mi carta de hoy: ${cardText}\n\nikigaier.com`,
+      })
+    } else {
+      await navigator.clipboard.writeText(cardText)
+      alert('Copiado al portapapeles')
+    }
   }
 
   return (
@@ -73,20 +96,35 @@ export default function OraculoClient({ userId, todaySessions, history, allPlaye
       {/* Header */}
       <div className="w-full max-w-lg flex items-center justify-between mb-8">
         <h1 className="font-[family-name:var(--font-cormorant)] text-2xl tracking-widest text-[#272727]">
-          IKICARD
+          {tn('title')}
         </h1>
-        <button
-          onClick={handleLogout}
-          className="text-xs text-[#272727]/40 hover:text-[#c2866b] transition-colors tracking-wide"
-        >
-          Salir
-        </button>
+        <div className="flex items-center gap-4">
+          <div className="flex gap-2">
+            {languages.map(lang => (
+              <button
+                key={lang.code}
+                onClick={() => router.push(`/${lang.code}${pathname.replace(/^\/[a-z]{2}/, '')}`)}
+                className={`text-xs tracking-wider transition-colors ${
+                  lang.code === locale ? 'text-[#c2866b]' : 'text-[#272727]/40 hover:text-[#c2866b]'
+                }`}
+              >
+                {lang.label}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={handleLogout}
+            className="text-xs text-[#272727]/40 hover:text-[#c2866b] transition-colors tracking-wide"
+          >
+            {tn('logout')}
+          </button>
+        </div>
       </div>
 
       {/* Carta del día */}
       <div className="w-full max-w-sm">
         <p className="text-xs text-[#272727]/40 tracking-widest uppercase mb-4 text-center">
-          Tu carta de hoy
+          {t('label')}
         </p>
 
         <div className="relative w-full aspect-[2/3] rounded-xl overflow-hidden shadow-md mb-6">
@@ -107,13 +145,13 @@ export default function OraculoClient({ userId, todaySessions, history, allPlaye
           onClick={handleShare}
           className="w-full py-3 border border-[#272727]/30 text-[#272727]/60 text-xs tracking-widest hover:border-[#c2866b] hover:text-[#c2866b] transition-colors mb-6"
         >
-          COMPARTIR POR WHATSAPP
+          {t('share_button')}
         </button>
 
         {/* Sello */}
         {saved ? (
           <div className="text-center">
-            <p className="text-xs text-[#272727]/40 tracking-widest uppercase mb-1">Tu sello</p>
+            <p className="text-xs text-[#272727]/40 tracking-widest uppercase mb-1">{t('sello_label')}</p>
             <p className="font-[family-name:var(--font-cormorant)] text-3xl text-[#c2866b]">
               {sello}
             </p>
@@ -122,7 +160,7 @@ export default function OraculoClient({ userId, todaySessions, history, allPlaye
           <div className="flex flex-col gap-3">
             <input
               type="text"
-              placeholder="Una palabra..."
+              placeholder={t('sello_placeholder')}
               value={sello}
               onChange={e => setSello(e.target.value)}
               maxLength={40}
@@ -134,7 +172,7 @@ export default function OraculoClient({ userId, todaySessions, history, allPlaye
               disabled={saving || !sello.trim()}
               className="w-full py-3 bg-[#272727] text-[#FDFBF7] text-xs tracking-widest hover:bg-[#c2866b] transition-colors disabled:opacity-40"
             >
-              {saving ? '...' : 'GUARDAR SELLO'}
+              {saving ? '...' : t('save_button')}
             </button>
           </div>
         )}
@@ -143,7 +181,7 @@ export default function OraculoClient({ userId, todaySessions, history, allPlaye
       {/* Historial */}
       {history.length > 0 && (
         <div className="w-full max-w-sm mt-12">
-          <p className="text-xs text-[#272727]/40 tracking-widest uppercase mb-4">Historial</p>
+          <p className="text-xs text-[#272727]/40 tracking-widest uppercase mb-4">{t('history_label')}</p>
           <div className="flex flex-col gap-3">
             {history.map((s, i) => (
               <div key={i} className="flex items-center gap-4 border-b border-[#272727]/10 pb-3">

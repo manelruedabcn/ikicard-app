@@ -1,0 +1,21 @@
+{
+  "nav": {
+    "title": "IKICARD",
+    "logout": "Quitter"
+  },
+  "oraculo": {
+    "label": "Votre carte du jour",
+    "sello_placeholder": "Un mot...",
+    "sello_label": "Votre sceau",
+    "save_button": "ENREGISTRER LE SCEAU",
+    "share_button": "PARTAGER",
+    "history_label": "Historique"
+  },
+  "auth": {
+    "login_title": "Connexion",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "login_button": "Se connecter",
+    "register_link": "Créer un compte"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "nav": {
+    "title": "IKICARD",
+    "logout": "Abmelden"
+  },
+  "oraculo": {
+    "label": "Deine Karte für heute",
+    "sello_placeholder": "Ein Wort...",
+    "sello_label": "Dein Siegel",
+    "save_button": "SIEGEL SPEICHERN",
+    "share_button": "TEILEN",
+    "history_label": "Verlauf"
+  },
+  "auth": {
+    "login_title": "Anmelden",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "login_button": "Anmelden",
+    "register_link": "Konto erstellen"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "nav": {
+    "title": "IKICARD",
+    "logout": "Salir"
+  },
+  "oraculo": {
+    "label": "Tu carta de hoy",
+    "sello_placeholder": "Una palabra...",
+    "sello_label": "Tu sello",
+    "save_button": "GUARDAR SELLO",
+    "share_button": "COMPARTIR",
+    "history_label": "Historial"
+  },
+  "auth": {
+    "login_title": "Iniciar sesión",
+    "email": "Correo",
+    "password": "Contraseña",
+    "login_button": "Entrar",
+    "register_link": "Crear cuenta"
+  }
+}

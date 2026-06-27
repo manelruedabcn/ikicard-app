@@ -1,0 +1,21 @@
+{
+  "nav": {
+    "title": "IKICARD",
+    "logout": "Sair"
+  },
+  "oraculo": {
+    "label": "Seu cartão de hoje",
+    "sello_placeholder": "Uma palavra...",
+    "sello_label": "Seu selo",
+    "save_button": "SALVAR SELO",
+    "share_button": "COMPARTILHAR",
+    "history_label": "Histórico"
+  },
+  "auth": {
+    "login_title": "Entrar",
+    "email": "E-mail",
+    "password": "Senha",
+    "login_button": "Entrar",
+    "register_link": "Criar conta"
+  }
+}

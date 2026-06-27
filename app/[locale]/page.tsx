@@ -3,13 +3,13 @@ export const dynamic = 'force-dynamic'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
-export default async function Home() {
+export default async function Home({ params: { locale } }: { params: { locale: string } }) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (user) {
-    redirect('/oraculo')
+    redirect(`/${locale}/oraculo`)
   } else {
-    redirect('/login')
+    redirect(`/${locale}/login`)
   }
 }

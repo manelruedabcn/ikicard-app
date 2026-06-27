@@ -1,0 +1,21 @@
+{
+  "nav": {
+    "title": "IKICARD",
+    "logout": "Sortir"
+  },
+  "oraculo": {
+    "label": "La teva carta d'avui",
+    "sello_placeholder": "Una paraula...",
+    "sello_label": "El teu segell",
+    "save_button": "GUARDAR SEGELL",
+    "share_button": "COMPARTIR",
+    "history_label": "Historial"
+  },
+  "auth": {
+    "login_title": "Iniciar sessió",
+    "email": "Correu",
+    "password": "Contrasenya",
+    "login_button": "Entrar",
+    "register_link": "Crear compte"
+  }
+}

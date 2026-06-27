@@ -1,17 +1,28 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 
-export default function LoginForm() {
+export default function LoginForm({ locale }: { locale: string }) {
   const router = useRouter()
+  const pathname = usePathname()
   const supabase = createClient()
+  const t = useTranslations('auth')
+  const tn = useTranslations('nav')
   const [mode, setMode] = useState<'login' | 'register'>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  const languages = [
+    { code: 'en', label: 'EN' },
+    { code: 'es', label: 'ES' },
+    { code: 'ca', label: 'CA' },
+    { code: 'pt', label: 'PT' },
+  ]
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -23,7 +34,7 @@ export default function LoginForm() {
       if (error) {
         setError(error.message)
       } else {
-        router.push('/oraculo')
+        router.push(`/${locale}/oraculo`)
         router.refresh()
       }
     } else {
@@ -41,7 +52,7 @@ export default function LoginForm() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 bg-[#FDFBF7]">
       <h1 className="font-[family-name:var(--font-cormorant)] text-5xl font-light tracking-widest text-[#272727] mb-12">
-        IKICARD
+        {tn('title')}
       </h1>
 
       <div className="w-full max-w-sm">
@@ -52,7 +63,7 @@ export default function LoginForm() {
             }`}
             onClick={() => setMode('login')}
           >
-            Entrar
+            {t('login_title')}
           </button>
           <button
             className={`flex-1 pb-2 text-sm tracking-wide transition-colors ${
@@ -60,14 +71,14 @@ export default function LoginForm() {
             }`}
             onClick={() => setMode('register')}
           >
-            Registrarse
+            {t('register_link')}
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input
             type="email"
-            placeholder="Email"
+            placeholder={t('email')}
             value={email}
             onChange={e => setEmail(e.target.value)}
             required
@@ -75,7 +86,7 @@ export default function LoginForm() {
           />
           <input
             type="password"
-            placeholder="Contraseña"
+            placeholder={t('password')}
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
@@ -89,9 +100,24 @@ export default function LoginForm() {
             disabled={loading}
             className="mt-4 w-full py-3 bg-[#272727] text-[#FDFBF7] text-xs tracking-widest hover:bg-[#c2866b] transition-colors disabled:opacity-50"
           >
-            {loading ? '...' : mode === 'login' ? 'ENTRAR' : 'REGISTRARSE'}
+            {loading ? '...' : mode === 'login' ? t('login_button') : t('register_link')}
           </button>
         </form>
+
+        {/* Language selector */}
+        <div className="flex justify-center gap-3 mt-10">
+          {languages.map(lang => (
+            <button
+              key={lang.code}
+              onClick={() => router.push(`/${lang.code}${pathname.replace(/^\/[a-z]{2}/, '')}`)}
+              className={`text-xs tracking-wider transition-colors ${
+                lang.code === locale ? 'text-[#c2866b]' : 'text-[#272727]/40 hover:text-[#c2866b]'
+              }`}
+            >
+              {lang.label}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   )

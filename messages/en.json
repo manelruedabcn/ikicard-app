@@ -1,0 +1,21 @@
+{
+  "nav": {
+    "title": "IKICARD",
+    "logout": "Sign out"
+  },
+  "oraculo": {
+    "label": "Your card today",
+    "sello_placeholder": "One word...",
+    "sello_label": "Your seal",
+    "save_button": "SAVE SEAL",
+    "share_button": "SHARE",
+    "history_label": "History"
+  },
+  "auth": {
+    "login_title": "Sign in",
+    "email": "Email",
+    "password": "Password",
+    "login_button": "Sign in",
+    "register_link": "Create account"
+  }
+}

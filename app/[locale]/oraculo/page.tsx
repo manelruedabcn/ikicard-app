@@ -4,11 +4,11 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import OraculoClient from './OraculoClient'
 
-export default async function OraculoPage() {
+export default async function OraculoPage({ params: { locale } }: { params: { locale: string } }) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) redirect('/login')
+  if (!user) redirect(`/${locale}/login`)
 
   // Cartas jugadas hoy
   const today = new Date().toISOString().split('T')[0]
@@ -38,6 +38,7 @@ export default async function OraculoPage() {
   return (
     <OraculoClient
       userId={user.id}
+      locale={locale}
       todaySessions={todaySessions || []}
       history={history || []}
       allPlayedCodes={(allPlayed || []).map(s => s.card_code)}
