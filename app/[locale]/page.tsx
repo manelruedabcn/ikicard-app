@@ -8,7 +8,7 @@ export default async function Home({ params: { locale } }: { params: { locale: s
   const { data: { user } } = await supabase.auth.getUser()
 
   if (user) {
-    redirect(`/${locale}/oraculo`)
+    redirect(`/${locale}/dashboard`)
   } else {
     redirect(`/${locale}/login`)
   }

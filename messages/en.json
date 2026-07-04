@@ -3,6 +3,12 @@
     "title": "IKICARD",
     "logout": "Sign out"
   },
+  "dashboard": {
+    "title": "How do you want to play today?",
+    "oraculo_desc": "One card a day. No commitment.",
+    "viaje_desc": "21 days with yourself. A real process.",
+    "circulo_desc": "In group. Coming soon."
+  },
   "oraculo": {
     "label": "Your card today",
     "sello_placeholder": "One word...",

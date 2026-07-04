@@ -32,7 +32,7 @@ export default function LoginForm({ locale }: { locale: string }) {
       if (error) {
         setError(error.message)
       } else {
-        router.push(`/${locale}/oraculo`)
+        router.push(`/${locale}/dashboard`)
         router.refresh()
       }
     } else {

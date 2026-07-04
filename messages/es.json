@@ -3,6 +3,12 @@
     "title": "IKICARD",
     "logout": "Salir"
   },
+  "dashboard": {
+    "title": "¿Cómo quieres jugar hoy?",
+    "oraculo_desc": "Una carta al día. Sin compromiso.",
+    "viaje_desc": "21 días contigo. Un proceso real.",
+    "circulo_desc": "En grupo. Próximamente."
+  },
   "oraculo": {
     "label": "Tu carta de hoy",
     "sello_placeholder": "Una palabra...",
