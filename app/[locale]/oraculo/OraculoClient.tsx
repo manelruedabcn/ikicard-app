@@ -21,10 +21,19 @@ interface Props {
   allPlayedCodes: string[]
 }
 
-function pickCard(allPlayedCodes: string[]): string {
+// Índice determinista a partir de una semilla (mismo resultado para misma semilla)
+function seededIndex(seed: string, length: number): number {
+  let h = 0
+  for (let i = 0; i < seed.length; i++) {
+    h = (h * 31 + seed.charCodeAt(i)) | 0
+  }
+  return Math.abs(h) % length
+}
+
+function pickCard(allPlayedCodes: string[], seed: string): string {
   const notSeen = PLAYABLE_CARDS.filter(c => !allPlayedCodes.includes(c))
   const pool = notSeen.length > 0 ? notSeen : PLAYABLE_CARDS
-  return pool[Math.floor(Math.random() * pool.length)]
+  return pool[seededIndex(seed, pool.length)]
 }
 
 export default function OraculoClient({ userId, locale, todaySessions, history, allPlayedCodes }: Props) {
@@ -37,8 +46,9 @@ export default function OraculoClient({ userId, locale, todaySessions, history, 
   const alreadyPlayedToday = todaySessions.length > 0
   const todayCard = alreadyPlayedToday ? todaySessions[0] : null
 
+  const today = new Date().toISOString().split('T')[0]
   const [selectedCard] = useState<string>(() =>
-    alreadyPlayedToday ? todaySessions[0].card_code : pickCard(allPlayedCodes)
+    alreadyPlayedToday ? todaySessions[0].card_code : pickCard(allPlayedCodes, `${userId}-${today}`)
   )
   const [sello, setSello] = useState(todayCard?.sello || '')
   const [saved, setSaved] = useState(alreadyPlayedToday)
