@@ -1,13 +1,19 @@
 {
   "nav": {
-    "title": "IKICARD",
+    "title": "IKIGAIER",
+    "tagline": "Busca tu propósito",
     "logout": "Salir"
   },
   "dashboard": {
     "title": "¿Cómo quieres jugar hoy?",
     "oraculo_desc": "Una carta al día. Sin compromiso.",
     "viaje_desc": "21 días contigo. Un proceso real.",
-    "circulo_desc": "En grupo. Próximamente."
+    "circulo_desc": "En grupo. Próximamente.",
+    "greeting": "Hola, {name}.",
+    "welcome_back": "Bienvenido de nuevo.",
+    "prepared": "Hoy tienes preparado esto para ti.",
+    "empty": "Aún no hay nada preparado para ti. Vuelve pronto.",
+    "expires": "Disponible hasta el {date}"
   },
   "viaje": {
     "start_title": "El Viaje de 21 días",
@@ -54,6 +60,29 @@
     "email": "Correo",
     "password": "Contraseña",
     "login_button": "Entrar",
-    "register_link": "Crear cuenta"
+    "register_link": "Crear cuenta",
+    "forgot_link": "¿Has olvidado tu contraseña?",
+    "forgot_title": "Recuperar contraseña",
+    "forgot_desc": "Introduce tu correo y te enviaremos un enlace para restablecerla.",
+    "forgot_button": "Enviar enlace",
+    "forgot_sent": "Si el correo existe, te hemos enviado un enlace para restablecer la contraseña.",
+    "back_to_login": "Volver a iniciar sesión",
+    "register_confirm": "Revisa tu correo para confirmar el registro.",
+    "reset_title": "Nueva contraseña",
+    "reset_desc": "Escribe tu nueva contraseña.",
+    "new_password": "Nueva contraseña",
+    "reset_button": "Guardar contraseña",
+    "reset_done": "Contraseña actualizada. Ya puedes entrar."
+  },
+  "admin": {
+    "title": "Panel de administración",
+    "subtitle": "{count} usuarios registrados",
+    "no_tools": "Sin herramientas asignadas.",
+    "until": "hasta",
+    "forever": "para siempre",
+    "revoke": "Quitar",
+    "days_placeholder": "Días (vacío = ∞)",
+    "grant_tool": "Asignar herramienta",
+    "grant_program": "Asignar programa"
   }
 }

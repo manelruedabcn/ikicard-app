@@ -1,13 +1,19 @@
 {
   "nav": {
-    "title": "IKICARD",
+    "title": "IKIGAIER",
+    "tagline": "Find your purpose",
     "logout": "Sign out"
   },
   "dashboard": {
     "title": "How do you want to play today?",
     "oraculo_desc": "One card a day. No commitment.",
     "viaje_desc": "21 days with yourself. A real process.",
-    "circulo_desc": "In group. Coming soon."
+    "circulo_desc": "In group. Coming soon.",
+    "greeting": "Hello, {name}.",
+    "welcome_back": "Welcome back.",
+    "prepared": "Here's what's prepared for you today.",
+    "empty": "Nothing is prepared for you yet. Check back soon.",
+    "expires": "Available until {date}"
   },
   "viaje": {
     "start_title": "The 21-day Journey",
@@ -54,6 +60,29 @@
     "email": "Email",
     "password": "Password",
     "login_button": "Sign in",
-    "register_link": "Create account"
+    "register_link": "Create account",
+    "forgot_link": "Forgot your password?",
+    "forgot_title": "Reset password",
+    "forgot_desc": "Enter your email and we'll send you a link to reset it.",
+    "forgot_button": "Send link",
+    "forgot_sent": "If the email exists, we've sent you a link to reset your password.",
+    "back_to_login": "Back to sign in",
+    "register_confirm": "Check your email to confirm your registration.",
+    "reset_title": "New password",
+    "reset_desc": "Enter your new password.",
+    "new_password": "New password",
+    "reset_button": "Save password",
+    "reset_done": "Password updated. You can sign in now."
+  },
+  "admin": {
+    "title": "Admin panel",
+    "subtitle": "{count} registered users",
+    "no_tools": "No tools assigned.",
+    "until": "until",
+    "forever": "forever",
+    "revoke": "Remove",
+    "days_placeholder": "Days (empty = ∞)",
+    "grant_tool": "Grant tool",
+    "grant_program": "Grant program"
   }
 }
