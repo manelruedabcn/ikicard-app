@@ -21,6 +21,7 @@ import {
   firmaTexto,
   resolverCodigoPorSegmentos,
 } from '@/lib/paso-segments'
+import { generarNarrativa } from '@/lib/paso-narrativa'
 
 type Stage = 'intro' | 'test' | 'result'
 
@@ -218,6 +219,12 @@ export default function PasoClient({ locale, userId }: Props) {
           </p>
         )}
 
+        {/* La lectura máscara vs real: el corazón del test (protagonista) */}
+        <NarrativaBlock inf={inf} locale={locale} />
+
+        {/* Qué mide PASO: marco fijo (las cuatro formas de caminar) */}
+        <QueEsPasoBlock t={t} />
+
         {/* Gráfico horizonte */}
         <HorizonGraph inf={inf} labels={DIMS.map(d => t('dim_' + d))} t={t} />
 
@@ -226,22 +233,6 @@ export default function PasoClient({ locale, userId }: Props) {
 
         {/* Dónde te separas de ti (brechas máscara vs natural) */}
         <BrechasBlock inf={inf} t={t} />
-
-        {/* Zona de contradicción */}
-        {inf.contradicciones.length > 0 && (
-          <div className="mt-6 rounded-xl bg-[#272727]/[0.03] px-5 py-4">
-            <p className="text-xs tracking-widest uppercase text-[#272727]/40 mb-2">
-              {t('contradiccion_title')}
-            </p>
-            <div className="flex flex-col gap-1">
-              {inf.contradicciones.map(d => (
-                <p key={d} className="text-sm text-[#272727]/80">
-                  {t('contradiccion_desc', { dim: t('dim_' + d) })}
-                </p>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Lectura del patrón */}
         {patron && (
@@ -252,14 +243,6 @@ export default function PasoClient({ locale, userId }: Props) {
             <Field label={t('eficaz')} text={patron.seria_mas_eficaz_si} />
           </div>
         )}
-
-        {/* Punto ciego */}
-        <div className="mt-6 rounded-xl bg-[#272727]/[0.03] px-5 py-4">
-          <p className="text-xs tracking-widest uppercase text-[#272727]/40 mb-1">{t('punto_ciego')}</p>
-          <p className="text-sm text-[#272727]/80">
-            {t('punto_ciego_desc', { dim: t('dim_' + inf.puntoCiego) })}
-          </p>
-        </div>
 
         {/* Libro recomendado */}
         {patron && (
@@ -287,6 +270,11 @@ export default function PasoClient({ locale, userId }: Props) {
             </div>
           )}
         </div>
+
+        {/* Nota de encuadre: PASO es un espejo, no un diagnóstico */}
+        <p className="mt-10 text-center text-xs leading-relaxed text-[#272727]/40 px-2">
+          {t('nota_espejo')}
+        </p>
       </div>
     </Shell>
   )
@@ -328,8 +316,36 @@ function Field({ label, text }: { label: string; text: string }) {
   )
 }
 
-// "Dónde te separas de ti": la distancia entre máscara y paso natural,
-// eje por eje, ordenada de mayor a menor brecha. Es el corazón del test.
+// La lectura máscara vs real en palabras, para cualquier persona. Es el corazón
+// del test: "no eres así, te muestras así… pero por dentro…". Generada desde la
+// brecha por eje (lib/paso-narrativa.ts), cubre todos los casos.
+function NarrativaBlock({ inf, locale }: { inf: InformePaso; locale: string }) {
+  const n = generarNarrativa(inf, locale)
+  return (
+    <div className="mb-10">
+      <p className="text-sm leading-relaxed text-[#272727]/75 mb-5">{n.intro}</p>
+      {n.lineas.map((linea, i) => (
+        <p
+          key={i}
+          className="text-[15px] leading-relaxed text-[#272727]/90 mb-4 pl-4 border-l-2 border-[#c2866b]/40"
+        >
+          {linea}
+        </p>
+      ))}
+      {n.sintesis && (
+        <p className="text-sm leading-relaxed text-[#272727] mt-5">{n.sintesis}</p>
+      )}
+      {n.invitacion && (
+        <p className="font-[family-name:var(--font-cormorant)] text-xl text-[#c2866b] mt-4">
+          {n.invitacion}
+        </p>
+      )}
+    </div>
+  )
+}
+
+// "Dónde te separas de ti": el detalle numérico de la distancia máscara/natural,
+// eje por eje, ordenada de mayor a menor brecha. Complementa a NarrativaBlock.
 function BrechasBlock({
   inf,
   t,
@@ -337,7 +353,6 @@ function BrechasBlock({
   inf: InformePaso
   t: (k: string, v?: Record<string, string | number>) => string
 }) {
-  const top = inf.brechas[0]
   const dirLabel: Record<'exige_de_mas' | 'esconde' | 'alineado', string> = {
     exige_de_mas: t('dir_exige'),
     esconde: t('dir_esconde'),
@@ -380,11 +395,6 @@ function BrechasBlock({
           )
         })}
       </div>
-      {top && top.valor !== 0 && (
-        <p className="text-sm leading-relaxed text-[#272727]/70 mt-4 pt-4 border-t border-[#272727]/10">
-          {t('separas_gap', { dim: t('dim_' + top.dimension) })}
-        </p>
-      )}
     </div>
   )
 }
@@ -432,6 +442,36 @@ function FirmaBlock({
             </div>
             <span className="w-4 shrink-0 text-right text-xs text-[#272727]/50 tabular-nums">
               {segmentos[d]}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// "Qué mide PASO": el marco fijo que aparece en todos los informes. Explica las
+// cuatro formas de caminar (P·A·S·O) para que quien no conozca el modelo entienda
+// qué está mirando, sin jerga y sin jerarquía entre ejes.
+function QueEsPasoBlock({
+  t,
+}: {
+  t: (k: string, v?: Record<string, string | number>) => string
+}) {
+  return (
+    <div className="mt-8 rounded-xl bg-[#272727]/[0.03] px-5 py-5">
+      <p className="text-xs tracking-widest uppercase text-[#272727]/40 mb-2">
+        {t('que_es_title')}
+      </p>
+      <p className="text-sm leading-relaxed text-[#272727]/70 mb-5">{t('que_es_intro')}</p>
+      <div className="flex flex-col gap-4">
+        {DIMS.map(d => (
+          <div key={d} className="flex flex-col gap-0.5">
+            <span className="font-[family-name:var(--font-cormorant)] text-lg text-[#272727]">
+              {t('dim_' + d)}
+            </span>
+            <span className="text-sm leading-relaxed text-[#272727]/70">
+              {t('que_es_' + d)}
             </span>
           </div>
         ))}
