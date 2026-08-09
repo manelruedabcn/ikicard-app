@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
+import { trackEvent } from '@/lib/analytics'
 import {
   buildAssignment,
   computeCurrentDay,
@@ -78,6 +79,7 @@ export default function ViajeClient({ userId, locale, session, cards, gifts }: P
       card_code: a.card_code,
     }))
     await supabase.from('journey_cards').insert(rows)
+    trackEvent('journey_started', { tool: 'viaje' })
     router.refresh()
   }
 
@@ -171,6 +173,7 @@ export default function ViajeClient({ userId, locale, session, cards, gifts }: P
       gift_text: `${finalDon.trim()} — ${t('final_prompt')} ${finalIntent.trim()}`,
     })
     await supabase.from('journey_sessions').update({ status: 'completed' }).eq('id', session!.id)
+    trackEvent('journey_completed', { tool: 'viaje' })
     setBusy(false)
     router.refresh()
   }
@@ -230,6 +233,7 @@ export default function ViajeClient({ userId, locale, session, cards, gifts }: P
       .eq('session_id', session!.id)
       .eq('day', day)
       .eq('slot', slot)
+    trackEvent('save_sello', { tool: 'viaje', day, slot })
     setInput('')
     setBusy(false)
     router.refresh()

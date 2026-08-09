@@ -4,6 +4,7 @@ import { useState, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
+import { trackEvent } from '@/lib/analytics'
 import { TALLER_CONTENT, ANSWERABLE_IDS, type Block } from '@/lib/taller-content'
 
 // Enlace del directo del taller (Zoom / YouTube / Meet). Vacío = sin directo.
@@ -64,6 +65,7 @@ export default function TallerClient({ userId, locale, answers }: Props) {
         <div className="mb-6 text-center">
           <Link
             href={`/${locale}/taller/pdf`}
+            onClick={() => trackEvent('pdf_download', { tool: 'taller' })}
             className="text-xs tracking-wide text-[#c2866b] underline-offset-4 hover:underline"
           >
             {t('pdf_link')}

@@ -6,6 +6,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { PLAYABLE_CARDS } from '@/lib/cards'
+import { trackEvent } from '@/lib/analytics'
 
 interface Session {
   card_code: string
@@ -74,6 +75,7 @@ export default function OraculoClient({ userId, locale, todaySessions, history, 
     if (error) {
       setError(error.message)
     } else {
+      trackEvent('save_sello', { tool: 'oraculo' })
       setSaved(true)
     }
     setSaving(false)
@@ -86,6 +88,7 @@ export default function OraculoClient({ userId, locale, todaySessions, history, 
   }
 
   const handleShare = async () => {
+    trackEvent('share', { tool: 'oraculo' })
     const shareData = {
       title: 'IKICARD',
       text: `Mi carta de hoy — app.ikigaier.com`,

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
+import { trackEvent } from '@/lib/analytics'
 
 export default function LoginForm({ locale }: { locale: string }) {
   const router = useRouter()
@@ -40,6 +41,7 @@ export default function LoginForm({ locale }: { locale: string }) {
       if (error) {
         setError(error.message)
       } else {
+        trackEvent('login', { method: 'email' })
         router.push(`/${locale}/dashboard`)
         router.refresh()
       }
@@ -48,6 +50,7 @@ export default function LoginForm({ locale }: { locale: string }) {
       if (error) {
         setError(error.message)
       } else {
+        trackEvent('sign_up', { method: 'email' })
         setMessage(t('register_confirm'))
       }
     } else {

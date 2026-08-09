@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
+import { trackEvent } from '@/lib/analytics'
 import {
   PASO_GRUPOS,
   DIMS,
@@ -66,6 +67,7 @@ export default function PasoClient({ locale, userId }: Props) {
     // El código se asigna por SEGMENTOS (norming), no por la dominancia cruda:
     // es la asignación precisa (1 de 2.401 firmas).
     const codigo = resolverCodigoPorSegmentos(calcularSegmentos(inf.scores))
+    trackEvent('test_completed', { tool: 'paso', pattern: codigo })
     const payload = {
       codigo_patron: codigo,
       mascara_p: inf.mascara.P, mascara_a: inf.mascara.A, mascara_s: inf.mascara.S, mascara_o: inf.mascara.O,
