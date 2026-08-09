@@ -172,6 +172,14 @@ export default function LoginForm({ locale }: { locale: string }) {
             </button>
           ))}
         </div>
+
+        {/* Volver a la web de marketing */}
+        <a
+          href={`https://www.ikigaier.com/${['es', 'ca', 'en'].includes(locale) ? locale : 'es'}/`}
+          className="mt-8 block text-center text-xs tracking-wider text-[#272727]/40 hover:text-[#c2866b] transition-colors"
+        >
+          {t('back_to_site')}
+        </a>
       </div>
     </div>
   )

@@ -130,7 +130,8 @@
     "reset_desc": "Escribe tu nueva contraseña.",
     "new_password": "Nueva contraseña",
     "reset_button": "Guardar contraseña",
-    "reset_done": "Contraseña actualizada. Ya puedes entrar."
+    "reset_done": "Contraseña actualizada. Ya puedes entrar.",
+    "back_to_site": "← Volver a ikigaier.com"
   },
   "admin": {
     "title": "Panel de administración",

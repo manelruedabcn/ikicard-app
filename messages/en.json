@@ -130,7 +130,8 @@
     "reset_desc": "Enter your new password.",
     "new_password": "New password",
     "reset_button": "Save password",
-    "reset_done": "Password updated. You can sign in now."
+    "reset_done": "Password updated. You can sign in now.",
+    "back_to_site": "← Back to ikigaier.com"
   },
   "admin": {
     "title": "Admin panel",
