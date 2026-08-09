@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import { getMyTools } from '@/lib/entitlements'
+import PasoResultSync from './PasoResultSync'
 
 export default async function DashboardPage({ params: { locale } }: { params: { locale: string } }) {
   const supabase = createClient()
@@ -27,6 +28,7 @@ export default async function DashboardPage({ params: { locale } }: { params: { 
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-[#FDFBF7] px-4 py-16">
+      <PasoResultSync userId={user.id} />
       <div className="w-full max-w-sm">
         <div className="mb-12">
           <p className="font-[family-name:var(--font-cormorant)] text-3xl text-[#272727]">

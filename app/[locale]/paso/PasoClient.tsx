@@ -17,6 +17,7 @@ import {
 import {
   NUM_ZONAS,
   ZONA_EQUILIBRIO,
+  PASO_PENDING_KEY,
   calcularSegmentos,
   firmaTexto,
   resolverCodigoPorSegmentos,
@@ -62,20 +63,28 @@ export default function PasoClient({ locale, userId }: Props) {
     setStage('result')
     window.scrollTo({ top: 0 })
 
-    // Guardar solo si hay sesión. El código se asigna por SEGMENTOS (norming),
-    // no por la dominancia cruda: es la asignación precisa (1 de 2.401 firmas).
+    // El código se asigna por SEGMENTOS (norming), no por la dominancia cruda:
+    // es la asignación precisa (1 de 2.401 firmas).
+    const codigo = resolverCodigoPorSegmentos(calcularSegmentos(inf.scores))
+    const payload = {
+      codigo_patron: codigo,
+      mascara_p: inf.mascara.P, mascara_a: inf.mascara.A, mascara_s: inf.mascara.S, mascara_o: inf.mascara.O,
+      natural_p: inf.natural.P, natural_a: inf.natural.A, natural_s: inf.natural.S, natural_o: inf.natural.O,
+      score_p: inf.scores.P, score_a: inf.scores.A, score_s: inf.scores.S, score_o: inf.scores.O,
+      punto_ciego: inf.puntoCiego,
+    }
+
     if (userId) {
-      const codigo = resolverCodigoPorSegmentos(calcularSegmentos(inf.scores))
+      // Con sesión: se guarda ya.
       const supabase = createClient()
-      const { error } = await supabase.from('paso_results').insert({
-        user_id: userId,
-        codigo_patron: codigo,
-        mascara_p: inf.mascara.P, mascara_a: inf.mascara.A, mascara_s: inf.mascara.S, mascara_o: inf.mascara.O,
-        natural_p: inf.natural.P, natural_a: inf.natural.A, natural_s: inf.natural.S, natural_o: inf.natural.O,
-        score_p: inf.scores.P, score_a: inf.scores.A, score_s: inf.scores.S, score_o: inf.scores.O,
-        punto_ciego: inf.puntoCiego,
-      })
+      const { error } = await supabase.from('paso_results').insert({ user_id: userId, ...payload })
       if (!error) setSaved(true)
+    } else {
+      // Sin sesión: guardamos el resultado en el navegador para insertarlo en
+      // cuanto la persona se registre y entre (lo recoge el dashboard).
+      try {
+        localStorage.setItem(PASO_PENDING_KEY, JSON.stringify(payload))
+      } catch {}
     }
   }
 

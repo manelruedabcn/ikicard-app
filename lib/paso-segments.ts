@@ -18,6 +18,10 @@ import { DIMS, getPatron, type Dim, type Patron } from './paso-content'
 export const NUM_ZONAS = 7
 export const ZONA_EQUILIBRIO = 4
 
+// Clave de localStorage donde se guarda el resultado de quien hace el test SIN
+// sesión, para insertarlo en cuanto se registre y entre (lo recoge el dashboard).
+export const PASO_PENDING_KEY = 'paso_pending_result'
+
 // Umbral MÍNIMO de score neto para alcanzar cada zona (2..7). Por debajo del
 // primero, zona 1. Un umbral por dimensión = el norming.
 const UMBRALES_ZONA: Record<Dim, number[]> = {
