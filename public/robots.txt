@@ -1,0 +1,5 @@
+# robots.txt para app.ikigaier.com
+# Zona privada (login, dashboard y herramientas). No debe indexarse.
+
+User-agent: *
+Disallow: /
