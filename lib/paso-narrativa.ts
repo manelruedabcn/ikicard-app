@@ -41,25 +41,25 @@ const FRASE: Record<Locale, Record<Dim, { exige: string; esconde: string }>> = {
   es: {
     P: {
       exige:
-        'Por fuera te muestras decidido y directo, siempre empujando hacia delante. Pero por dentro tu instinto no pide tanta marcha: te exiges avanzar y resolver más de lo que de verdad necesitas.',
+        'Por fuera te muestras firme y frontal, siempre empujando hacia delante. Pero por dentro tu instinto no pide tanta marcha: te exiges avanzar y resolver más de lo que de verdad necesitas.',
       esconde:
         'Por fuera apenas empujas, dejas que las cosas lleguen a su ritmo. Pero por dentro llevas más determinación de la que enseñas: guardas una fuerza para decidir que casi no sacas a la luz.',
     },
     A: {
       exige:
-        'Por fuera te muestras sociable y cercano, muy pendiente de los demás. Pero por dentro no lo necesitas tanto: te exiges estar disponible y agradar más de lo que te nace.',
+        'Por fuera te muestras sociable y afable, muy pendiente de los demás. Pero por dentro no lo necesitas tanto: te exiges estar disponible y agradar más de lo que te nace.',
       esconde:
         'Por fuera pareces ir a lo tuyo, sin depender de nadie. Pero por dentro la gente te importa mucho más de lo que dejas ver: guardas una necesidad de compañía que no muestras.',
     },
     S: {
       exige:
-        'Por fuera te muestras calmado y constante, con el ritmo siempre bajo control. Pero por dentro no eres tan sereno: te exiges aguantar y sostener más de lo que tu instinto pediría.',
+        'Por fuera te muestras constante y en calma, con el ritmo siempre bajo control. Pero por dentro no lo estás tanto: te exiges aguantar y sostener más de lo que tu instinto pediría.',
       esconde:
         'Por fuera muestras poca paciencia y vas cambiando el paso. Pero por dentro sostienes mucho más de lo que enseñas: guardas una constancia que no dejas ver.',
     },
     O: {
       exige:
-        'Por fuera te muestras analítico y prudente, mirando bien antes de dar cada paso. Pero por dentro no lo necesitas tanto: te exiges controlar y calcular más de lo que te sale natural.',
+        'Por fuera te muestras con análisis y prudencia, mirando bien antes de dar cada paso. Pero por dentro no lo necesitas tanto: te exiges controlar y calcular más de lo que te sale natural.',
       esconde:
         'Por fuera pareces lanzarte sin darle muchas vueltas. Pero por dentro observas y calculas mucho más de lo que enseñas: guardas una cautela que no muestras.',
     },
@@ -103,7 +103,7 @@ const TEXTO: Record<
       `Donde más te separas de ti es en «${dim}». Ahí es donde caminar te cuesta más — no por debilidad, sino porque llevas un traje que no acaba de ser tu piel.`,
     invitacion: 'Caminar sin separarte de ti empieza justo por mirar ahí.',
     alineadoIntro:
-      'Hoy caminas bastante cerca de ti mismo: lo que muestras por fuera y lo que llevas por dentro van casi de la mano. No es poca cosa — es un buen lugar desde el que seguir caminando.',
+      'Hoy caminas bastante cerca de ti: lo que muestras por fuera y lo que llevas por dentro van casi de la mano. No es poca cosa — es un buen lugar desde el que seguir caminando.',
   },
   en: {
     intro:

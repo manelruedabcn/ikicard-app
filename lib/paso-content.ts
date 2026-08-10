@@ -48,216 +48,216 @@ export interface InformePaso {
 export const PASO_GRUPOS: Grupo[] = [
   {
     "grupo": 1,
-    "P": "Resuelto",
-    "A": "Cercano",
-    "S": "Sereno",
-    "O": "Cuidadoso"
+    "P": "Con decisión",
+    "A": "Afable",
+    "S": "Apacible",
+    "O": "Prudente"
   },
   {
     "grupo": 2,
     "P": "Firme",
-    "A": "Cálido",
+    "A": "Con calidez",
     "S": "Paciente",
-    "O": "Reflexivo"
+    "O": "Con reflexión"
   },
   {
     "grupo": 3,
-    "P": "Directo",
+    "P": "Frontal",
     "A": "Sociable",
     "S": "Constante",
-    "O": "Preciso"
+    "O": "Con precisión"
   },
   {
     "grupo": 4,
     "P": "Audaz",
     "A": "Cordial",
-    "S": "Templado",
-    "O": "Meticuloso"
+    "S": "Estable",
+    "O": "Detallista"
   },
   {
     "grupo": 5,
-    "P": "Impulsor",
-    "A": "Comunicativo",
+    "P": "Con empuje",
+    "A": "Elocuente",
     "S": "Fiel",
-    "O": "Riguroso"
+    "O": "Con rigor"
   },
   {
     "grupo": 6,
-    "P": "Competitivo",
+    "P": "Tenaz",
     "A": "Optimista",
-    "S": "Sosegado",
+    "S": "En calma",
     "O": "Prudente"
   },
   {
     "grupo": 7,
     "P": "Exigente",
-    "A": "Persuasivo",
+    "A": "Convincente",
     "S": "Estable",
     "O": "Detallista"
   },
   {
     "grupo": 8,
-    "P": "Autónomo",
+    "P": "Autosuficiente",
     "A": "Entusiasta",
-    "S": "Discreto",
-    "O": "Escéptico"
+    "S": "Con discreción",
+    "O": "Con reservas"
   },
   {
     "grupo": 9,
-    "P": "Arriesgado",
-    "A": "Expresivo",
+    "P": "Valiente",
+    "A": "Con expresividad",
     "S": "Leal",
-    "O": "Metódico"
+    "O": "Con método"
   },
   {
     "grupo": 10,
     "P": "Contundente",
-    "A": "Animoso",
-    "S": "Sencillo",
-    "O": "Analítico"
+    "A": "Alegre",
+    "S": "Humilde",
+    "O": "Con análisis"
   },
   {
     "grupo": 11,
     "P": "Veloz",
-    "A": "Receptivo",
+    "A": "Con apertura",
     "S": "Constante",
-    "O": "Cauto"
+    "O": "Con cautela"
   },
   {
     "grupo": 12,
     "P": "Insistente",
-    "A": "Encantador",
+    "A": "Con encanto",
     "S": "Amable",
-    "O": "Ordenado"
+    "O": "Con orden"
   },
   {
     "grupo": 13,
-    "P": "Enérgico",
+    "P": "Con energía",
     "A": "Vivaz",
     "S": "Confiable",
-    "O": "Selectivo"
+    "O": "Con criterio"
   },
   {
     "grupo": 14,
-    "P": "Ambicioso",
-    "A": "Abierto",
-    "S": "Sosegado",
-    "O": "Exacto"
+    "P": "Con ambición",
+    "A": "Con apertura",
+    "S": "En calma",
+    "O": "Con exactitud"
   },
   {
     "grupo": 15,
-    "P": "Combativo",
-    "A": "Espontáneo",
-    "S": "Sencillo",
-    "O": "Reservado"
+    "P": "Con brío",
+    "A": "Natural",
+    "S": "Humilde",
+    "O": "Con reserva"
   },
   {
     "grupo": 16,
     "P": "Independiente",
     "A": "Locuaz",
     "S": "Complaciente",
-    "O": "Sistemático"
+    "O": "Con sistema"
   },
   {
     "grupo": 17,
-    "P": "Decidido",
-    "A": "Alentador",
-    "S": "Duradero",
-    "O": "Escrupuloso"
+    "P": "Con decisión",
+    "A": "Que alienta",
+    "S": "Que perdura",
+    "O": "Con esmero"
   },
   {
     "grupo": 18,
-    "P": "Práctico",
-    "A": "Ameno",
-    "S": "Sereno",
-    "O": "Meditativo"
+    "P": "Eficaz",
+    "A": "Agradable",
+    "S": "Apacible",
+    "O": "Con reflexión"
   },
   {
     "grupo": 19,
-    "P": "Autoritario",
-    "A": "Contagioso",
+    "P": "Dominante",
+    "A": "Que contagia",
     "S": "Predecible",
-    "O": "Calculador"
+    "O": "Con cálculo"
   },
   {
     "grupo": 20,
-    "P": "Directivo",
+    "P": "Que dirige",
     "A": "Sociable",
-    "S": "Comedido",
+    "S": "Con mesura",
     "O": "Perfeccionista"
   },
   {
     "grupo": 21,
     "P": "Frontal",
-    "A": "Efusivo",
-    "S": "Confiado",
-    "O": "Justo"
+    "A": "Con efusión",
+    "S": "Con confianza",
+    "O": "Ecuánime"
   },
   {
     "grupo": 22,
-    "P": "Emprendedor",
-    "A": "Cálido",
+    "P": "Con iniciativa",
+    "A": "Con calidez",
     "S": "Regular",
     "O": "Formal"
   },
   {
     "grupo": 23,
-    "P": "Determinado",
+    "P": "Con determinación",
     "A": "Popular",
-    "S": "Modesto",
-    "O": "Cuidadoso"
+    "S": "Humilde",
+    "O": "Prudente"
   },
   {
     "grupo": 24,
-    "P": "Osado",
-    "A": "Extrovertido",
+    "P": "Valiente",
+    "A": "Sociable",
     "S": "Apacible",
-    "O": "Escéptico"
+    "O": "Con reservas"
   },
   {
     "grupo": 25,
-    "P": "Franco",
-    "A": "Simpático",
+    "P": "Con franqueza",
+    "A": "Afable",
     "S": "Servicial",
-    "O": "Introspectivo"
+    "O": "Con introspección"
   },
   {
     "grupo": 26,
     "P": "Autosuficiente",
     "A": "Convincente",
-    "S": "Tranquilo",
-    "O": "Concienzudo"
+    "S": "Apacible",
+    "O": "Con esmero"
   },
   {
     "grupo": 27,
-    "P": "Enérgico",
-    "A": "Divertido",
-    "S": "Amistoso",
-    "O": "Riguroso"
+    "P": "Con energía",
+    "A": "Jovial",
+    "S": "Amable",
+    "O": "Con rigor"
   },
   {
     "grupo": 28,
     "P": "Persistente",
-    "A": "Inspirador",
+    "A": "Que inspira",
     "S": "Paciente",
-    "O": "Objetivo"
+    "O": "Imparcial"
   }
 ]
 
 export const PASO_PATRONES: Patron[] = [
   {
     "codigo": "PPPP",
-    "nombre": "El Caminante Frontal",
+    "nombre": "Caminante Frontal",
     "retrato": "Caminas de frente, sin rodeos. Donde otros aún miran el mapa, tú ya has dado el primer paso: para ti moverte es la prueba de que la vida avanza. Tu fuerza es que nada te frena; tu reto, recordar que no todo tramo se gana por velocidad, algunos piden presencia.",
     "motivacion": "Llegar, resolver, tener algo que mostrar al final del día. El movimiento mismo es la prueba de que la vida avanza.",
-    "bajo_presion": "Se vuelve más brusco, no más lento. Decide rápido y exige que los demás sigan el ritmo.",
-    "teme": "La irrelevancia. Quedarse parado sin nada que conquistar le pesa más que cualquier fracaso.",
+    "bajo_presion": "Se vuelve más tajante, no más despacio. Decide rápido y exige que los demás sigan el ritmo.",
+    "teme": "La irrelevancia. Quedarse sin avanzar, sin nada que conquistar, le pesa más que cualquier fracaso.",
     "seria_mas_eficaz_si": "Aceptara que algunos tramos del camino no piden velocidad, piden presencia.",
     "libro_recomendado": "El Ikigai que no te contaron"
   },
   {
     "codigo": "AAAA",
-    "nombre": "El Caminante Acompañado",
+    "nombre": "Caminante en Compañía",
     "retrato": "No concibes el camino en soledad. Cada paso cobra sentido cuando hay alguien al lado con quien compartirlo, y tu energía crece con la del grupo. Tu don es unir a la gente; tu aprendizaje, sostener también los tramos que se recorren sin testigos.",
     "motivacion": "Que el camino se comparta. Un logro sin nadie que lo celebre casi no cuenta como logro.",
     "bajo_presion": "Dispersa energía en conversación y validación, y a veces confunde hablar del problema con resolverlo.",
@@ -267,7 +267,7 @@ export const PASO_PATRONES: Patron[] = [
   },
   {
     "codigo": "SSSS",
-    "nombre": "El Caminante Sostenido",
+    "nombre": "Caminante que Sostiene",
     "retrato": "Caminas a paso constante, sin sobresaltos ni prisas. Tu terreno es la fiabilidad: los demás saben que estarás ahí, mañana y pasado, al mismo ritmo firme. Tu fuerza es la constancia; tu reto, atreverte a acelerar cuando el momento de verdad lo pide.",
     "motivacion": "Un paso constante, sin sobresaltos. La fiabilidad es su forma de excelencia.",
     "bajo_presion": "Se repliega y busca que todo vuelva cuanto antes al cauce conocido; el cambio brusco le cuesta más que el esfuerzo.",
@@ -277,7 +277,7 @@ export const PASO_PATRONES: Patron[] = [
   },
   {
     "codigo": "OOOO",
-    "nombre": "El Caminante Observador",
+    "nombre": "Caminante que Observa",
     "retrato": "Antes de pisar, miras. Estudias el terreno, calculas la ruta y solo entonces avanzas, porque para ti un paso bien pensado vale por diez dados a ciegas. Tu don es la lucidez; tu trampa, creer que el mapa puede estar completo antes de caminar.",
     "motivacion": "Entender el terreno antes de pisarlo. Un paso bien calculado vale más que diez dados a ciegas.",
     "bajo_presion": "Se repliega hacia el análisis y revisa una vez más antes de decidir; el riesgo es que la revisión no termine nunca.",
@@ -287,28 +287,28 @@ export const PASO_PATRONES: Patron[] = [
   },
   {
     "codigo": "PA",
-    "nombre": "El Caminante que Arrastra",
-    "retrato": "Avanzas rápido y no vas solo: llevas a otros en tu impulso. Necesitas tanto llegar como que se note lo lejos que has llegado. Tu fuerza mueve a grupos enteros; tu reto, mirar atrás y preguntar antes de arrastrar.",
+    "nombre": "Caminante que Arrastra",
+    "retrato": "Avanzas rápido y no caminas en soledad: llevas a otros en tu impulso. Necesitas tanto llegar como que se note lo lejos que has llegado. Tu fuerza mueve a grupos enteros; tu reto, mirar atrás y preguntar antes de arrastrar.",
     "motivacion": "Moverse rápido y llevar a otros consigo. Necesita tanto el resultado como el aplauso que lo acompaña.",
     "bajo_presion": "Impone el ritmo sin pedir permiso, y puede arrollar sin darse cuenta a quien camina más despacio.",
-    "teme": "Que el grupo avance sin él, o que nadie note lo lejos que ha llegado.",
+    "teme": "Que el grupo avance sin su empuje, o que nadie note lo lejos que ha llegado.",
     "seria_mas_eficaz_si": "Aprendiera a preguntar antes de arrastrar, y a celebrar el paso de otros sin necesitar protagonizarlo.",
     "libro_recomendado": "El Ikigai que no te contaron"
   },
   {
     "codigo": "PO",
-    "nombre": "El Caminante Calculador",
+    "nombre": "Caminante que Calcula",
     "retrato": "Avanzas, sí, pero solo cuando entiendes el terreno. Analizas primero y luego decides rápido, sin titubear. Tu don es unir cabeza y acción; tu trampa, exigir un análisis perfecto que nunca acaba de llegar.",
     "motivacion": "Avanzar, pero solo después de haber entendido el terreno. Decide rápido una vez que ha analizado.",
-    "bajo_presion": "Se vuelve frío y cortante, priorizando la eficacia sobre cualquier consideración que la ralentice.",
+    "bajo_presion": "Se vuelve distante y cortante, priorizando la eficacia sobre cualquier consideración que la ralentice.",
     "teme": "Actuar sobre información incompleta y que el error sea evidente para todos.",
     "seria_mas_eficaz_si": "Aceptara que el análisis perfecto no existe, y que parte de caminar es tolerar la incertidumbre.",
     "libro_recomendado": "No todo lo que te frena es tuyo"
   },
   {
     "codigo": "AS",
-    "nombre": "El Caminante que Acoge",
-    "retrato": "Caminas pendiente de que nadie se quede atrás. El ritmo lo marca el más lento, porque para ti el camino solo vale si se recorre juntos y en calma. Tu don es acoger; tu aprendizaje, entender que sostener a alguien no siempre es complacerlo.",
+    "nombre": "Caminante que Acoge",
+    "retrato": "Caminas pendiente de que nadie se quede atrás. El ritmo lo marca quien va más despacio, porque para ti el camino solo vale si se recorre en compañía y en calma. Tu don es acoger; tu aprendizaje, entender que sostener a alguien no siempre es complacerlo.",
     "motivacion": "Que nadie se quede atrás. El camino solo tiene sentido si se recorre en buena compañía y sin prisa.",
     "bajo_presion": "Evita el conflicto a toda costa, incluso cuando decir algo incómodo sería lo más útil.",
     "teme": "Romper la armonía del grupo, aunque eso signifique callar algo importante.",
@@ -317,7 +317,7 @@ export const PASO_PATRONES: Patron[] = [
   },
   {
     "codigo": "SO",
-    "nombre": "El Caminante Metódico",
+    "nombre": "Caminante del Método",
     "retrato": "Confías en el proceso más que en el impulso. Un camino claro, sin atajos ni sorpresas, es tu terreno seguro. Tu fuerza es el orden; tu reto, improvisar cuando el mapa ya no describe lo que estás pisando.",
     "motivacion": "Un proceso claro, sin sorpresas ni atajos. Confía en el sistema más que en el impulso.",
     "bajo_presion": "Se aferra al procedimiento incluso cuando la situación pide flexibilidad.",
@@ -327,7 +327,7 @@ export const PASO_PATRONES: Patron[] = [
   },
   {
     "codigo": "PS",
-    "nombre": "El Caminante Terco",
+    "nombre": "Caminante que no se Desvía",
     "retrato": "Cuando eliges una dirección, la sostienes cueste lo que cueste. Tu determinación no se mide en velocidad, sino en que no te desvías. Tu fuerza es esa persistencia; tu trampa, confundir sostener el rumbo con negarte a mirar de nuevo el mapa.",
     "motivacion": "Llegar a la meta sin desviarse, cueste lo que cueste. La determinación es su fuerza, no la velocidad.",
     "bajo_presion": "Se cierra en una sola dirección y le cuesta reconsiderar, aunque el terreno haya cambiado.",
@@ -337,17 +337,17 @@ export const PASO_PATRONES: Patron[] = [
   },
   {
     "codigo": "AO",
-    "nombre": "El Caminante que Observa en Compañía",
+    "nombre": "Caminante que Observa en Compañía",
     "retrato": "Miras a las personas antes que al terreno. Escuchas, observas y procesas en silencio antes de opinar, porque entender a quien tienes al lado es tu brújula. Tu don es la lectura fina; tu reto, atreverte a compartir lo que ves aunque aún no esté del todo verificado.",
     "motivacion": "Entender profundamente a quienes le rodean, más que al terreno en sí. Escucha antes de opinar.",
     "bajo_presion": "Se retrae, procesa en silencio, y puede parecer distante justo cuando más se le necesita cerca.",
-    "teme": "Malinterpretar a alguien importante, o que le malinterpreten a él sin oportunidad de explicarse.",
+    "teme": "Malinterpretar a alguien importante, o que le malinterpreten sin oportunidad de explicarse.",
     "seria_mas_eficaz_si": "Confiara en compartir una primera impresión, aunque no esté aún del todo verificada.",
     "libro_recomendado": "Camina sin separarte de ti"
   },
   {
     "codigo": "PAO",
-    "nombre": "El Caminante Estratega",
+    "nombre": "Caminante Estratega",
     "retrato": "Avanzas con otros, pero por una ruta que ya has estudiado. Combinas impulso, relación y cálculo casi a partes iguales, y sueles tomar el mando con un plan bajo el brazo. Tu don es dirigir con criterio; tu reto, dejar sitio al plan que no es el tuyo.",
     "motivacion": "Avanzar con otros, pero solo por una ruta ya estudiada. Combina impulso, relación y cálculo a partes iguales.",
     "bajo_presion": "Toma el mando del grupo con un plan ya trazado, aunque no siempre lo consulte antes.",
@@ -357,18 +357,18 @@ export const PASO_PATRONES: Patron[] = [
   },
   {
     "codigo": "ASO",
-    "nombre": "El Caminante que Cuida el Proceso",
-    "retrato": "Caminas para que el grupo llegue entero, con cada paso bien dado y nadie forzado a correr. Cuidas el ritmo y el proceso por igual. Tu don es que nadie se pierda por el camino; tu aprendizaje, ver que a veces cuidar bien también significa avanzar.",
+    "nombre": "Caminante que Cuida el Proceso",
+    "retrato": "Caminas para que el grupo llegue entero, con cada paso bien dado y sin forzar a nadie a correr. Cuidas el ritmo y el proceso por igual. Tu don es que nadie se pierda por el camino; tu aprendizaje, ver que a veces cuidar bien también significa avanzar.",
     "motivacion": "Que el grupo llegue entero, con cada paso bien dado y nadie forzado a correr.",
     "bajo_presion": "Ralentiza aún más para no dejar a nadie atrás, incluso cuando la situación pide avanzar.",
-    "teme": "Que su cuidado se confunda con lentitud, o que alguien se sienta ignorado por el camino.",
+    "teme": "Que su cuidado se confunda con lentitud, o que alguien se sienta al margen del camino.",
     "seria_mas_eficaz_si": "Aceptara que a veces cuidar bien también significa avanzar, no solo esperar.",
     "libro_recomendado": "No todo lo que te frena es tuyo"
   },
   {
     "codigo": "PAS",
-    "nombre": "El Caminante Motor",
-    "retrato": "Eres el motor que mantiene al grupo en marcha: empujas con energía, cercanía y ritmo, sin frenar pero sin quemar a nadie. Decides sobre la marcha y ya revisarás después. Tu fuerza es sostener el movimiento; tu reto, parar a pensar antes de empujar, no después.",
+    "nombre": "Caminante Motor",
+    "retrato": "Mantienes al grupo en marcha: empujas con energía, cercanía y ritmo, sin frenar pero sin quemar a nadie. Decides sobre la marcha y ya revisarás después. Tu fuerza es sostener el movimiento; tu reto, parar a pensar antes de empujar, no después.",
     "motivacion": "Que el grupo avance de forma constante, sin frenar pero sin quemar a nadie. Combina impulso, cercanía y ritmo sostenido.",
     "bajo_presion": "Empuja con energía pero se guarda el análisis para después: decide y ya revisará sobre la marcha.",
     "teme": "Que el grupo pierda la cohesión por ir demasiado rápido, o el ritmo por pararse a pensar de más.",
@@ -377,7 +377,7 @@ export const PASO_PATRONES: Patron[] = [
   },
   {
     "codigo": "PSO",
-    "nombre": "El Caminante Sólido",
+    "nombre": "Caminante de Paso Firme",
     "retrato": "Avanzas con paso firme, sin prisa pero sin pausa, y siempre sobre terreno ya comprobado. Tu método es tu roca. Tu fuerza es esa solidez; tu trampa, volverte inflexible justo cuando el propio método pide cambiar.",
     "motivacion": "Avanzar con paso firme, sin prisa pero sin pausa, y siempre sobre terreno ya comprobado.",
     "bajo_presion": "Se vuelve inflexible: confía tanto en su método que le cuesta admitir que quizá haya que cambiarlo.",
@@ -387,11 +387,11 @@ export const PASO_PATRONES: Patron[] = [
   },
   {
     "codigo": "PASO",
-    "nombre": "El Caminante Equilibrado",
+    "nombre": "Caminante en Equilibrio",
     "retrato": "Ningún eje manda por encima de los demás: decides, acompañas, sostienes y observas según lo pida cada momento. No tienes un modo por defecto, los tienes todos disponibles. Tu don es la versatilidad; tu reto, confiar en que esa adaptabilidad ya es una fuerza, no algo que compensar.",
     "motivacion": "Ningún eje domina con claridad sobre los demás: decide, acompaña, sostiene y observa según lo pida cada momento, no según un patrón fijo.",
     "bajo_presion": "Responde con la energía que la situación necesita, aunque puede dudar unos instantes de más al no tener un modo por defecto claro.",
-    "teme": "Perder esa capacidad de adaptarse y quedar atrapado en un solo modo de caminar.",
+    "teme": "Perder esa capacidad de adaptarse y caer en un solo modo de caminar.",
     "seria_mas_eficaz_si": "Confiara en que esa versatilidad ya es una fuerza en sí misma, y no algo que compensar por no tener un tipo definido.",
     "libro_recomendado": "Sin uno que destaque especialmente: es el perfil que más se beneficia de ver el método completo"
   }
