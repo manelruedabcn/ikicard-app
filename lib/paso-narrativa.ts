@@ -59,7 +59,7 @@ const FRASE: Record<Locale, Record<Dim, { exige: string; esconde: string }>> = {
     },
     O: {
       exige:
-        'Por fuera te muestras con análisis y prudencia, mirando bien antes de dar cada paso. Pero por dentro no lo necesitas tanto: te exiges controlar y calcular más de lo que te sale natural.',
+        'Por fuera te muestras detallista y prudente, mirando bien antes de dar cada paso. Pero por dentro no lo necesitas tanto: te exiges controlar y calcular más de lo que te sale natural.',
       esconde:
         'Por fuera pareces lanzarte sin darle muchas vueltas. Pero por dentro observas y calculas mucho más de lo que enseñas: guardas una cautela que no muestras.',
     },
