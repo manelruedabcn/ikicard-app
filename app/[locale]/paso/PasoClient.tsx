@@ -27,6 +27,15 @@ import { generarNarrativa } from '@/lib/paso-narrativa'
 
 type Stage = 'intro' | 'test' | 'result'
 
+// Enlaces de compra por libro recomendado. Clave = título exacto en los patrones.
+// Los libros sin entrada (p. ej. el perfil Equilibrio) no muestran enlace.
+const LIBRO_LINKS: Record<string, string> = {
+  'El Ikigai que no te contaron': 'https://amzn.eu/d/087ECE8M',
+  'No todo lo que te frena es tuyo': 'https://amzn.eu/d/0gyFdxbV',
+  'Disciplina para indisciplinados': 'https://amzn.eu/d/03GIlPhr',
+  'Camina sin separarte de ti': 'https://amzn.eu/d/01keLRwF',
+}
+
 interface Props {
   locale: string
   userId: string | null
@@ -269,13 +278,32 @@ export default function PasoClient({ locale, userId }: Props) {
           </div>
         )}
 
-        {/* Libro recomendado */}
+        {/* Libro recomendado. Si hay enlace de compra, el título es clicable
+            (abre Amazon en pestaña nueva) y se muestra un CTA. El enlace <a>
+            sigue siendo clicable si el resultado se guarda como PDF. */}
         {patron && (
           <div className="mt-6 rounded-xl border border-[#c2866b]/30 bg-[#c2866b]/5 px-5 py-5 text-center">
             <p className="text-xs tracking-widest uppercase text-[#c2866b] mb-2">{t('book')}</p>
-            <p className="font-[family-name:var(--font-cormorant)] text-2xl text-[#272727]">
-              {patron.libro_recomendado}
-            </p>
+            {LIBRO_LINKS[patron.libro_recomendado] ? (
+              <a
+                href={LIBRO_LINKS[patron.libro_recomendado]}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackEvent('paso_libro_click', { libro: patron.libro_recomendado })}
+                className="group inline-block"
+              >
+                <span className="font-[family-name:var(--font-cormorant)] text-2xl text-[#272727] underline decoration-[#c2866b]/40 underline-offset-4 group-hover:decoration-[#c2866b]">
+                  {patron.libro_recomendado}
+                </span>
+                <span className="block text-xs tracking-widest uppercase text-[#c2866b] mt-2">
+                  {t('book_cta')}
+                </span>
+              </a>
+            ) : (
+              <p className="font-[family-name:var(--font-cormorant)] text-2xl text-[#272727]">
+                {patron.libro_recomendado}
+              </p>
+            )}
           </div>
         )}
 
