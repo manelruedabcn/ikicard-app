@@ -233,6 +233,9 @@ export default function PasoClient({ locale, userId }: Props) {
             print-color-adjust: exact;
           }
           .paso-print-only { display: block; }
+          /* La lectura del patrón empieza en página nueva y no se parte. */
+          .paso-break-before { break-before: page; }
+          .paso-avoid-break { break-inside: avoid; }
         }
       `}</style>
       <div className="w-full max-w-md paso-print-root">
@@ -270,7 +273,7 @@ export default function PasoClient({ locale, userId }: Props) {
 
         {/* Lectura del patrón */}
         {patron && (
-          <div className="flex flex-col gap-6 mt-10">
+          <div className="flex flex-col gap-6 mt-10 paso-break-before paso-avoid-break">
             <Field label={t('motivacion')} text={patron.motivacion} />
             <Field label={t('bajo_presion')} text={patron.bajo_presion} />
             <Field label={t('teme')} text={patron.teme} />
