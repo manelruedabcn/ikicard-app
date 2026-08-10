@@ -103,7 +103,10 @@
     "nota_espejo": "PASO isn't a scientific test or a diagnosis. It's a mirror: what your answers draw, a direction to look at yourself. It doesn't say who you are, but how you walk today — and that can always change.",
     "saved": "Result saved to your account.",
     "cta_account": "Create a free account to save your result and keep exploring the method.",
-    "cta_button": "CREATE ACCOUNT"
+    "cta_button": "CREATE ACCOUNT",
+    "pdf_button": "Save as PDF",
+    "pdf_hint": "Download or share it. The dialog to save it as a PDF will open.",
+    "pdf_footer": "Discover how you walk at www.ikigaier.com"
   },
   "oraculo": {
     "label": "Your card today",

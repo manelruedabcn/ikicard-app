@@ -212,7 +212,21 @@ export default function PasoClient({ locale, userId }: Props) {
 
   return (
     <Shell locale={locale} tn={tn} userId={userId}>
-      <div className="w-full max-w-md">
+      {/* Reglas de impresión: al guardar como PDF se deja solo el informe,
+          limpio, con los colores del gráfico y las barras (color-adjust). */}
+      <style>{`
+        .paso-print-only { display: none; }
+        @media print {
+          @page { margin: 12mm; }
+          body { background: #fff !important; }
+          .paso-print-root, .paso-print-root * {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+          .paso-print-only { display: block; }
+        }
+      `}</style>
+      <div className="w-full max-w-md paso-print-root">
         <div className="text-center mb-8">
           <p className="text-xs tracking-[0.4em] uppercase text-[#c2866b] mb-2">
             {t('your_pattern')}
@@ -265,8 +279,42 @@ export default function PasoClient({ locale, userId }: Props) {
           </div>
         )}
 
+        {/* Guardar en PDF: en móvil abre el diálogo nativo para guardarlo en
+            Archivos o compartirlo. Sin cuenta: se lleva el resultado tal cual. */}
+        <div className="mt-4 text-center print:hidden">
+          <button
+            onClick={() => window.print()}
+            className="w-full py-3 border border-[#272727] text-[#272727] text-xs tracking-widest hover:bg-[#272727] hover:text-[#FDFBF7] transition-colors"
+          >
+            {t('pdf_button')}
+          </button>
+          <p className="text-xs text-[#272727]/40 mt-2">{t('pdf_hint')}</p>
+        </div>
+
+        {/* Pie de marca: solo aparece en el PDF/impresión, para que quien lo
+            reciba compartido sepa dónde hacer su propio test. El QR lleva a
+            www.ikigaier.com para maximizar la conversión de quien lo escanea. */}
+        <div className="paso-print-only mt-10 pt-6 border-t border-[#272727]/15">
+          <div className="flex items-center justify-center gap-5">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/paso-qr.png"
+              alt="ikigaier.com"
+              width={88}
+              height={88}
+              className="w-[88px] h-[88px] shrink-0"
+            />
+            <div className="text-left">
+              <p className="text-xs tracking-[0.4em] uppercase text-[#c2866b] mb-1">P · A · S · O</p>
+              <p className="font-[family-name:var(--font-cormorant)] text-lg leading-snug text-[#272727]">
+                {t('pdf_footer')}
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Guardado / CTA cuenta */}
-        <div className="mt-8 text-center">
+        <div className="mt-8 text-center print:hidden">
           {userId ? (
             saved && <p className="text-xs text-[#272727]/50">{t('saved')}</p>
           ) : (
@@ -619,7 +667,7 @@ function Shell({
 }) {
   return (
     <div className="min-h-screen flex flex-col items-center bg-[#FDFBF7] px-4 py-8">
-      <div className="w-full max-w-md flex items-center justify-between mb-8">
+      <div className="w-full max-w-md flex items-center justify-between mb-8 print:hidden">
         <Link
           href={`/${locale}/${userId ? 'dashboard' : 'login'}`}
           className="text-xs text-[#272727]/40 hover:text-[#c2866b] transition-colors tracking-wide"

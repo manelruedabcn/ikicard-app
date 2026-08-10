@@ -103,7 +103,10 @@
     "nota_espejo": "PASO no es un test científico ni un diagnóstico. Es un espejo: lo que dibujan tus respuestas, una dirección para mirarte. No dice quién eres, sino cómo caminas hoy — y eso siempre se puede cambiar.",
     "saved": "Resultado guardado en tu cuenta.",
     "cta_account": "Crea una cuenta gratis para guardar tu resultado y seguir explorando el método.",
-    "cta_button": "CREAR CUENTA"
+    "cta_button": "CREAR CUENTA",
+    "pdf_button": "Guardar en PDF",
+    "pdf_hint": "Descárgalo o compártelo. Se abrirá el diálogo para guardarlo como PDF.",
+    "pdf_footer": "Descubre tu forma de caminar en www.ikigaier.com"
   },
   "oraculo": {
     "label": "Tu carta de hoy",
