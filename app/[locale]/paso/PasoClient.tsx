@@ -463,25 +463,27 @@ function BrechasBlock({
                 ? '#7a8b6f'
                 : '#27272733'
           return (
-            <div key={b.dimension} className="flex items-baseline justify-between gap-3">
-              <div className="flex items-baseline gap-2 min-w-0">
-                <span
-                  className="inline-block h-2 w-2 rounded-full shrink-0 translate-y-[-1px]"
-                  style={{ background: color }}
-                />
-                <EjeLabel
-                  label={t('dim_' + b.dimension)}
-                  className="text-[#272727] font-[family-name:var(--font-cormorant)] text-lg shrink-0"
-                />
-                <span className="text-xs text-[#272727]/50 truncate">
-                  — {dirLabel[b.direccion]}
-                </span>
+            <div key={b.dimension} className="flex flex-col gap-0.5">
+              <div className="flex items-baseline justify-between gap-3">
+                <div className="flex items-baseline gap-2 min-w-0">
+                  <span
+                    className="inline-block h-2 w-2 rounded-full shrink-0 translate-y-[-1px]"
+                    style={{ background: color }}
+                  />
+                  <EjeLabel
+                    label={t('dim_' + b.dimension)}
+                    className="text-[#272727] font-[family-name:var(--font-cormorant)] text-lg"
+                  />
+                </div>
+                {abs > 0 && (
+                  <span className="text-xs text-[#272727]/40 shrink-0 tabular-nums">
+                    {t('separas_puntos', { n: abs })}
+                  </span>
+                )}
               </div>
-              {abs > 0 && (
-                <span className="text-xs text-[#272727]/40 shrink-0 tabular-nums">
-                  {t('separas_puntos', { n: abs })}
-                </span>
-              )}
+              <span className="text-xs leading-relaxed text-[#272727]/50 pl-4">
+                {dirLabel[b.direccion]}
+              </span>
             </div>
           )
         })}
