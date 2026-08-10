@@ -31,8 +31,8 @@ const MAX_LINEAS = 3
 const UMBRAL_NARRAR = 2
 
 const NOMBRE_EJE: Record<Locale, Record<Dim, string>> = {
-  es: { P: 'Paso firme', A: 'Acompañado', S: 'Sostenido', O: 'Observador' },
-  en: { P: 'Firm step', A: 'Accompanied', S: 'Sustained', O: 'Observer' },
+  es: { P: 'Pisar firme', A: 'Acompañar', S: 'Sostener', O: 'Observar' },
+  en: { P: 'Press on', A: 'Accompany', S: 'Sustain', O: 'Observe' },
 }
 
 // Frase por (eje, dirección). "exige" = la máscara empuja el rasgo por encima de

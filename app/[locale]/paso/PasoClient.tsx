@@ -466,9 +466,10 @@ function BrechasBlock({
                   className="inline-block h-2 w-2 rounded-full shrink-0 translate-y-[-1px]"
                   style={{ background: color }}
                 />
-                <span className="text-sm text-[#272727] font-[family-name:var(--font-cormorant)] text-lg shrink-0">
-                  {t('dim_' + b.dimension)}
-                </span>
+                <EjeLabel
+                  label={t('dim_' + b.dimension)}
+                  className="text-[#272727] font-[family-name:var(--font-cormorant)] text-lg shrink-0"
+                />
                 <span className="text-xs text-[#272727]/50 truncate">
                   — {dirLabel[b.direccion]}
                 </span>
@@ -505,9 +506,10 @@ function FirmaBlock({
       <div className="flex flex-col gap-3">
         {DIMS.map(d => (
           <div key={d} className="flex items-center gap-3">
-            <span className="w-24 shrink-0 text-sm text-[#272727] font-[family-name:var(--font-cormorant)] text-lg">
-              {t('dim_' + d)}
-            </span>
+            <EjeLabel
+              label={t('dim_' + d)}
+              className="w-24 shrink-0 text-[#272727] font-[family-name:var(--font-cormorant)] text-lg"
+            />
             <div className="flex-1 flex gap-1">
               {zonas.map(z => {
                 const active = z === segmentos[d]
@@ -554,9 +556,10 @@ function QueEsPasoBlock({
       <div className="flex flex-col gap-4">
         {DIMS.map(d => (
           <div key={d} className="flex flex-col gap-0.5">
-            <span className="font-[family-name:var(--font-cormorant)] text-lg text-[#272727]">
-              {t('dim_' + d)}
-            </span>
+            <EjeLabel
+              label={t('dim_' + d)}
+              className="font-[family-name:var(--font-cormorant)] text-lg text-[#272727]"
+            />
             <span className="text-sm leading-relaxed text-[#272727]/70">
               {t('que_es_' + d)}
             </span>
@@ -564,6 +567,19 @@ function QueEsPasoBlock({
         ))}
       </div>
     </div>
+  )
+}
+
+// Etiqueta de eje con la inicial (P·A·S·O) resaltada en negrita y algo mayor,
+// para que las cuatro leídas en vertical dibujen la palabra PASO.
+function EjeLabel({ label, className = '' }: { label: string; className?: string }) {
+  const inicial = label.charAt(0)
+  const resto = label.slice(1)
+  return (
+    <span className={className}>
+      <span className="font-bold text-[1.25em]">{inicial}</span>
+      {resto}
+    </span>
   )
 }
 
