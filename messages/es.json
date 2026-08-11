@@ -116,6 +116,7 @@
   },
   "oraculo": {
     "label": "Tu carta de hoy",
+    "reveal_hint": "Toca la carta para revelarla",
     "sello_placeholder": "Una palabra...",
     "sello_label": "Tu sello",
     "save_button": "GUARDAR SELLO",

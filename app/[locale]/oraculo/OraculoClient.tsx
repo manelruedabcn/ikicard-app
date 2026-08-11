@@ -52,6 +52,7 @@ export default function OraculoClient({ userId, locale, todaySessions, history, 
     alreadyPlayedToday ? todaySessions[0].card_code : pickCard(allPlayedCodes, `${userId}-${today}`)
   )
   const [sello, setSello] = useState(todayCard?.sello || '')
+  const [revealed, setRevealed] = useState(alreadyPlayedToday)
   const [saved, setSaved] = useState(alreadyPlayedToday)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -138,20 +139,45 @@ export default function OraculoClient({ userId, locale, todaySessions, history, 
           {t('label')}
         </p>
 
-        <div className="relative w-full aspect-[2/3] rounded-xl overflow-hidden shadow-md mb-6">
-          <Image
-            src={`/cards/${locale}/${selectedCard}.png`}
-            alt={selectedCard}
-            fill
-            className="object-cover"
-            priority
-          />
+        <div className="relative w-full aspect-[2/3] mb-6 [perspective:1200px]">
+          <button
+            type="button"
+            onClick={() => setRevealed(true)}
+            disabled={revealed}
+            aria-label={revealed ? selectedCard : t('reveal_hint')}
+            className={`relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] [-webkit-transform-style:preserve-3d] ${
+              revealed ? '[transform:rotateY(180deg)] cursor-default' : 'cursor-pointer'
+            }`}
+          >
+            {/* Dorso */}
+            <div className="absolute inset-0 rounded-xl overflow-hidden shadow-md [backface-visibility:hidden] [-webkit-backface-visibility:hidden]">
+              <Image
+                src="/cards/back.png"
+                alt=""
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+            {/* Cara */}
+            <div className="absolute inset-0 rounded-xl overflow-hidden shadow-md [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:rotateY(180deg)]">
+              <Image
+                src={`/cards/${locale}/${selectedCard}.png`}
+                alt={selectedCard}
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+          </button>
         </div>
 
         <p className="text-center font-[family-name:var(--font-cormorant)] text-lg text-[#272727]/60 mb-6">
-          {selectedCard}
+          {revealed ? selectedCard : t('reveal_hint')}
         </p>
 
+        {revealed && (
+        <>
         <button
           onClick={handleShare}
           className="w-full py-3 border border-[#272727]/30 text-[#272727]/60 text-xs tracking-widest hover:border-[#c2866b] hover:text-[#c2866b] transition-colors mb-6"
@@ -186,6 +212,8 @@ export default function OraculoClient({ userId, locale, todaySessions, history, 
               {saving ? '...' : t('save_button')}
             </button>
           </div>
+        )}
+        </>
         )}
       </div>
 

@@ -116,6 +116,7 @@
   },
   "oraculo": {
     "label": "Your card today",
+    "reveal_hint": "Tap the card to reveal it",
     "sello_placeholder": "One word...",
     "sello_label": "Your seal",
     "save_button": "SAVE SEAL",
