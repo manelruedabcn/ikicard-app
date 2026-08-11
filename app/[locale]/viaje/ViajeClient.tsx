@@ -350,6 +350,7 @@ function SlotCard({
 }) {
   const [value, setValue] = useState('')
   const answered = !!card?.answered_at
+  const [revealed, setRevealed] = useState(answered)
 
   return (
     <div>
@@ -365,17 +366,38 @@ function SlotCard({
         </div>
       ) : (
         <>
-          <div className="relative w-full aspect-[2/3] rounded-xl overflow-hidden shadow-md mb-4">
-            {card && (
-              <Image
-                src={`/cards/${locale}/${card.card_code}.png`}
-                alt={card.card_code}
-                fill
-                className="object-cover"
-              />
-            )}
+          <div className="relative w-full aspect-[2/3] mb-4 [perspective:1200px]">
+            <button
+              type="button"
+              onClick={() => setRevealed(true)}
+              disabled={revealed || !card}
+              aria-label={revealed ? (card?.card_code ?? '') : t('reveal_hint')}
+              className={`relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] [-webkit-transform-style:preserve-3d] ${
+                revealed ? '[transform:rotateY(180deg)] cursor-default' : 'cursor-pointer'
+              }`}
+            >
+              {/* Dorso */}
+              <div className="absolute inset-0 rounded-xl overflow-hidden shadow-md [backface-visibility:hidden] [-webkit-backface-visibility:hidden]">
+                <Image src="/cards/back.png" alt="" fill className="object-cover" />
+              </div>
+              {/* Cara */}
+              <div className="absolute inset-0 rounded-xl overflow-hidden shadow-md [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:rotateY(180deg)]">
+                {card && (
+                  <Image
+                    src={`/cards/${locale}/${card.card_code}.png`}
+                    alt={card.card_code}
+                    fill
+                    className="object-cover"
+                  />
+                )}
+              </div>
+            </button>
           </div>
-          {answered ? (
+          {!revealed ? (
+            <p className="text-center text-xs text-[#272727]/40 tracking-wide">
+              {t('reveal_hint')}
+            </p>
+          ) : answered ? (
             <p className="text-center font-[family-name:var(--font-cormorant)] text-2xl text-[#c2866b]">
               {card?.sello}
             </p>

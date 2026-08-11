@@ -27,6 +27,7 @@
     "slot_morning": "Morning",
     "slot_midday": "Midday",
     "slot_night": "Night",
+    "reveal_hint": "Tap to reveal",
     "locked": "Unlocks at {hour}:00",
     "sello_placeholder": "One word...",
     "save_button": "SAVE SEAL",

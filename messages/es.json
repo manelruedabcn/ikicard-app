@@ -27,6 +27,7 @@
     "slot_morning": "Mañana",
     "slot_midday": "Mediodía",
     "slot_night": "Noche",
+    "reveal_hint": "Toca para revelar",
     "locked": "Se desbloquea a las {hour}:00",
     "sello_placeholder": "Una palabra...",
     "save_button": "GUARDAR SELLO",
