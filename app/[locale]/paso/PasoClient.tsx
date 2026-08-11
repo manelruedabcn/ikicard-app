@@ -54,6 +54,26 @@ export default function PasoClient({ locale, userId }: Props) {
   const [generandoPdf, setGenerandoPdf] = useState(false)
   const informeRef = useRef<HTMLDivElement>(null)
 
+  async function compartir(nombrePatron: string) {
+    trackEvent('share', { tool: 'paso' })
+    const url = 'https://www.ikigaier.com'
+    const data = {
+      title: t('share_title'),
+      text: `${t('share_text', { patron: nombrePatron })} ${url}`,
+      url,
+    }
+    try {
+      if (navigator.share) {
+        await navigator.share(data)
+      } else {
+        await navigator.clipboard.writeText(data.text)
+        alert(t('share_copied'))
+      }
+    } catch {
+      // La persona cerró el diálogo de compartir: no hacemos nada.
+    }
+  }
+
   async function guardarPdf() {
     if (!informeRef.current || generandoPdf) return
     setGenerandoPdf(true)
@@ -332,9 +352,15 @@ export default function PasoClient({ locale, userId }: Props) {
             Archivos o compartirlo. Sin cuenta: se lleva el resultado tal cual. */}
         <div className="mt-4 text-center print:hidden paso-no-export">
           <button
+            onClick={() => compartir(patron?.nombre ?? '')}
+            className="w-full py-3 bg-[#c2866b] text-[#FDFBF7] text-xs tracking-widest hover:bg-[#272727] transition-colors"
+          >
+            {t('share_button')}
+          </button>
+          <button
             onClick={guardarPdf}
             disabled={generandoPdf}
-            className="w-full py-3 border border-[#272727] text-[#272727] text-xs tracking-widest hover:bg-[#272727] hover:text-[#FDFBF7] transition-colors disabled:opacity-40"
+            className="w-full py-3 mt-3 border border-[#272727] text-[#272727] text-xs tracking-widest hover:bg-[#272727] hover:text-[#FDFBF7] transition-colors disabled:opacity-40"
           >
             {generandoPdf ? t('pdf_generating') : t('pdf_button')}
           </button>

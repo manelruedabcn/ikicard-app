@@ -108,6 +108,10 @@
     "pdf_button": "Guardar en PDF",
     "pdf_generating": "Preparando tu PDF…",
     "pdf_hint": "Se creará un PDF y se abrirá el menú para guardarlo o compartirlo.",
+    "share_button": "Compartir",
+    "share_title": "PASO — Mi forma de caminar",
+    "share_text": "Mi forma de caminar en PASO: «{patron}». Descubre la tuya:",
+    "share_copied": "Enlace copiado",
     "pdf_footer": "Descubre tu forma de caminar en www.ikigaier.com"
   },
   "oraculo": {

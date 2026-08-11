@@ -108,6 +108,10 @@
     "pdf_button": "Save as PDF",
     "pdf_generating": "Preparing your PDF…",
     "pdf_hint": "A PDF will be created and the menu to save or share it will open.",
+    "share_button": "Share",
+    "share_title": "PASO — How I walk",
+    "share_text": "My way of walking in PASO: “{patron}”. Discover yours:",
+    "share_copied": "Link copied",
     "pdf_footer": "Discover how you walk at www.ikigaier.com"
   },
   "oraculo": {
