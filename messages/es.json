@@ -106,7 +106,8 @@
     "cta_account": "Crea una cuenta gratis para guardar tu resultado y seguir explorando el método.",
     "cta_button": "CREAR CUENTA",
     "pdf_button": "Guardar en PDF",
-    "pdf_hint": "Descárgalo o compártelo. Se abrirá el diálogo para guardarlo como PDF.",
+    "pdf_generating": "Preparando tu PDF…",
+    "pdf_hint": "Se creará un PDF y se abrirá el menú para guardarlo o compartirlo.",
     "pdf_footer": "Descubre tu forma de caminar en www.ikigaier.com"
   },
   "oraculo": {

@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { trackEvent } from '@/lib/analytics'
+import { generarPasoPdf } from '@/lib/paso-pdf'
 import {
   PASO_GRUPOS,
   DIMS,
@@ -50,6 +51,23 @@ export default function PasoClient({ locale, userId }: Props) {
   const [answers, setAnswers] = useState<Record<number, { mas?: Dim; menos?: Dim }>>({})
   const [informe, setInforme] = useState<InformePaso | null>(null)
   const [saved, setSaved] = useState(false)
+  const [generandoPdf, setGenerandoPdf] = useState(false)
+  const informeRef = useRef<HTMLDivElement>(null)
+
+  async function guardarPdf() {
+    if (!informeRef.current || generandoPdf) return
+    setGenerandoPdf(true)
+    trackEvent('pdf_download', { tool: 'paso' })
+    try {
+      await generarPasoPdf(informeRef.current)
+    } catch {
+      // Último recurso si la generación falla (navegador muy antiguo):
+      // el diálogo de impresión del sistema.
+      window.print()
+    } finally {
+      setGenerandoPdf(false)
+    }
+  }
 
   function pick(grupo: number, kind: 'mas' | 'menos', dim: Dim) {
     setAnswers(prev => {
@@ -238,7 +256,7 @@ export default function PasoClient({ locale, userId }: Props) {
           .paso-avoid-break { break-inside: avoid; }
         }
       `}</style>
-      <div className="w-full max-w-md paso-print-root">
+      <div ref={informeRef} className="w-full max-w-md paso-print-root">
         <div className="text-center mb-8">
           <p className="text-xs tracking-[0.4em] uppercase text-[#c2866b] mb-2">
             {t('your_pattern')}
@@ -312,12 +330,13 @@ export default function PasoClient({ locale, userId }: Props) {
 
         {/* Guardar en PDF: en móvil abre el diálogo nativo para guardarlo en
             Archivos o compartirlo. Sin cuenta: se lleva el resultado tal cual. */}
-        <div className="mt-4 text-center print:hidden">
+        <div className="mt-4 text-center print:hidden paso-no-export">
           <button
-            onClick={() => window.print()}
-            className="w-full py-3 border border-[#272727] text-[#272727] text-xs tracking-widest hover:bg-[#272727] hover:text-[#FDFBF7] transition-colors"
+            onClick={guardarPdf}
+            disabled={generandoPdf}
+            className="w-full py-3 border border-[#272727] text-[#272727] text-xs tracking-widest hover:bg-[#272727] hover:text-[#FDFBF7] transition-colors disabled:opacity-40"
           >
-            {t('pdf_button')}
+            {generandoPdf ? t('pdf_generating') : t('pdf_button')}
           </button>
           <p className="text-xs text-[#272727]/40 mt-2">{t('pdf_hint')}</p>
         </div>
@@ -345,7 +364,7 @@ export default function PasoClient({ locale, userId }: Props) {
         </div>
 
         {/* Guardado / CTA cuenta */}
-        <div className="mt-8 text-center print:hidden">
+        <div className="mt-8 text-center print:hidden paso-no-export">
           {userId ? (
             saved && <p className="text-xs text-[#272727]/50">{t('saved')}</p>
           ) : (

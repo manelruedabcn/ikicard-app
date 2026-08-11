@@ -106,7 +106,8 @@
     "cta_account": "Create a free account to save your result and keep exploring the method.",
     "cta_button": "CREATE ACCOUNT",
     "pdf_button": "Save as PDF",
-    "pdf_hint": "Download or share it. The dialog to save it as a PDF will open.",
+    "pdf_generating": "Preparing your PDF…",
+    "pdf_hint": "A PDF will be created and the menu to save or share it will open.",
     "pdf_footer": "Discover how you walk at www.ikigaier.com"
   },
   "oraculo": {
