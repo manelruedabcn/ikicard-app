@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { useRouter, usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
@@ -56,6 +56,16 @@ export default function OraculoClient({ userId, locale, todaySessions, history, 
   const [saved, setSaved] = useState(alreadyPlayedToday)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [showIntro, setShowIntro] = useState(false)
+
+  useEffect(() => {
+    if (!localStorage.getItem('ikigaier_oraculo_intro_v1')) setShowIntro(true)
+  }, [])
+
+  function dismissIntro() {
+    localStorage.setItem('ikigaier_oraculo_intro_v1', '1')
+    setShowIntro(false)
+  }
   const languages = [
     { code: 'en', label: 'EN' },
     { code: 'es', label: 'ES' },
@@ -133,6 +143,25 @@ export default function OraculoClient({ userId, locale, todaySessions, history, 
         </div>
       </div>
 
+      {showIntro && (
+        <div className="w-full max-w-sm text-center mt-8">
+          <h2 className="font-[family-name:var(--font-cormorant)] text-3xl text-[#272727] mb-6">
+            {t('intro_title')}
+          </h2>
+          <p className="text-sm text-[#272727]/70 leading-relaxed mb-10">
+            {t('intro_desc')}
+          </p>
+          <button
+            onClick={dismissIntro}
+            className="w-full py-4 bg-[#272727] text-[#FDFBF7] text-xs tracking-widest hover:bg-[#c2866b] transition-colors"
+          >
+            {t('intro_button')}
+          </button>
+        </div>
+      )}
+
+      {!showIntro && (
+      <>
       {/* Carta del día */}
       <div className="w-full max-w-sm">
         <p className="text-xs text-[#272727]/40 tracking-widest uppercase mb-4 text-center">
@@ -250,6 +279,8 @@ export default function OraculoClient({ userId, locale, todaySessions, history, 
             ))}
           </div>
         </div>
+      )}
+      </>
       )}
     </div>
   )

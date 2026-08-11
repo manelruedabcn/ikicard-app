@@ -18,6 +18,11 @@
   "viaje": {
     "start_title": "El Viaje de 20 días",
     "start_desc": "Un proceso real. Tres cartas cada día: mañana, mediodía y noche. No hay atajos.",
+    "start_how_title": "Cómo funciona",
+    "start_how_1": "20 días contigo. Un proceso, no un juego. Ve a tu ritmo, sin saltarte pasos.",
+    "start_how_2": "Cada día, tres cartas: mañana, mediodía y noche. Cada una se abre a su hora.",
+    "start_how_3": "Atraviesas cuatro fases: Despertar, Descender, Atravesar y Retornar.",
+    "start_how_4": "De cada carta te llevas una palabra. Al final tendrás el mapa completo de tu viaje.",
     "start_button": "COMENZAR MI VIAJE DE 20 DÍAS",
     "day_label": "Día {day} de 20",
     "phase_despertar": "Despertar",
@@ -117,6 +122,9 @@
     "pdf_footer": "Descubre tu forma de caminar en www.ikigaier.com"
   },
   "oraculo": {
+    "intro_title": "Una carta al día",
+    "intro_desc": "Cada día recibes una carta con una pregunta. Tócala para voltearla, léela con calma y guarda la palabra que quieras llevarte. Sin prisa, sin compromiso.",
+    "intro_button": "EMPEZAR",
     "label": "Tu carta de hoy",
     "reveal_hint": "Toca la carta para revelarla",
     "sello_prompt": "¿Con qué palabra te quedas?",

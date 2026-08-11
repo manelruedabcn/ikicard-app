@@ -80,17 +80,40 @@ export default function ViajeClient({ userId, locale, session, cards, gifts }: P
     }))
     await supabase.from('journey_cards').insert(rows)
     trackEvent('journey_started', { tool: 'viaje' })
+
+    // Email de bienvenida (no bloquea el Viaje si falla)
+    fetch('/api/viaje/enroll', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ locale }),
+    }).catch(() => {})
+
     router.refresh()
   }
 
   if (!session) {
     return (
       <Shell locale={locale} tn={tn}>
-        <div className="w-full max-w-sm text-center mt-16">
+        <div className="w-full max-w-sm text-center mt-12">
           <h2 className="font-[family-name:var(--font-cormorant)] text-3xl text-[#272727] mb-4">
             {t('start_title')}
           </h2>
           <p className="text-sm text-[#272727]/60 mb-10">{t('start_desc')}</p>
+
+          <div className="text-left border-t border-[#272727]/10 pt-8 mb-10">
+            <p className="text-xs text-[#272727]/40 tracking-widest uppercase mb-5 text-center">
+              {t('start_how_title')}
+            </p>
+            <ul className="flex flex-col gap-4">
+              {['start_how_1', 'start_how_2', 'start_how_3', 'start_how_4'].map(k => (
+                <li key={k} className="flex gap-3 text-sm text-[#272727]/70 leading-relaxed">
+                  <span className="text-[#c2866b] mt-[2px]">—</span>
+                  <span>{t(k)}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
           <button
             onClick={startJourney}
             disabled={busy}

@@ -18,6 +18,11 @@
   "viaje": {
     "start_title": "The 20-day Journey",
     "start_desc": "A real process. Three cards each day: morning, midday and night. No shortcuts.",
+    "start_how_title": "How it works",
+    "start_how_1": "20 days with yourself. A process, not a game. Go at your pace, no skipping steps.",
+    "start_how_2": "Each day, three cards: morning, midday and night. Each one opens at its hour.",
+    "start_how_3": "You move through four phases: Awaken, Descend, Cross and Return.",
+    "start_how_4": "From each card you keep one word. At the end you'll have the full map of your journey.",
     "start_button": "BEGIN MY 20-DAY JOURNEY",
     "day_label": "Day {day} of 20",
     "phase_despertar": "Awaken",
@@ -117,6 +122,9 @@
     "pdf_footer": "Discover how you walk at www.ikigaier.com"
   },
   "oraculo": {
+    "intro_title": "One card a day",
+    "intro_desc": "Each day you receive a card with a question. Tap to flip it, read it calmly and keep the word you want to take with you. No rush, no commitment.",
+    "intro_button": "BEGIN",
     "label": "Your card today",
     "reveal_hint": "Tap the card to reveal it",
     "sello_prompt": "What word do you keep?",

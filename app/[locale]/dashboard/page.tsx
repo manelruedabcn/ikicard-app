@@ -6,6 +6,7 @@ import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import { getMyTools } from '@/lib/entitlements'
 import PasoResultSync from './PasoResultSync'
+import TimezoneSync from './TimezoneSync'
 import SignOutButton from './SignOutButton'
 
 export default async function DashboardPage({ params: { locale } }: { params: { locale: string } }) {
@@ -30,6 +31,7 @@ export default async function DashboardPage({ params: { locale } }: { params: { 
   return (
     <div className="min-h-screen flex flex-col items-center bg-[#FDFBF7] px-4 py-16">
       <PasoResultSync userId={user.id} />
+      <TimezoneSync userId={user.id} />
       <div className="w-full max-w-sm">
         <div className="mb-12">
           <div className="flex items-start justify-between gap-4">
