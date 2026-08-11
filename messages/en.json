@@ -124,6 +124,8 @@
   },
   "auth": {
     "login_title": "Sign in",
+    "google_button": "Continue with Google",
+    "or": "or",
     "email": "Email",
     "password": "Password",
     "login_button": "Sign in",

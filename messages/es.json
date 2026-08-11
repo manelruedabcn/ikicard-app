@@ -124,6 +124,8 @@
   },
   "auth": {
     "login_title": "Iniciar sesión",
+    "google_button": "Continuar con Google",
+    "or": "o",
     "email": "Correo",
     "password": "Contraseña",
     "login_button": "Entrar",
