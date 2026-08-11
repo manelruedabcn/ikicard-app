@@ -6,6 +6,7 @@ import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import { getMyTools } from '@/lib/entitlements'
 import PasoResultSync from './PasoResultSync'
+import SignOutButton from './SignOutButton'
 
 export default async function DashboardPage({ params: { locale } }: { params: { locale: string } }) {
   const supabase = createClient()
@@ -31,9 +32,12 @@ export default async function DashboardPage({ params: { locale } }: { params: { 
       <PasoResultSync userId={user.id} />
       <div className="w-full max-w-sm">
         <div className="mb-12">
-          <p className="font-[family-name:var(--font-cormorant)] text-3xl text-[#272727]">
-            {t('greeting', { name })}
-          </p>
+          <div className="flex items-start justify-between gap-4">
+            <p className="font-[family-name:var(--font-cormorant)] text-3xl text-[#272727]">
+              {t('greeting', { name })}
+            </p>
+            <SignOutButton locale={locale} />
+          </div>
           <p className="text-[#272727]/60 mt-1">{t('welcome_back')}</p>
           {tools.length > 0 && (
             <p className="text-[#272727]/60 mt-4 text-sm">{t('prepared')}</p>
