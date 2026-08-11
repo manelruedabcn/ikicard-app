@@ -1,5 +1,5 @@
 // ============================================================
-// IKICARD — Reglas del modo Viaje (21 días)
+// IKICARD — Reglas del modo Viaje (20 días)
 // ============================================================
 
 export type Slot = 'morning' | 'midday' | 'night'
@@ -19,7 +19,7 @@ export const PHASE_DAYS: Record<Phase, [number, number]> = {
   despertar: [1, 5],
   descender: [6, 10],
   atravesar: [11, 15],
-  retornar: [16, 21],
+  retornar: [16, 20],
 }
 
 export const PHASE_ORDER: Phase[] = ['despertar', 'descender', 'atravesar', 'retornar']
@@ -56,8 +56,8 @@ export interface Assignment {
   card_code: string
 }
 
-// Genera las 63 cartas del viaje (3/día × 21 días), sin repetir dentro de cada fase.
-// Días 16-21 (18 slots): 15 cartas R + 3 comodines X no vistos.
+// Genera las 60 cartas del viaje (3/día × 20 días), sin repetir dentro de cada fase.
+// Retornar (días 16-20): 15 cartas R, una por slot, sin comodines.
 export function buildAssignment(): Assignment[] {
   const result: Assignment[] = []
 
@@ -74,22 +74,19 @@ export function buildAssignment(): Assignment[] {
   fill(1, 5, range('D', 1, 15))
   fill(6, 10, range('E', 1, 15))
   fill(11, 15, range('A', 1, 15))
-
-  // Retornar: R01-R15 + 3 comodines X
-  const retornar = [...range('R', 1, 15), ...shuffle(['X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7', 'X8']).slice(0, 3)]
-  fill(16, 21, retornar)
+  fill(16, 20, range('R', 1, 15))
 
   return result
 }
 
-// current_day = días transcurridos desde started_at + 1 (máx 21)
+// current_day = días transcurridos desde started_at + 1 (máx 20)
 export function computeCurrentDay(startedAt: string): number {
   const start = new Date(startedAt)
   const startMidnight = new Date(start.getFullYear(), start.getMonth(), start.getDate())
   const now = new Date()
   const nowMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   const diffDays = Math.floor((nowMidnight.getTime() - startMidnight.getTime()) / 86400000)
-  return Math.min(21, Math.max(1, diffDays + 1))
+  return Math.min(20, Math.max(1, diffDays + 1))
 }
 
 // ¿Está desbloqueado este slot en el día actual? (por hora local)

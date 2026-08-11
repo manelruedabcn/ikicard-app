@@ -1,4 +1,6 @@
-// Cartas jugables del mazo IKICARD (68 total)
+// Cartas jugables en solitario (Oráculo/Viaje): 60 cartas de las 4 fases.
+// Los comodines X son de juego en grupo ("otro jugador responde por ti"),
+// así que no entran en el mazo individual.
 const range = (prefix: string, from: number, to: number) =>
   Array.from({ length: to - from + 1 }, (_, i) => {
     const n = from + i
@@ -10,12 +12,12 @@ export const PLAYABLE_CARDS: string[] = [
   ...range('E', 1, 15), // Descender
   ...range('A', 1, 15), // Atravesar
   ...range('R', 1, 15), // Retornar
-  'X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7', 'X8', // Wildcards
 ]
 
-// Todas las cartas del mazo (incluye separadores e instrucciones)
+// Todas las cartas del mazo físico (incluye comodines, separadores e instrucciones)
 export const ALL_CARDS: string[] = [
   ...PLAYABLE_CARDS,
+  'X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7', 'X8', // Comodines (solo juego en grupo)
   'F1', 'F2', 'F3', 'F4',
   'I1',
 ]

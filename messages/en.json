@@ -7,7 +7,7 @@
   "dashboard": {
     "title": "How do you want to play today?",
     "oraculo_desc": "One card a day. No commitment.",
-    "viaje_desc": "21 days with yourself. A real process.",
+    "viaje_desc": "20 days with yourself. A real process.",
     "circulo_desc": "In group. Coming soon.",
     "greeting": "Hello, {name}.",
     "welcome_back": "Welcome back.",
@@ -16,10 +16,10 @@
     "expires": "Available until {date}"
   },
   "viaje": {
-    "start_title": "The 21-day Journey",
+    "start_title": "The 20-day Journey",
     "start_desc": "A real process. Three cards each day: morning, midday and night. No shortcuts.",
-    "start_button": "BEGIN MY 21-DAY JOURNEY",
-    "day_label": "Day {day} of 21",
+    "start_button": "BEGIN MY 20-DAY JOURNEY",
+    "day_label": "Day {day} of 20",
     "phase_despertar": "Awaken",
     "phase_descender": "Descend",
     "phase_atravesar": "Cross",
@@ -29,8 +29,9 @@
     "slot_night": "Night",
     "reveal_hint": "Tap to reveal",
     "locked": "Unlocks at {hour}:00",
-    "sello_placeholder": "One word...",
-    "save_button": "SAVE SEAL",
+    "sello_prompt": "What word do you keep?",
+    "sello_placeholder": "Your word...",
+    "save_button": "KEEP YOUR WORD",
     "map_link": "See the journey map →",
     "map_title": "The journey map",
     "map_back": "Back to journey",
@@ -118,9 +119,10 @@
   "oraculo": {
     "label": "Your card today",
     "reveal_hint": "Tap the card to reveal it",
-    "sello_placeholder": "One word...",
-    "sello_label": "Your seal",
-    "save_button": "SAVE SEAL",
+    "sello_prompt": "What word do you keep?",
+    "sello_placeholder": "Your word...",
+    "sello_label": "Your word",
+    "save_button": "KEEP YOUR WORD",
     "share_button": "SHARE",
     "history_label": "History"
   },

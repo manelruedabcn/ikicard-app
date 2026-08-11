@@ -36,7 +36,7 @@ export default async function MapaPage({ params: { locale } }: { params: { local
     if (c.sello && !selloByDay[c.day]) selloByDay[c.day] = c.sello
   }
 
-  const days = Array.from({ length: 21 }, (_, i) => i + 1)
+  const days = Array.from({ length: 20 }, (_, i) => i + 1)
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-[#FDFBF7] px-4 py-8">

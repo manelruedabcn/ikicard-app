@@ -163,7 +163,7 @@ export default function ViajeClient({ userId, locale, session, cards, gifts }: P
     )
   }
 
-  // ---- Ritual final (día 21) ----
+  // ---- Ritual final (día 20) ----
   async function completeJourney() {
     if (!finalIntent.trim() || !finalDon.trim()) return
     setBusy(true)
@@ -178,7 +178,7 @@ export default function ViajeClient({ userId, locale, session, cards, gifts }: P
     router.refresh()
   }
 
-  if (showFinal && currentDay >= 21) {
+  if (showFinal && currentDay >= 20) {
     return (
       <Shell locale={locale} tn={tn}>
         <div className="w-full max-w-sm text-center mt-10">
@@ -281,7 +281,7 @@ export default function ViajeClient({ userId, locale, session, cards, gifts }: P
           })}
         </div>
 
-        {currentDay >= 21 && allAnswered && (
+        {currentDay >= 20 && allAnswered && (
           <button
             onClick={() => setShowFinal(true)}
             className="w-full mt-10 py-4 bg-[#c2866b] text-[#FDFBF7] text-xs tracking-widest hover:bg-[#272727] transition-colors"
@@ -403,6 +403,9 @@ function SlotCard({
             </p>
           ) : (
             <div className="flex flex-col gap-3">
+              <p className="text-center text-xs text-[#272727]/50 tracking-wide">
+                {t('sello_prompt')}
+              </p>
               <input
                 type="text"
                 placeholder={t('sello_placeholder')}

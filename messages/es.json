@@ -7,7 +7,7 @@
   "dashboard": {
     "title": "¿Cómo quieres jugar hoy?",
     "oraculo_desc": "Una carta al día. Sin compromiso.",
-    "viaje_desc": "21 días contigo. Un proceso real.",
+    "viaje_desc": "20 días contigo. Un proceso real.",
     "circulo_desc": "En grupo. Próximamente.",
     "greeting": "Hola, {name}.",
     "welcome_back": "Bienvenido de nuevo.",
@@ -16,10 +16,10 @@
     "expires": "Disponible hasta el {date}"
   },
   "viaje": {
-    "start_title": "El Viaje de 21 días",
+    "start_title": "El Viaje de 20 días",
     "start_desc": "Un proceso real. Tres cartas cada día: mañana, mediodía y noche. No hay atajos.",
-    "start_button": "COMENZAR MI VIAJE DE 21 DÍAS",
-    "day_label": "Día {day} de 21",
+    "start_button": "COMENZAR MI VIAJE DE 20 DÍAS",
+    "day_label": "Día {day} de 20",
     "phase_despertar": "Despertar",
     "phase_descender": "Descender",
     "phase_atravesar": "Atravesar",
@@ -29,8 +29,9 @@
     "slot_night": "Noche",
     "reveal_hint": "Toca para revelar",
     "locked": "Se desbloquea a las {hour}:00",
-    "sello_placeholder": "Una palabra...",
-    "save_button": "GUARDAR SELLO",
+    "sello_prompt": "¿Con qué palabra te quedas?",
+    "sello_placeholder": "Tu palabra...",
+    "save_button": "GUARDA TU PALABRA",
     "map_link": "Ver el mapa del viaje →",
     "map_title": "El mapa del viaje",
     "map_back": "Volver al viaje",
@@ -118,9 +119,10 @@
   "oraculo": {
     "label": "Tu carta de hoy",
     "reveal_hint": "Toca la carta para revelarla",
-    "sello_placeholder": "Una palabra...",
-    "sello_label": "Tu sello",
-    "save_button": "GUARDAR SELLO",
+    "sello_prompt": "¿Con qué palabra te quedas?",
+    "sello_placeholder": "Tu palabra...",
+    "sello_label": "Tu palabra",
+    "save_button": "GUARDA TU PALABRA",
     "share_button": "COMPARTIR",
     "history_label": "Historial"
   },

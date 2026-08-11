@@ -195,6 +195,9 @@ export default function OraculoClient({ userId, locale, todaySessions, history, 
           </div>
         ) : (
           <div className="flex flex-col gap-3">
+            <p className="text-center text-xs text-[#272727]/50 tracking-wide">
+              {t('sello_prompt')}
+            </p>
             <input
               type="text"
               placeholder={t('sello_placeholder')}
