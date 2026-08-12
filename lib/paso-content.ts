@@ -72,7 +72,7 @@ export const PASO_GRUPOS: Grupo[] = [
     "P": "Me atrevo con lo difícil",
     "A": "Conecto con facilidad",
     "S": "Me mantengo estable",
-    "O": "Cuido cada detalle"
+    "O": "Me fijo en todo"
   },
   {
     "grupo": 5,
@@ -92,8 +92,8 @@ export const PASO_GRUPOS: Grupo[] = [
     "grupo": 7,
     "P": "Me exijo",
     "A": "Sé convencer",
-    "S": "Me mantengo estable",
-    "O": "Reviso los detalles"
+    "S": "No me altero",
+    "O": "Reviso antes de darlo por bueno"
   },
   {
     "grupo": 8,
@@ -119,7 +119,7 @@ export const PASO_GRUPOS: Grupo[] = [
   {
     "grupo": 11,
     "P": "Voy rápido",
-    "A": "Me abro a lo nuevo",
+    "A": "Soy sociable",
     "S": "Soy constante",
     "O": "Voy con cautela"
   },
@@ -140,16 +140,16 @@ export const PASO_GRUPOS: Grupo[] = [
   {
     "grupo": 14,
     "P": "Apunto alto",
-    "A": "Me abro a lo nuevo",
+    "A": "Me sumo a los planes",
     "S": "Estoy en calma",
-    "O": "Busco la exactitud"
+    "O": "Voy a lo exacto"
   },
   {
     "grupo": 15,
     "P": "Voy con brío",
     "A": "Soy natural",
-    "S": "Me quito importancia",
-    "O": "Me guardo algo"
+    "S": "No presumo",
+    "O": "No lo cuento todo"
   },
   {
     "grupo": 16,
@@ -160,7 +160,7 @@ export const PASO_GRUPOS: Grupo[] = [
   },
   {
     "grupo": 17,
-    "P": "Decido y avanzo",
+    "P": "Decido rápido",
     "A": "Animo a los demás",
     "S": "Aguanto en el tiempo",
     "O": "Lo hago con esmero"
@@ -169,8 +169,8 @@ export const PASO_GRUPOS: Grupo[] = [
     "grupo": 18,
     "P": "Soy eficaz",
     "A": "Resulto agradable",
-    "S": "Voy sin prisa",
-    "O": "Me lo pienso con calma"
+    "S": "Me tomo mi tiempo",
+    "O": "Lo reflexiono"
   },
   {
     "grupo": 19,
@@ -182,13 +182,13 @@ export const PASO_GRUPOS: Grupo[] = [
   {
     "grupo": 20,
     "P": "Dirijo",
-    "A": "Me abro a los demás",
+    "A": "Me llevo bien con todos",
     "S": "Voy con mesura",
-    "O": "Busco que salga perfecto"
+    "O": "No dejo fallos"
   },
   {
     "grupo": 21,
-    "P": "Voy de frente",
+    "P": "Digo las cosas claras",
     "A": "Me expreso con calor",
     "S": "Voy con confianza",
     "O": "Soy ecuánime"
@@ -196,23 +196,23 @@ export const PASO_GRUPOS: Grupo[] = [
   {
     "grupo": 22,
     "P": "Tomo la iniciativa",
-    "A": "Trato con calidez",
+    "A": "Soy cercano",
     "S": "Mantengo un ritmo regular",
     "O": "Soy formal"
   },
   {
     "grupo": 23,
     "P": "Voy con determinación",
-    "A": "Caigo bien a todos",
-    "S": "Me quito importancia",
-    "O": "Voy con prudencia"
+    "A": "Me gano a la gente",
+    "S": "Me mantengo humilde",
+    "O": "Voy con cuidado"
   },
   {
     "grupo": 24,
-    "P": "Tengo valor",
-    "A": "Me abro a los demás",
-    "S": "Voy sin prisa",
-    "O": "Me guardo algo"
+    "P": "No me achico",
+    "A": "Hago buenas migas",
+    "S": "No me acelero",
+    "O": "Soy reservado"
   },
   {
     "grupo": 25,
@@ -223,17 +223,17 @@ export const PASO_GRUPOS: Grupo[] = [
   },
   {
     "grupo": 26,
-    "P": "Me basto solo",
-    "A": "Sé convencer",
-    "S": "Voy sin prisa",
-    "O": "Lo hago con esmero"
+    "P": "No dependo de nadie",
+    "A": "Sé llegar a la gente",
+    "S": "Avanzo con calma",
+    "O": "Lo remato bien"
   },
   {
     "grupo": 27,
-    "P": "Le pongo energía",
+    "P": "Voy con fuerza",
     "A": "Voy de buen humor",
-    "S": "Soy amable",
-    "O": "Trabajo con rigor"
+    "S": "Soy considerado",
+    "O": "Cuido que esté bien hecho"
   },
   {
     "grupo": 28,
