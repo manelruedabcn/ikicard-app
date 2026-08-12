@@ -142,7 +142,7 @@ export default function PasoClient({ locale, userId }: Props) {
     return (
       <Shell locale={locale} tn={tn} userId={userId}>
         <div className="w-full max-w-md text-center mt-10">
-          <p className="text-xs tracking-[0.4em] uppercase text-[#c2866b] mb-4">P · A · S · O</p>
+          <p className="text-2xl font-medium tracking-[0.4em] uppercase text-[#c2866b] mb-4">P · A · S · O</p>
           <h1 className="font-[family-name:var(--font-cormorant)] text-4xl text-[#272727] mb-6">
             {t('intro_title')}
           </h1>
