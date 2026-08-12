@@ -48,199 +48,199 @@ export interface InformePaso {
 export const PASO_GRUPOS: Grupo[] = [
   {
     "grupo": 1,
-    "P": "Con decisión",
-    "A": "Afable",
-    "S": "Apacible",
-    "O": "Prudente"
+    "P": "Decido y avanzo",
+    "A": "Me acerco a la gente",
+    "S": "Voy sin prisa",
+    "O": "Miro antes de dar el paso"
   },
   {
     "grupo": 2,
-    "P": "Firme",
-    "A": "Con calidez",
-    "S": "Paciente",
-    "O": "Con reflexión"
+    "P": "Sostengo lo que pienso",
+    "A": "Trato con calidez",
+    "S": "Espero sin impacientarme",
+    "O": "Me lo pienso con calma"
   },
   {
     "grupo": 3,
-    "P": "Frontal",
-    "A": "Sociable",
-    "S": "Constante",
-    "O": "Con precisión"
+    "P": "Voy de frente",
+    "A": "Me abro a los demás",
+    "S": "No me caigo del ritmo",
+    "O": "Cuido el detalle"
   },
   {
     "grupo": 4,
-    "P": "Audaz",
-    "A": "Cordial",
-    "S": "Estable",
-    "O": "Detallista"
+    "P": "Me atrevo con lo difícil",
+    "A": "Conecto con facilidad",
+    "S": "Me mantengo estable",
+    "O": "Cuido cada detalle"
   },
   {
     "grupo": 5,
-    "P": "Con empuje",
-    "A": "Elocuente",
-    "S": "Fiel",
-    "O": "Con rigor"
+    "P": "Empujo hasta el final",
+    "A": "Me expreso bien",
+    "S": "Soy fiel a los míos",
+    "O": "Trabajo con rigor"
   },
   {
     "grupo": 6,
-    "P": "Tenaz",
-    "A": "Optimista",
-    "S": "En calma",
-    "O": "Prudente"
+    "P": "No me rindo",
+    "A": "Miro el lado bueno",
+    "S": "Mantengo la calma",
+    "O": "Voy con prudencia"
   },
   {
     "grupo": 7,
-    "P": "Exigente",
-    "A": "Convincente",
-    "S": "Estable",
-    "O": "Detallista"
+    "P": "Me exijo",
+    "A": "Sé convencer",
+    "S": "Me mantengo estable",
+    "O": "Reviso los detalles"
   },
   {
     "grupo": 8,
-    "P": "Autosuficiente",
-    "A": "Entusiasta",
-    "S": "Con discreción",
-    "O": "Con reservas"
+    "P": "Me basto solo",
+    "A": "Me entusiasmo",
+    "S": "Voy con discreción",
+    "O": "Me guardo algo"
   },
   {
     "grupo": 9,
-    "P": "Valiente",
-    "A": "Con expresividad",
-    "S": "Leal",
-    "O": "Con método"
+    "P": "Tengo valor",
+    "A": "Digo lo que siento",
+    "S": "Soy leal",
+    "O": "Sigo un método"
   },
   {
     "grupo": 10,
-    "P": "Contundente",
-    "A": "Alegre",
-    "S": "Humilde",
-    "O": "Con análisis"
+    "P": "Soy contundente",
+    "A": "Voy con alegría",
+    "S": "Me quito importancia",
+    "O": "Lo analizo"
   },
   {
     "grupo": 11,
-    "P": "Veloz",
-    "A": "Con apertura",
-    "S": "Constante",
-    "O": "Con cautela"
+    "P": "Voy rápido",
+    "A": "Me abro a lo nuevo",
+    "S": "Soy constante",
+    "O": "Voy con cautela"
   },
   {
     "grupo": 12,
-    "P": "Insistente",
-    "A": "Con encanto",
-    "S": "Amable",
-    "O": "Con orden"
+    "P": "Insisto hasta lograrlo",
+    "A": "Caigo bien",
+    "S": "Soy amable",
+    "O": "Lo hago con orden"
   },
   {
     "grupo": 13,
-    "P": "Con energía",
-    "A": "Vivaz",
-    "S": "Confiable",
-    "O": "Con criterio"
+    "P": "Le pongo energía",
+    "A": "Soy vivaz",
+    "S": "Se puede confiar en mí",
+    "O": "Tengo criterio"
   },
   {
     "grupo": 14,
-    "P": "Con ambición",
-    "A": "Con apertura",
-    "S": "En calma",
-    "O": "Con exactitud"
+    "P": "Apunto alto",
+    "A": "Me abro a lo nuevo",
+    "S": "Estoy en calma",
+    "O": "Busco la exactitud"
   },
   {
     "grupo": 15,
-    "P": "Con brío",
-    "A": "Natural",
-    "S": "Humilde",
-    "O": "Con reserva"
+    "P": "Voy con brío",
+    "A": "Soy natural",
+    "S": "Me quito importancia",
+    "O": "Me guardo algo"
   },
   {
     "grupo": 16,
-    "P": "Independiente",
-    "A": "Locuaz",
-    "S": "Complaciente",
-    "O": "Con sistema"
+    "P": "Voy por mi cuenta",
+    "A": "Hablo con soltura",
+    "S": "Intento agradar",
+    "O": "Sigo un sistema"
   },
   {
     "grupo": 17,
-    "P": "Con decisión",
-    "A": "Que alienta",
-    "S": "Que perdura",
-    "O": "Con esmero"
+    "P": "Decido y avanzo",
+    "A": "Animo a los demás",
+    "S": "Aguanto en el tiempo",
+    "O": "Lo hago con esmero"
   },
   {
     "grupo": 18,
-    "P": "Eficaz",
-    "A": "Agradable",
-    "S": "Apacible",
-    "O": "Con reflexión"
+    "P": "Soy eficaz",
+    "A": "Resulto agradable",
+    "S": "Voy sin prisa",
+    "O": "Me lo pienso con calma"
   },
   {
     "grupo": 19,
-    "P": "Dominante",
-    "A": "Que contagia",
-    "S": "Predecible",
-    "O": "Con cálculo"
+    "P": "Llevo las riendas",
+    "A": "Contagio lo que siento",
+    "S": "Soy predecible",
+    "O": "Lo calculo"
   },
   {
     "grupo": 20,
-    "P": "Que dirige",
-    "A": "Sociable",
-    "S": "Con mesura",
-    "O": "Perfeccionista"
+    "P": "Dirijo",
+    "A": "Me abro a los demás",
+    "S": "Voy con mesura",
+    "O": "Busco que salga perfecto"
   },
   {
     "grupo": 21,
-    "P": "Frontal",
-    "A": "Con efusión",
-    "S": "Con confianza",
-    "O": "Ecuánime"
+    "P": "Voy de frente",
+    "A": "Me expreso con calor",
+    "S": "Voy con confianza",
+    "O": "Soy ecuánime"
   },
   {
     "grupo": 22,
-    "P": "Con iniciativa",
-    "A": "Con calidez",
-    "S": "Regular",
-    "O": "Formal"
+    "P": "Tomo la iniciativa",
+    "A": "Trato con calidez",
+    "S": "Mantengo un ritmo regular",
+    "O": "Soy formal"
   },
   {
     "grupo": 23,
-    "P": "Con determinación",
-    "A": "Popular",
-    "S": "Humilde",
-    "O": "Prudente"
+    "P": "Voy con determinación",
+    "A": "Caigo bien a todos",
+    "S": "Me quito importancia",
+    "O": "Voy con prudencia"
   },
   {
     "grupo": 24,
-    "P": "Valiente",
-    "A": "Sociable",
-    "S": "Apacible",
-    "O": "Con reservas"
+    "P": "Tengo valor",
+    "A": "Me abro a los demás",
+    "S": "Voy sin prisa",
+    "O": "Me guardo algo"
   },
   {
     "grupo": 25,
-    "P": "Con franqueza",
-    "A": "Afable",
-    "S": "Servicial",
-    "O": "Con introspección"
+    "P": "Hablo con franqueza",
+    "A": "Trato con amabilidad",
+    "S": "Echo una mano",
+    "O": "Miro hacia dentro"
   },
   {
     "grupo": 26,
-    "P": "Autosuficiente",
-    "A": "Convincente",
-    "S": "Apacible",
-    "O": "Con esmero"
+    "P": "Me basto solo",
+    "A": "Sé convencer",
+    "S": "Voy sin prisa",
+    "O": "Lo hago con esmero"
   },
   {
     "grupo": 27,
-    "P": "Con energía",
-    "A": "Jovial",
-    "S": "Amable",
-    "O": "Con rigor"
+    "P": "Le pongo energía",
+    "A": "Voy de buen humor",
+    "S": "Soy amable",
+    "O": "Trabajo con rigor"
   },
   {
     "grupo": 28,
-    "P": "Persistente",
-    "A": "Que inspira",
-    "S": "Paciente",
-    "O": "Imparcial"
+    "P": "No abandono",
+    "A": "Inspiro a otros",
+    "S": "Tengo paciencia",
+    "O": "Soy imparcial"
   }
 ]
 

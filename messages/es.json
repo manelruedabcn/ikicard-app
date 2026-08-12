@@ -69,11 +69,11 @@
   "paso": {
     "intro_title": "¿Cómo caminas?",
     "intro_desc": "PASO es un test breve que revela tu forma de moverte por la vida: cómo decides, cómo te relacionas, cómo sostienes el ritmo y cómo miras el terreno antes de pisarlo.",
-    "intro_how": "Verás 28 grupos de cuatro palabras. En cada uno, marca la que MÁS te representa y la que MENOS. No hay respuestas buenas ni malas.",
+    "intro_how": "Verás 28 grupos de cuatro frases. En cada uno, marca la que MÁS te representa y la que MENOS. No hay respuestas buenas ni malas.",
     "intro_start": "EMPEZAR EL TEST",
     "intro_time": "Unos 5 minutos.",
     "progress": "{n} de {total}",
-    "test_prompt": "Marca la palabra que MÁS y la que MENOS te representan.",
+    "test_prompt": "Marca la frase que MÁS y la que MENOS te representan.",
     "mas": "Más",
     "menos": "Menos",
     "back": "Atrás",

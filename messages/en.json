@@ -69,11 +69,11 @@
   "paso": {
     "intro_title": "How do you walk?",
     "intro_desc": "PASO is a short test that reveals how you move through life: how you decide, how you relate, how you keep your pace, and how you read the terrain before stepping on it.",
-    "intro_how": "You'll see 28 groups of four words. In each one, mark the one that represents you MOST and the one that represents you LEAST. There are no right or wrong answers.",
+    "intro_how": "You'll see 28 groups of four phrases. In each one, mark the one that represents you MOST and the one that represents you LEAST. There are no right or wrong answers.",
     "intro_start": "START THE TEST",
     "intro_time": "About 5 minutes.",
     "progress": "{n} of {total}",
-    "test_prompt": "Mark the word that represents you MOST and the one that represents you LEAST.",
+    "test_prompt": "Mark the phrase that represents you MOST and the one that represents you LEAST.",
     "mas": "Most",
     "menos": "Least",
     "back": "Back",
