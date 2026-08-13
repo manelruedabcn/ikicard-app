@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
@@ -79,10 +79,14 @@ export default function PasoClient({ locale, userId }: Props) {
   const informeRef = useRef<HTMLDivElement>(null)
 
   // Ejemplo interactivo de la intro (práctica del gesto MÁS/MENOS, no puntúa).
-  const [ejemplo] = useState(() => {
-    const sets = locale === 'en' ? EJEMPLOS_EN : EJEMPLOS_ES
-    return sets[Math.floor(Math.random() * sets.length)]
-  })
+  // Se arranca con el primer set (igual en servidor y cliente, sin mismatch de
+  // hidratación) y se aleatoriza en el cliente tras montar.
+  const sets = locale === 'en' ? EJEMPLOS_EN : EJEMPLOS_ES
+  const [ejemplo, setEjemplo] = useState(sets[0])
+  useEffect(() => {
+    setEjemplo(sets[Math.floor(Math.random() * sets.length)])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const [ej, setEj] = useState<{ mas?: number; menos?: number }>({})
 
   function pickEj(kind: 'mas' | 'menos', idx: number) {
