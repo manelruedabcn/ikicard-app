@@ -37,6 +37,27 @@ const LIBRO_LINKS: Record<string, string> = {
   'Camina sin separarte de ti': 'https://amzn.eu/d/01keLRwF',
 }
 
+// Sets del ejemplo interactivo de la intro: cosas fáciles y cotidianas para
+// que la persona practique el gesto "MÁS / MENOS" antes del test real. Se elige
+// uno al azar en cada visita (dinámico). Los ejes P/A/S/O NO intervienen aquí:
+// es solo una práctica del gesto, no puntúa nada.
+interface EjemploItem {
+  e: string
+  n: string
+}
+const EJEMPLOS_ES: EjemploItem[][] = [
+  [{ e: '🍌', n: 'Plátano' }, { e: '🍪', n: 'Galletas' }, { e: '🥩', n: 'Carne' }, { e: '🍚', n: 'Arroz' }],
+  [{ e: '☕', n: 'Café' }, { e: '🍵', n: 'Té' }, { e: '🥤', n: 'Refresco' }, { e: '💧', n: 'Agua' }],
+  [{ e: '🟥', n: 'Rojo' }, { e: '🟩', n: 'Verde' }, { e: '🟦', n: 'Azul' }, { e: '🟨', n: 'Amarillo' }],
+  [{ e: '🐶', n: 'Perro' }, { e: '🐱', n: 'Gato' }, { e: '🐦', n: 'Pájaro' }, { e: '🐟', n: 'Pez' }],
+]
+const EJEMPLOS_EN: EjemploItem[][] = [
+  [{ e: '🍌', n: 'Banana' }, { e: '🍪', n: 'Cookies' }, { e: '🥩', n: 'Meat' }, { e: '🍚', n: 'Rice' }],
+  [{ e: '☕', n: 'Coffee' }, { e: '🍵', n: 'Tea' }, { e: '🥤', n: 'Soda' }, { e: '💧', n: 'Water' }],
+  [{ e: '🟥', n: 'Red' }, { e: '🟩', n: 'Green' }, { e: '🟦', n: 'Blue' }, { e: '🟨', n: 'Yellow' }],
+  [{ e: '🐶', n: 'Dog' }, { e: '🐱', n: 'Cat' }, { e: '🐦', n: 'Bird' }, { e: '🐟', n: 'Fish' }],
+]
+
 interface Props {
   locale: string
   userId: string | null
@@ -53,6 +74,23 @@ export default function PasoClient({ locale, userId }: Props) {
   const [saved, setSaved] = useState(false)
   const [generandoPdf, setGenerandoPdf] = useState(false)
   const informeRef = useRef<HTMLDivElement>(null)
+
+  // Ejemplo interactivo de la intro (práctica del gesto MÁS/MENOS, no puntúa).
+  const [ejemplo] = useState(() => {
+    const sets = locale === 'en' ? EJEMPLOS_EN : EJEMPLOS_ES
+    return sets[Math.floor(Math.random() * sets.length)]
+  })
+  const [ej, setEj] = useState<{ mas?: number; menos?: number }>({})
+
+  function pickEj(kind: 'mas' | 'menos', idx: number) {
+    setEj(prev => {
+      const cur = { ...prev }
+      const other = kind === 'mas' ? 'menos' : 'mas'
+      if (cur[other] === idx) cur[other] = undefined
+      cur[kind] = cur[kind] === idx ? undefined : idx
+      return cur
+    })
+  }
 
   async function compartir(nombrePatron: string) {
     trackEvent('share', { tool: 'paso' })
@@ -147,7 +185,40 @@ export default function PasoClient({ locale, userId }: Props) {
             {t('intro_title')}
           </h1>
           <p className="text-sm leading-relaxed text-[#272727]/70 mb-4">{t('intro_desc')}</p>
-          <p className="text-sm leading-relaxed text-[#272727]/70 mb-10">{t('intro_how')}</p>
+          <p className="text-sm leading-relaxed text-[#272727]/70 mb-6">{t('intro_how')}</p>
+
+          {/* Ejemplo interactivo: practica el gesto MÁS/MENOS con algo fácil */}
+          <div className="rounded-2xl border border-[#272727]/10 bg-[#272727]/[0.02] p-5 mb-8">
+            <p className="text-xs tracking-widest uppercase text-[#c2866b] mb-1">{t('example_eyebrow')}</p>
+            <p className="text-sm leading-relaxed text-[#272727]/70 mb-4">{t('example_intro')}</p>
+            <div className="flex items-center justify-end gap-2 mb-2 pr-1">
+              <span className="w-14 text-center text-[10px] tracking-widest uppercase text-[#c2866b]">
+                {t('mas')}
+              </span>
+              <span className="w-14 text-center text-[10px] tracking-widest uppercase text-[#272727]/40">
+                {t('menos')}
+              </span>
+            </div>
+            <div className="flex flex-col gap-2">
+              {ejemplo.map((it, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-2 rounded-xl border border-[#272727]/10 bg-[#FDFBF7] px-4 py-2.5"
+                >
+                  <span className="flex-1 flex items-center gap-2 text-left text-[15px] text-[#272727]">
+                    <span className="text-xl leading-none">{it.e}</span>
+                    {it.n}
+                  </span>
+                  <ChoiceBtn active={ej.mas === i} variant="mas" onClick={() => pickEj('mas', i)} />
+                  <ChoiceBtn active={ej.menos === i} variant="menos" onClick={() => pickEj('menos', i)} />
+                </div>
+              ))}
+            </div>
+            {ej.mas !== undefined && ej.menos !== undefined && (
+              <p className="text-sm text-[#c2866b] mt-4">{t('example_done')}</p>
+            )}
+          </div>
+
           <button
             onClick={() => setStage('test')}
             className="w-full py-4 bg-[#272727] text-[#FDFBF7] text-xs tracking-widest hover:bg-[#c2866b] transition-colors"
