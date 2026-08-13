@@ -18,6 +18,7 @@ import {
   type InformePaso,
 } from '@/lib/paso-content'
 import { getRareza } from '@/lib/paso-rareza'
+import { generarTitulares } from '@/lib/paso-titulares'
 import {
   NUM_ZONAS,
   ZONA_EQUILIBRIO,
@@ -361,27 +362,33 @@ export default function PasoClient({ locale, userId }: Props) {
           <p className="text-xs tracking-[0.3em] text-[#272727]/40 mt-2">{firma}</p>
         </div>
 
-        {/* Retrato del Caminante: la apertura de la lectura */}
+        {/* GANCHO (parte superior): titulares dinámicos + gráfica + retrato corto.
+            Da el golpe visual y empuja a leer el desarrollo de abajo. */}
+        <TitularesBlock inf={inf} locale={locale} />
+
+        {/* Gráfico horizonte: sube arriba, es lo más visual del informe */}
+        <HorizonGraph inf={inf} labels={DIMS.map(d => t('dim_' + d))} t={t} />
+
+        {/* Descripción básica: el retrato del Caminante, la apertura */}
         {patron?.retrato && (
-          <p className="text-[15px] leading-relaxed text-[#272727]/80 text-center mb-10 px-1">
+          <p className="text-[15px] leading-relaxed text-[#272727]/80 text-center mt-8 mb-10 px-1">
             {patron.retrato}
           </p>
         )}
 
+        {/* DESARROLLO (abajo): la lectura completa para quien quiere profundizar. */}
+
         {/* La lectura máscara vs real: el corazón del test (protagonista) */}
         <NarrativaBlock inf={inf} locale={locale} />
 
-        {/* Qué mide PASO: marco fijo (las cuatro formas de caminar) */}
-        <QueEsPasoBlock t={t} />
-
-        {/* Gráfico horizonte */}
-        <HorizonGraph inf={inf} labels={DIMS.map(d => t('dim_' + d))} t={t} />
+        {/* Dónde te separas de ti (brechas máscara vs natural) */}
+        <BrechasBlock inf={inf} t={t} />
 
         {/* Tu firma: la asignación precisa por zonas (1 de 2.401) */}
         <FirmaBlock segmentos={segmentos} t={t} />
 
-        {/* Dónde te separas de ti (brechas máscara vs natural) */}
-        <BrechasBlock inf={inf} t={t} />
+        {/* Qué mide PASO: marco fijo (las cuatro formas de caminar) */}
+        <QueEsPasoBlock t={t} />
 
         {/* Lectura del patrón */}
         {patron && (
@@ -525,6 +532,31 @@ function Field({ label, text }: { label: string; text: string }) {
     <div>
       <p className="text-xs tracking-widest uppercase text-[#c2866b] mb-1">{label}</p>
       <p className="text-sm leading-relaxed text-[#272727]/80">{text}</p>
+    </div>
+  )
+}
+
+// Titulares-gancho: parte superior del informe. El primero es el titular grande
+// (la brecha jugosa o el "caminas cerca de ti"); los siguientes, subtítulos.
+// Generados dinámicamente desde los datos de la persona (lib/paso-titulares.ts).
+function TitularesBlock({ inf, locale }: { inf: InformePaso; locale: string }) {
+  const titulares = generarTitulares(inf, locale)
+  if (titulares.length === 0) return null
+  const [principal, ...resto] = titulares
+  return (
+    <div className="text-center mb-8">
+      <p className="font-[family-name:var(--font-cormorant)] text-2xl leading-snug text-[#272727] px-2">
+        {principal}
+      </p>
+      {resto.length > 0 && (
+        <div className="mt-3 flex flex-col gap-1">
+          {resto.map((linea, i) => (
+            <p key={i} className="text-sm text-[#272727]/60">
+              {linea}
+            </p>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
