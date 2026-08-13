@@ -168,6 +168,11 @@
     "revoke": "Remove",
     "days_placeholder": "Days (empty = ∞)",
     "grant_tool": "Grant tool",
-    "grant_program": "Grant program"
+    "grant_program": "Grant program",
+    "stat_paso_total": "PASO tests (total)",
+    "stat_paso_today": "Tests today",
+    "stat_paso_week": "Tests (7 days)",
+    "stat_journeys": "Journeys started",
+    "stat_users": "Registered users"
   }
 }

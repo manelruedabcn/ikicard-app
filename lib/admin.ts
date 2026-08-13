@@ -76,6 +76,42 @@ export async function listUsers(): Promise<AdminUser[]> {
   }))
 }
 
+export interface AdminStats {
+  pasoTotal: number
+  pasoToday: number
+  pasoWeek: number
+  journeysStarted: number
+  users: number
+}
+
+// Métricas globales de uso (vista de dueño). Usa el cliente admin para contar
+// TODOS los registros saltándose la RLS. Solo se invoca desde /admin, ya
+// protegido por isCurrentUserAdmin().
+export async function getAdminStats(): Promise<AdminStats> {
+  const admin = createAdminClient()
+
+  const now = new Date()
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString()
+  const startOfWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
+
+  // head:true + count:'exact' devuelve solo el número, sin traer filas.
+  const [pasoTotal, pasoToday, pasoWeek, journeys, users] = await Promise.all([
+    admin.from('paso_results').select('*', { count: 'exact', head: true }),
+    admin.from('paso_results').select('*', { count: 'exact', head: true }).gte('created_at', startOfToday),
+    admin.from('paso_results').select('*', { count: 'exact', head: true }).gte('created_at', startOfWeek),
+    admin.from('journey_sessions').select('*', { count: 'exact', head: true }),
+    admin.from('profiles').select('*', { count: 'exact', head: true }),
+  ])
+
+  return {
+    pasoTotal: pasoTotal.count ?? 0,
+    pasoToday: pasoToday.count ?? 0,
+    pasoWeek: pasoWeek.count ?? 0,
+    journeysStarted: journeys.count ?? 0,
+    users: users.count ?? 0,
+  }
+}
+
 export async function listCatalog(): Promise<{ tools: CatalogTool[]; programs: CatalogProgram[] }> {
   const admin = createAdminClient()
   const { data: tools } = await admin.from('tools').select('id, code, name').eq('is_active', true).order('sort_order')

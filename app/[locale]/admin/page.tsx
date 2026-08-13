@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
-import { isCurrentUserAdmin, listUsers, listCatalog } from '@/lib/admin'
+import { isCurrentUserAdmin, listUsers, listCatalog, getAdminStats } from '@/lib/admin'
 import { grantTool, grantProgram, revokeEntitlement } from './actions'
 
 export default async function AdminPage({ params: { locale } }: { params: { locale: string } }) {
@@ -13,13 +13,22 @@ export default async function AdminPage({ params: { locale } }: { params: { loca
   if (!(await isCurrentUserAdmin())) redirect(`/${locale}/dashboard`)
 
   const t = await getTranslations('admin')
-  const [users, catalog] = await Promise.all([listUsers(), listCatalog()])
+  const [users, catalog, stats] = await Promise.all([listUsers(), listCatalog(), getAdminStats()])
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] px-4 py-12">
       <div className="max-w-3xl mx-auto">
         <h1 className="font-[family-name:var(--font-cormorant)] text-3xl text-[#272727] mb-2">{t('title')}</h1>
-        <p className="text-sm text-[#272727]/60 mb-10">{t('subtitle', { count: users.length })}</p>
+        <p className="text-sm text-[#272727]/60 mb-8">{t('subtitle', { count: users.length })}</p>
+
+        {/* Métricas clave de uso */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-12">
+          <StatCard value={stats.pasoTotal} label={t('stat_paso_total')} highlight />
+          <StatCard value={stats.pasoToday} label={t('stat_paso_today')} />
+          <StatCard value={stats.pasoWeek} label={t('stat_paso_week')} />
+          <StatCard value={stats.journeysStarted} label={t('stat_journeys')} />
+          <StatCard value={stats.users} label={t('stat_users')} />
+        </div>
 
         <div className="flex flex-col gap-6">
           {users.map(u => (
@@ -113,6 +122,19 @@ export default async function AdminPage({ params: { locale } }: { params: { loca
           ))}
         </div>
       </div>
+    </div>
+  )
+}
+
+function StatCard({ value, label, highlight = false }: { value: number; label: string; highlight?: boolean }) {
+  return (
+    <div
+      className={`rounded-xl border p-4 ${
+        highlight ? 'border-[#c2866b]/40 bg-[#c2866b]/[0.06]' : 'border-[#272727]/15 bg-white'
+      }`}
+    >
+      <p className="font-[family-name:var(--font-cormorant)] text-3xl text-[#272727]">{value}</p>
+      <p className="text-xs text-[#272727]/55 mt-1 leading-tight">{label}</p>
     </div>
   )
 }

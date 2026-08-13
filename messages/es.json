@@ -168,6 +168,11 @@
     "revoke": "Quitar",
     "days_placeholder": "Días (vacío = ∞)",
     "grant_tool": "Asignar herramienta",
-    "grant_program": "Asignar programa"
+    "grant_program": "Asignar programa",
+    "stat_paso_total": "Tests PASO (total)",
+    "stat_paso_today": "Tests hoy",
+    "stat_paso_week": "Tests (7 días)",
+    "stat_journeys": "Viajes iniciados",
+    "stat_users": "Usuarios registrados"
   }
 }
