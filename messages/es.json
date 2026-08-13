@@ -122,7 +122,15 @@
     "share_title": "PASO — Mi forma de caminar",
     "share_text": "Mi forma de caminar en PASO: «{patron}». Descubre la tuya:",
     "share_copied": "Enlace copiado",
-    "pdf_footer": "Descubre tu forma de caminar en www.ikigaier.com"
+    "pdf_footer": "Descubre tu forma de caminar en www.ikigaier.com",
+    "rareza_frecuente": "Una forma frecuente de caminar",
+    "rareza_habitual": "Una forma menos habitual de caminar",
+    "rareza_poco": "Una forma poco frecuente de caminar",
+    "rareza_short_frecuente": "Frecuente",
+    "rareza_short_habitual": "Menos habitual",
+    "rareza_short_poco": "Poco frecuente",
+    "mapa_title": "Las 15 formas de caminar",
+    "mapa_intro": "La tuya está marcada. Cómo de común es cada una es solo una aproximación, y ninguna es mejor que otra: todos llevamos algo de las cuatro."
   },
   "oraculo": {
     "intro_title": "Una carta al día",

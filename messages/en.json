@@ -122,7 +122,15 @@
     "share_title": "PASO — How I walk",
     "share_text": "My way of walking in PASO: “{patron}”. Discover yours:",
     "share_copied": "Link copied",
-    "pdf_footer": "Discover how you walk at www.ikigaier.com"
+    "pdf_footer": "Discover how you walk at www.ikigaier.com",
+    "rareza_frecuente": "A common way of walking",
+    "rareza_habitual": "A less common way of walking",
+    "rareza_poco": "An uncommon way of walking",
+    "rareza_short_frecuente": "Common",
+    "rareza_short_habitual": "Less common",
+    "rareza_short_poco": "Uncommon",
+    "mapa_title": "The 15 ways of walking",
+    "mapa_intro": "Yours is marked. How common each one is is only an approximation, and none is better than another: we all carry some of the four."
   },
   "oraculo": {
     "intro_title": "One card a day",

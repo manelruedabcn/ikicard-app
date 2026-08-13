@@ -8,6 +8,7 @@ import { trackEvent } from '@/lib/analytics'
 import { generarPasoPdf } from '@/lib/paso-pdf'
 import {
   PASO_GRUPOS,
+  PASO_PATRONES,
   DIMS,
   TOTAL_GRUPOS,
   calcularInformePaso,
@@ -16,6 +17,7 @@ import {
   type Answer,
   type InformePaso,
 } from '@/lib/paso-content'
+import { getRareza } from '@/lib/paso-rareza'
 import {
   NUM_ZONAS,
   ZONA_EQUILIBRIO,
@@ -355,6 +357,7 @@ export default function PasoClient({ locale, userId }: Props) {
           <h1 className="font-[family-name:var(--font-cormorant)] text-4xl text-[#272727]">
             {patron?.nombre}
           </h1>
+          <p className="text-sm text-[#272727]/55 mt-2">{t('rareza_' + getRareza(codigo))}</p>
           <p className="text-xs tracking-[0.3em] text-[#272727]/40 mt-2">{firma}</p>
         </div>
 
@@ -389,6 +392,10 @@ export default function PasoClient({ locale, userId }: Props) {
             <Field label={t('eficaz')} text={patron.seria_mas_eficaz_si} />
           </div>
         )}
+
+        {/* Mapa de las 15 formas de caminar: sitúa tu tipo entre todos.
+            Refuerza que no es una etiqueta, sino una de muchas formas. */}
+        <MapaCaminantes codigoActual={codigo} t={t} />
 
         {/* Libro recomendado. Si hay enlace de compra, el título es clicable
             (abre Amazon en pestaña nueva) y se muestra un CTA. El enlace <a>
@@ -518,6 +525,49 @@ function Field({ label, text }: { label: string; text: string }) {
     <div>
       <p className="text-xs tracking-widest uppercase text-[#c2866b] mb-1">{label}</p>
       <p className="text-sm leading-relaxed text-[#272727]/80">{text}</p>
+    </div>
+  )
+}
+
+// Mapa de las 15 formas de caminar. Lista los 15 tipos agrupados por rareza
+// (frecuente → menos habitual → poco frecuente) y resalta el del usuario. No es
+// un ranking de valor: refuerza que su tipo es una de muchas formas posibles.
+function MapaCaminantes({
+  codigoActual,
+  t,
+}: {
+  codigoActual: string
+  t: (k: string, v?: Record<string, string | number>) => string
+}) {
+  const orden = { frecuente: 0, habitual: 1, poco: 2 } as const
+  const lista = [...PASO_PATRONES].sort(
+    (a, b) => orden[getRareza(a.codigo)] - orden[getRareza(b.codigo)]
+  )
+  return (
+    <div className="mt-10 rounded-xl bg-[#272727]/[0.03] px-5 py-5 paso-avoid-break">
+      <p className="text-xs tracking-widest uppercase text-[#272727]/40 mb-2">{t('mapa_title')}</p>
+      <p className="text-sm leading-relaxed text-[#272727]/70 mb-4">{t('mapa_intro')}</p>
+      <ul className="flex flex-col gap-1.5">
+        {lista.map(p => {
+          const activo = p.codigo === codigoActual
+          return (
+            <li
+              key={p.codigo}
+              className={`flex items-baseline justify-between text-sm ${
+                activo ? 'text-[#272727] font-medium' : 'text-[#272727]/55'
+              }`}
+            >
+              <span>
+                {activo && <span className="text-[#c2866b] mr-1.5">●</span>}
+                {p.nombre}
+              </span>
+              <span className="text-xs text-[#272727]/35 ml-3 shrink-0">
+                {t('rareza_short_' + getRareza(p.codigo))}
+              </span>
+            </li>
+          )
+        })}
+      </ul>
     </div>
   )
 }
