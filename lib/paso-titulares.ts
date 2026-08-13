@@ -6,7 +6,7 @@
 // Voz: la misma de PASO — calma, honesta, sin eslóganes de anuncio. Un titular
 // es un anzuelo hacia una sección de abajo, no una afirmación cerrada.
 
-import { DIMS, type Dim, type InformePaso } from './paso-content'
+import { type Dim, type InformePaso } from './paso-content'
 
 type Locale = 'es' | 'en'
 
@@ -89,11 +89,14 @@ function esLocale(locale: string): Locale {
 
 // Devuelve los titulares en orden de impacto: el primero es el "gancho" grande
 // (la brecha jugosa, o el alineado); los siguientes son subtítulos.
-export function generarTitulares(inf: InformePaso, locale: string): string[] {
+//
+// `dominante` llega YA resuelto desde fuera (el eje dominante por SEGMENTOS, la
+// misma fuente que da el nombre del Caminante y la firma). Así el titular "tu
+// fuerza es…" nunca contradice al nombre: el score neto crudo y la zona normada
+// pueden señalar ejes distintos, y el nombre manda.
+export function generarTitulares(inf: InformePaso, dominante: Dim, locale: string): string[] {
   const L = esLocale(locale)
 
-  // Eje dominante = mayor score neto (empate → orden P-A-S-O).
-  const dominante = DIMS.reduce((a, b) => (inf.scores[a] >= inf.scores[b] ? a : b))
   const tDominante = DOMINANTE[L][dominante]
 
   const separaciones = inf.brechas.filter(b => b.direccion !== 'alineado')

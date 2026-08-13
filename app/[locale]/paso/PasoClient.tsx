@@ -334,6 +334,9 @@ export default function PasoClient({ locale, userId }: Props) {
   const firma = firmaTexto(segmentos)
   const codigo = resolverCodigoPorSegmentos(segmentos)
   const patron = getPatron(codigo)
+  // Eje dominante POR SEGMENTOS (zona más alta, empate → orden P-A-S-O): la misma
+  // fuente que da el nombre del Caminante, para que el titular no lo contradiga.
+  const dominante = DIMS.reduce((a, b) => (segmentos[a] >= segmentos[b] ? a : b))
 
   return (
     <Shell locale={locale} tn={tn} userId={userId}>
@@ -368,7 +371,7 @@ export default function PasoClient({ locale, userId }: Props) {
 
         {/* GANCHO (parte superior): titulares dinámicos + gráfica + retrato corto.
             Da el golpe visual y empuja a leer el desarrollo de abajo. */}
-        <TitularesBlock inf={inf} locale={locale} />
+        <TitularesBlock inf={inf} dominante={dominante} locale={locale} />
 
         {/* Gráfico horizonte: sube arriba, es lo más visual del informe */}
         <HorizonGraph inf={inf} labels={DIMS.map(d => t('dim_' + d))} t={t} />
@@ -543,8 +546,8 @@ function Field({ label, text }: { label: string; text: string }) {
 // Titulares-gancho: parte superior del informe. El primero es el titular grande
 // (la brecha jugosa o el "caminas cerca de ti"); los siguientes, subtítulos.
 // Generados dinámicamente desde los datos de la persona (lib/paso-titulares.ts).
-function TitularesBlock({ inf, locale }: { inf: InformePaso; locale: string }) {
-  const titulares = generarTitulares(inf, locale)
+function TitularesBlock({ inf, dominante, locale }: { inf: InformePaso; dominante: Dim; locale: string }) {
+  const titulares = generarTitulares(inf, dominante, locale)
   if (titulares.length === 0) return null
   const [principal, ...resto] = titulares
   return (
