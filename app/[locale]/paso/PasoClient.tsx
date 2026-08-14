@@ -560,9 +560,11 @@ function ChoiceBtn({
   )
 }
 
-// Captura de email al terminar el test (solo anónimos). Single opt-in:
-// el envío exige checkbox marcado. Copy inline (es/en) con promesa abierta:
-// recibir las herramientas de IKIGAIER a medida que se abren.
+// Captura de email al terminar el test (solo anónimos). El botón es
+// TRANSACCIONAL: envía a la persona su resultado por correo (algo que pide).
+// El checkbox es SEPARADO y opcional: consentimiento explícito para recibir
+// información del universo IKIGAIER (marketing). Nadie entra en marketing sin
+// marcarlo. Copy inline (es/en).
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 function LeadCapture({ codigo, locale }: { codigo: string; locale: string }) {
@@ -573,24 +575,24 @@ function LeadCapture({ codigo, locale }: { codigo: string; locale: string }) {
 
   const copy = es
     ? {
-        title: 'Esto es solo tu primera forma.',
-        body: 'IKIGAIER es un universo de herramientas para conocerte mejor, y las voy abriendo poco a poco. Déjame tu correo y te aviso cuando llegue la siguiente.',
+        title: '¿Te envío tu resultado por correo?',
+        body: 'Te llega un enlace a tu forma de caminar para volver a ella cuando quieras.',
         placeholder: 'tu@correo.com',
-        consent: 'Quiero recibir las herramientas de IKIGAIER en mi correo. Puedo darme de baja cuando quiera.',
-        button: 'Avísame',
+        consent: 'Quiero recibir más información del universo IKIGAIER (nuevas herramientas). Puedo darme de baja cuando quiera.',
+        button: 'Enviarme mi resultado',
         sending: 'Enviando…',
-        done: 'Hecho. Te escribiré cuando abra la siguiente herramienta.',
-        error: 'No se pudo guardar. Inténtalo de nuevo.',
+        done: 'Hecho. Revisa tu correo: te envío tu forma.',
+        error: 'No se pudo enviar. Inténtalo de nuevo.',
       }
     : {
-        title: 'This is just your first shape.',
-        body: "IKIGAIER is a universe of tools to know yourself better, and I open them little by little. Leave your email and I'll let you know when the next one arrives.",
+        title: 'Shall I email you your result?',
+        body: "You'll get a link to your way of walking, to come back to it whenever you like.",
         placeholder: 'you@email.com',
-        consent: "I want to receive IKIGAIER's tools in my inbox. I can unsubscribe anytime.",
-        button: 'Notify me',
+        consent: 'I want to receive more from the IKIGAIER universe (new tools). I can unsubscribe anytime.',
+        button: 'Email me my result',
         sending: 'Sending…',
-        done: "Done. I'll write when I open the next tool.",
-        error: 'Could not save. Please try again.',
+        done: 'Done. Check your inbox: your shape is on its way.',
+        error: 'Could not send. Please try again.',
       }
 
   if (status === 'done') {
@@ -601,7 +603,9 @@ function LeadCapture({ codigo, locale }: { codigo: string; locale: string }) {
     )
   }
 
-  const valid = EMAIL_RE.test(email.trim()) && consent
+  // El botón solo necesita un email válido (es transaccional). El consent es
+  // aparte: viaja en el body pero no condiciona el envío del resultado.
+  const valid = EMAIL_RE.test(email.trim())
   const submit = async () => {
     if (!valid || status === 'sending') return
     setStatus('sending')

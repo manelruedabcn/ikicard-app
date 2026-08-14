@@ -2,16 +2,19 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { PASO_PATRONES } from '@/lib/paso-content'
-import { sendLeadWelcomeEmail } from '@/lib/email'
+import { sendResultEmail, sendLeadWelcomeEmail } from '@/lib/email'
 import { unsubUrl } from '@/lib/notify'
 
 export const dynamic = 'force-dynamic'
 
 // Captura el email al terminar el test PASO (lead magnet), con o sin cuenta.
-// Single opt-in: exige consentimiento explícito del checkbox. Guarda email +
-// forma PASO para segmentar el email marketing (herramientas de IKIGAIER).
-// El user_id se toma de la SESIÓN (no del body), así queda enlazado si está
-// logueado. Upsert por email para no duplicar si repite el test.
+// Dos permisos SEPARADOS:
+//   · Transaccional: la persona pide su resultado → siempre le enviamos el
+//     enlace a su forma (no requiere consent, lo pidió).
+//   · Marketing: consent=true (checkbox) → además, bienvenida con la promesa
+//     de las herramientas de IKIGAIER. Sin consent NO se hace marketing.
+// El código es obligatorio (el email de resultado lo necesita). El user_id se
+// toma de la SESIÓN (no del body). Upsert por email para no duplicar.
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export async function POST(req: Request) {
@@ -24,12 +27,8 @@ export async function POST(req: Request) {
   if (!EMAIL_RE.test(emailRaw)) {
     return NextResponse.json({ ok: false, error: 'bad email' }, { status: 400 })
   }
-  // Sin consentimiento no hay base legal para el envío: no se guarda.
-  if (!consent) {
-    return NextResponse.json({ ok: false, error: 'consent required' }, { status: 400 })
-  }
-  // El código es opcional, pero si viene, debe ser un patrón real.
-  if (codigo && !PASO_PATRONES.some(p => p.codigo === codigo)) {
+  // El resultado se envía por código de forma: debe ser un patrón real.
+  if (!codigo || !PASO_PATRONES.some(p => p.codigo === codigo)) {
     return NextResponse.json({ ok: false, error: 'bad pattern' }, { status: 400 })
   }
 
@@ -47,7 +46,7 @@ export async function POST(req: Request) {
   const { data: lead, error } = await admin
     .from('paso_leads')
     .upsert(
-      { email: emailRaw, user_id: userId, codigo_patron: codigo, locale, source: 'paso', consent: true },
+      { email: emailRaw, user_id: userId, codigo_patron: codigo, locale, source: 'paso', consent },
       { onConflict: 'email' },
     )
     .select('id, unsubscribed_at')
@@ -58,9 +57,14 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: 'insert failed' }, { status: 500 })
   }
 
-  // Bienvenida inmediata solo si no se ha dado de baja antes. No bloquea la
-  // respuesta: si Resend falla, el lead ya quedó guardado.
-  if (lead && !lead.unsubscribed_at) {
+  // Envío transaccional: la persona pidió su resultado, siempre se lo mandamos.
+  // No bloquea la respuesta: si Resend falla, el lead ya quedó guardado.
+  sendResultEmail(emailRaw, locale, codigo).catch(err => {
+    console.error('[paso lead] result email error:', err)
+  })
+
+  // Marketing: solo con consentimiento explícito y sin baja previa.
+  if (consent && lead && !lead.unsubscribed_at) {
     sendLeadWelcomeEmail(emailRaw, locale, unsubUrl(`lead:${lead.id}`, locale)).catch(err => {
       console.error('[paso lead] welcome email error:', err)
     })

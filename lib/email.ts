@@ -1,4 +1,5 @@
 import { Resend } from 'resend'
+import { getPatron } from '@/lib/paso-content'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -161,4 +162,45 @@ export async function sendReminderEmail(to: string, locale: string, day: number,
 export async function sendLeadWelcomeEmail(to: string, locale: string, unsubUrl: string) {
   const c = leadWelcomeCopy[lang(locale)]
   return resend.emails.send({ from: FROM, to, subject: c.subject, html: c.html(unsubUrl) })
+}
+
+// ── Resultado del test (transaccional) ───────────────────────
+// Lo pidió la persona al terminar el test. Lleva un enlace permanente a su
+// forma de caminar (uno de los 15 Caminantes). No es el informe personal fino
+// (eso depende de las respuestas y vive en el resultado/dashboard): es su
+// forma, para volver a ella y compartirla.
+export async function sendResultEmail(to: string, locale: string, codigo: string) {
+  const l = lang(locale)
+  const patron = getPatron(codigo)
+  const nombre = patron?.nombre ?? ''
+  const url = `${APP_URL}/${l}/paso/forma/${encodeURIComponent(codigo)}`
+
+  const c = l === 'en'
+    ? {
+        subject: `Your way of walking: ${nombre}`,
+        heading: 'Your result',
+        intro: 'You just discovered your way of walking:',
+        cta: 'SEE MY SHAPE',
+        note: 'The link is permanent —come back to it whenever you like.',
+      }
+    : {
+        subject: `Tu forma de caminar: ${nombre}`,
+        heading: 'Tu resultado',
+        intro: 'Acabas de descubrir tu forma de caminar:',
+        cta: 'VER MI FORMA',
+        note: 'El enlace es permanente —vuelve a él cuando quieras.',
+      }
+
+  return resend.emails.send({
+    from: FROM,
+    to,
+    subject: c.subject,
+    html: shell(`
+      <h1 style="font-size:26px;font-weight:normal;text-align:center;margin:0 0 20px;">${c.heading}</h1>
+      <p style="font-size:15px;line-height:1.7;color:rgba(39,39,39,0.8);text-align:center;">${c.intro}</p>
+      <p style="font-family:Georgia,serif;font-size:28px;text-align:center;color:#272727;margin:12px 0 4px;">${nombre}</p>
+      ${button(url, c.cta)}
+      <p style="font-size:12px;color:rgba(39,39,39,0.5);text-align:center;margin-top:8px;">${c.note}</p>
+    `),
+  })
 }
