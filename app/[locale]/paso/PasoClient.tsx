@@ -507,14 +507,19 @@ export default function PasoClient({ locale, userId }: Props) {
           {userId ? (
             saved && <p className="text-xs text-[#272727]/50">{t('saved')}</p>
           ) : (
-            <div className="rounded-xl bg-[#272727]/[0.03] px-5 py-5">
-              <p className="text-sm text-[#272727]/70 mb-4">{t('cta_account')}</p>
-              <Link
-                href={`/${locale}/login`}
-                className="inline-block px-6 py-3 bg-[#272727] text-[#FDFBF7] text-xs tracking-widest hover:bg-[#c2866b] transition-colors"
-              >
-                {t('cta_button')}
-              </Link>
+            <div className="space-y-5">
+              {/* Captura de email (lead magnet): promesa abierta de recibir las
+                  herramientas de IKIGAIER. Single opt-in con checkbox explícito. */}
+              <LeadCapture codigo={codigo} locale={locale} />
+              <div className="rounded-xl bg-[#272727]/[0.03] px-5 py-5">
+                <p className="text-sm text-[#272727]/70 mb-4">{t('cta_account')}</p>
+                <Link
+                  href={`/${locale}/login`}
+                  className="inline-block px-6 py-3 bg-[#272727] text-[#FDFBF7] text-xs tracking-widest hover:bg-[#c2866b] transition-colors"
+                >
+                  {t('cta_button')}
+                </Link>
+              </div>
             </div>
           )}
         </div>
@@ -552,6 +557,97 @@ function ChoiceBtn({
     >
       {variant === 'mas' ? '+' : '−'}
     </button>
+  )
+}
+
+// Captura de email al terminar el test (solo anónimos). Single opt-in:
+// el envío exige checkbox marcado. Copy inline (es/en) con promesa abierta:
+// recibir las herramientas de IKIGAIER a medida que se abren.
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+function LeadCapture({ codigo, locale }: { codigo: string; locale: string }) {
+  const es = locale !== 'en'
+  const [email, setEmail] = useState('')
+  const [consent, setConsent] = useState(false)
+  const [status, setStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
+
+  const copy = es
+    ? {
+        title: 'Esto es solo tu primera forma.',
+        body: 'IKIGAIER es un universo de herramientas para conocerte mejor, y las voy abriendo poco a poco. Déjame tu correo y te aviso cuando llegue la siguiente.',
+        placeholder: 'tu@correo.com',
+        consent: 'Quiero recibir las herramientas de IKIGAIER en mi correo. Puedo darme de baja cuando quiera.',
+        button: 'Avísame',
+        sending: 'Enviando…',
+        done: 'Hecho. Te escribiré cuando abra la siguiente herramienta.',
+        error: 'No se pudo guardar. Inténtalo de nuevo.',
+      }
+    : {
+        title: 'This is just your first shape.',
+        body: "IKIGAIER is a universe of tools to know yourself better, and I open them little by little. Leave your email and I'll let you know when the next one arrives.",
+        placeholder: 'you@email.com',
+        consent: "I want to receive IKIGAIER's tools in my inbox. I can unsubscribe anytime.",
+        button: 'Notify me',
+        sending: 'Sending…',
+        done: "Done. I'll write when I open the next tool.",
+        error: 'Could not save. Please try again.',
+      }
+
+  if (status === 'done') {
+    return (
+      <div className="rounded-xl bg-[#c2866b]/[0.08] px-5 py-6 text-center">
+        <p className="text-sm text-[#272727]/70">{copy.done}</p>
+      </div>
+    )
+  }
+
+  const valid = EMAIL_RE.test(email.trim()) && consent
+  const submit = async () => {
+    if (!valid || status === 'sending') return
+    setStatus('sending')
+    try {
+      const res = await fetch('/api/paso/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), codigo, locale, consent }),
+      })
+      setStatus(res.ok ? 'done' : 'error')
+    } catch {
+      setStatus('error')
+    }
+  }
+
+  return (
+    <div className="rounded-xl border border-[#c2866b]/30 bg-[#c2866b]/[0.05] px-5 py-6 text-left">
+      <p className="font-[family-name:var(--font-cormorant)] text-xl text-[#272727] text-center mb-2">{copy.title}</p>
+      <p className="text-sm leading-relaxed text-[#272727]/70 text-center mb-4">{copy.body}</p>
+      <input
+        type="email"
+        inputMode="email"
+        autoComplete="email"
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+        placeholder={copy.placeholder}
+        className="w-full rounded-lg border border-[#272727]/20 bg-white px-4 py-3 text-sm text-[#272727] focus:border-[#c2866b] focus:outline-none"
+      />
+      <label className="flex items-start gap-2 mt-3 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={consent}
+          onChange={e => setConsent(e.target.checked)}
+          className="mt-1 accent-[#c2866b]"
+        />
+        <span className="text-xs leading-relaxed text-[#272727]/60">{copy.consent}</span>
+      </label>
+      <button
+        onClick={submit}
+        disabled={!valid || status === 'sending'}
+        className="w-full mt-4 py-3 bg-[#272727] text-[#FDFBF7] text-xs tracking-widest hover:bg-[#c2866b] transition-colors disabled:opacity-40"
+      >
+        {status === 'sending' ? copy.sending : copy.button}
+      </button>
+      {status === 'error' && <p className="text-xs text-red-600/70 mt-2 text-center">{copy.error}</p>}
+    </div>
   )
 }
 

@@ -105,6 +105,45 @@ const reminderCopy: Record<Lang, { subject: (day: number) => string; html: (day:
   },
 }
 
+// ── Bienvenida del lead (al capturar email en el test PASO) ──
+// Promesa abierta: recibir las herramientas de IKIGAIER a medida que se
+// abren. Sin fechas ni cadencia. Refuerza el intercambio y calienta el
+// dominio en Resend.
+const leadWelcomeCopy: Record<Lang, { subject: string; html: (unsubUrl: string) => string }> = {
+  es: {
+    subject: 'Bienvenido a IKIGAIER',
+    html: unsubUrl => shell(`
+      <h1 style="font-size:26px;font-weight:normal;text-align:center;margin:0 0 20px;">Gracias por dejar tu rastro</h1>
+      <p style="font-size:15px;line-height:1.7;color:rgba(39,39,39,0.8);">
+        Acabas de ver la primera forma de cómo caminas. Es solo un esbozo.
+      </p>
+      <p style="font-size:15px;line-height:1.7;color:rgba(39,39,39,0.8);">
+        IKIGAIER es un universo de herramientas para conocerte mejor, y las voy abriendo poco a poco. Te avisaré cuando llegue la siguiente —sin ruido, sin prisa.
+      </p>
+      ${button(APP_URL, 'VOLVER A IKIGAIER')}
+      <p style="font-size:11px;color:rgba(39,39,39,0.4);text-align:center;margin-top:24px;">
+        Si prefieres no recibir nada, <a href="${unsubUrl}" style="color:rgba(39,39,39,0.5);">date de baja aquí</a>.
+      </p>
+    `),
+  },
+  en: {
+    subject: 'Welcome to IKIGAIER',
+    html: unsubUrl => shell(`
+      <h1 style="font-size:26px;font-weight:normal;text-align:center;margin:0 0 20px;">Thank you for leaving your trace</h1>
+      <p style="font-size:15px;line-height:1.7;color:rgba(39,39,39,0.8);">
+        You've just seen the first shape of how you walk. It's only a sketch.
+      </p>
+      <p style="font-size:15px;line-height:1.7;color:rgba(39,39,39,0.8);">
+        IKIGAIER is a universe of tools to know yourself better, and I open them little by little. I'll let you know when the next one arrives —no noise, no rush.
+      </p>
+      ${button(APP_URL, 'BACK TO IKIGAIER')}
+      <p style="font-size:11px;color:rgba(39,39,39,0.4);text-align:center;margin-top:24px;">
+        If you'd rather not hear from me, <a href="${unsubUrl}" style="color:rgba(39,39,39,0.5);">unsubscribe here</a>.
+      </p>
+    `),
+  },
+}
+
 function lang(l?: string): Lang {
   return l === 'en' ? 'en' : 'es'
 }
@@ -117,4 +156,9 @@ export async function sendEnrollmentEmail(to: string, locale: string, unsubUrl: 
 export async function sendReminderEmail(to: string, locale: string, day: number, unsubUrl: string) {
   const c = reminderCopy[lang(locale)]
   return resend.emails.send({ from: FROM, to, subject: c.subject(day), html: c.html(day, unsubUrl) })
+}
+
+export async function sendLeadWelcomeEmail(to: string, locale: string, unsubUrl: string) {
+  const c = leadWelcomeCopy[lang(locale)]
+  return resend.emails.send({ from: FROM, to, subject: c.subject, html: c.html(unsubUrl) })
 }

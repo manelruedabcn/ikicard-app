@@ -8,9 +8,14 @@ export async function GET(req: NextRequest) {
   const t = req.nextUrl.searchParams.get('t') || ''
   const l = req.nextUrl.searchParams.get('l') === 'en' ? 'en' : 'es'
 
-  const done = l === 'en'
-    ? 'Reminders turned off. You can re-enable them from the app.'
-    : 'Recordatorios desactivados. Puedes reactivarlos desde la app.'
+  const isLead = uid.startsWith('lead:')
+  const done = isLead
+    ? (l === 'en'
+        ? "Done. You won't receive more emails from IKIGAIER."
+        : 'Hecho. No recibirás más correos de IKIGAIER.')
+    : (l === 'en'
+        ? 'Reminders turned off. You can re-enable them from the app.'
+        : 'Recordatorios desactivados. Puedes reactivarlos desde la app.')
   const bad = l === 'en' ? 'Invalid link.' : 'Enlace no válido.'
 
   const page = (msg: string) => new NextResponse(
@@ -27,7 +32,13 @@ export async function GET(req: NextRequest) {
   if (!uid || !t || t !== unsubToken(uid)) return page(bad)
 
   const admin = createAdminClient()
-  await admin.from('profiles').update({ notify_opt_out: true }).eq('id', uid)
+  // uid con prefijo "lead:<id>" → baja de email marketing (tabla paso_leads).
+  // Sin prefijo → baja de recordatorios del Viaje (perfil logueado).
+  if (uid.startsWith('lead:')) {
+    await admin.from('paso_leads').update({ unsubscribed_at: new Date().toISOString() }).eq('id', uid.slice(5))
+  } else {
+    await admin.from('profiles').update({ notify_opt_out: true }).eq('id', uid)
+  }
 
   return page(done)
 }
