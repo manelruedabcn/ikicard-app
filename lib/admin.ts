@@ -112,6 +112,72 @@ export async function getAdminStats(): Promise<AdminStats> {
   }
 }
 
+// Bloque de contadores de una entidad para el reporte horario a Telegram:
+// lo creado en la última hora (el incremental) + acumulados rodantes.
+export interface StatusCounts {
+  lastHour: number
+  today: number
+  week: number
+  month: number
+  total: number
+}
+
+export interface StatusReport {
+  paso: StatusCounts
+  users: StatusCounts
+  from: string // ISO de hace 1 hora (inicio de la ventana incremental)
+  to: string   // ISO de ahora
+}
+
+// Cuenta una tabla por ventanas de tiempo (rodantes) usando created_at.
+async function countWindows(
+  admin: ReturnType<typeof createAdminClient>,
+  table: string,
+  since: { hour: string; today: string; week: string; month: string },
+): Promise<StatusCounts> {
+  const q = () => admin.from(table).select('*', { count: 'exact', head: true })
+  const [lastHour, today, week, month, total] = await Promise.all([
+    q().gte('created_at', since.hour),
+    q().gte('created_at', since.today),
+    q().gte('created_at', since.week),
+    q().gte('created_at', since.month),
+    q(),
+  ])
+  return {
+    lastHour: lastHour.count ?? 0,
+    today: today.count ?? 0,
+    week: week.count ?? 0,
+    month: month.count ?? 0,
+    total: total.count ?? 0,
+  }
+}
+
+// Reporte horario: tests PASO y usuarios, con el incremental de la última hora
+// y acumulados rodantes (hoy, 7 días, 30 días, total). Lo consume el cron de
+// estado, que solo envía a Telegram si hubo movimiento en la última hora.
+export async function getStatusReport(): Promise<StatusReport> {
+  const admin = createAdminClient()
+  const now = new Date()
+  const iso = (ms: number) => new Date(now.getTime() - ms).toISOString()
+  const H = 60 * 60 * 1000
+  const D = 24 * H
+
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString()
+  const since = {
+    hour: iso(H),
+    today: startOfToday,
+    week: iso(7 * D),
+    month: iso(30 * D),
+  }
+
+  const [paso, users] = await Promise.all([
+    countWindows(admin, 'paso_results', since),
+    countWindows(admin, 'profiles', since),
+  ])
+
+  return { paso, users, from: since.hour, to: now.toISOString() }
+}
+
 export async function listCatalog(): Promise<{ tools: CatalogTool[]; programs: CatalogProgram[] }> {
   const admin = createAdminClient()
   const { data: tools } = await admin.from('tools').select('id, code, name').eq('is_active', true).order('sort_order')

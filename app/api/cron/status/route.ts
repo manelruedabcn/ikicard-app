@@ -1,0 +1,67 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { getStatusReport, type StatusCounts } from '@/lib/admin'
+
+export const dynamic = 'force-dynamic'
+
+// Reporte horario de estado a Telegram. Lo dispara el cron de GitHub Actions
+// (.github/workflows/status.yml) cada hora en punto. Regla de silencio: si en
+// la última hora NO hubo tests PASO ni usuarios nuevos, no se envía nada.
+export async function POST(req: NextRequest) {
+  if (req.headers.get('x-cron-secret') !== process.env.CRON_SECRET) {
+    return NextResponse.json({ ok: false }, { status: 401 })
+  }
+
+  const botToken = process.env.TELEGRAM_BOT_TOKEN
+  const chatId = process.env.TELEGRAM_CHAT_ID
+  if (!botToken || !chatId) {
+    return NextResponse.json({ ok: false, error: 'telegram not configured' }, { status: 500 })
+  }
+
+  const report = await getStatusReport()
+
+  // Silencio si no hubo movimiento en la última hora.
+  const movimiento = report.paso.lastHour > 0 || report.users.lastHour > 0
+  if (!movimiento) {
+    return NextResponse.json({ ok: true, skipped: true })
+  }
+
+  const text = formatReport(report.paso, report.users)
+
+  const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: chatId, text }),
+  })
+
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '')
+    console.error('[status cron] telegram error:', res.status, detail)
+    return NextResponse.json({ ok: false, error: 'telegram send failed' }, { status: 502 })
+  }
+
+  return NextResponse.json({ ok: true, sent: true })
+}
+
+// Resumen incremental: "+N" solo si hubo altas en la última hora.
+function delta(n: number): string {
+  return n > 0 ? `+${n}` : '±0'
+}
+
+function linea(c: StatusCounts): string {
+  return `  Hoy: ${c.today}   Semana: ${c.week}   Mes: ${c.month}   Total: ${c.total}`
+}
+
+function formatReport(paso: StatusCounts, users: StatusCounts): string {
+  const cabecera = `📊 IKIGAIER · última hora`
+  const inc = `🆕 ${delta(paso.lastHour)} tests · ${delta(users.lastHour)} usuarios`
+  return [
+    cabecera,
+    inc,
+    '',
+    '🧭 Tests PASO',
+    linea(paso),
+    '',
+    '👤 Usuarios',
+    linea(users),
+  ].join('\n')
+}

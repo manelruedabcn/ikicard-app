@@ -1,0 +1,18 @@
+name: Status report
+
+# Se ejecuta cada hora en punto. El endpoint calcula el movimiento de la última
+# hora (tests PASO y usuarios) y solo envía el reporte a Telegram si hubo algún
+# alta; si la hora fue tranquila, no manda nada.
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch: {}
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger status endpoint
+        run: |
+          curl -fsS -X POST "https://app.ikigaier.com/api/cron/status" \
+            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}"
