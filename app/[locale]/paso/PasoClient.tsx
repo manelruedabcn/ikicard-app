@@ -18,7 +18,12 @@ import {
   type InformePaso,
 } from '@/lib/paso-content'
 import { getRareza } from '@/lib/paso-rareza'
-import { generarTitulares } from '@/lib/paso-titulares'
+import {
+  generarTitulares,
+  generarTeaserGancho,
+  teaserTemido,
+  teaserRareza,
+} from '@/lib/paso-titulares'
 import {
   NUM_ZONAS,
   ZONA_EQUILIBRIO,
@@ -367,14 +372,15 @@ export default function PasoClient({ locale, userId }: Props) {
           </h1>
           <p className="text-sm text-[#272727]/55 mt-2">{t('rareza_' + getRareza(codigo))}</p>
           <p className="text-xs tracking-[0.3em] text-[#272727]/40 mt-2">{firma}</p>
+          {/* FOMO M3: anzuelo de rareza que tira hasta el mapa de los 15 (al final) */}
+          <p className="text-[13px] italic text-[#c2866b]/80 mt-3">
+            {teaserRareza(getRareza(codigo), locale)}
+          </p>
         </div>
 
-        {/* GANCHO (parte superior): titulares dinámicos + gráfica + retrato corto.
+        {/* GANCHO (parte superior): titular dinámico + retrato + gráfica.
             Da el golpe visual y empuja a leer el desarrollo de abajo. */}
         <TitularesBlock inf={inf} dominante={dominante} locale={locale} />
-
-        {/* Gráfico horizonte: sube arriba, es lo más visual del informe */}
-        <HorizonGraph inf={inf} labels={DIMS.map(d => t('dim_' + d))} t={t} />
 
         {/* Descripción básica: el retrato del Caminante, la apertura */}
         {patron?.retrato && (
@@ -382,6 +388,9 @@ export default function PasoClient({ locale, userId }: Props) {
             {patron.retrato}
           </p>
         )}
+
+        {/* Gráfico horizonte: lo más visual del informe */}
+        <HorizonGraph inf={inf} labels={DIMS.map(d => t('dim_' + d))} t={t} />
 
         {/* DESARROLLO (abajo): la lectura completa para quien quiere profundizar. */}
 
@@ -400,6 +409,10 @@ export default function PasoClient({ locale, userId }: Props) {
         {/* Lectura del patrón */}
         {patron && (
           <div className="flex flex-col gap-6 mt-10 paso-break-before paso-avoid-break">
+            {/* FOMO M2: teaser seco que anticipa «Lo que temes» sin resolverlo */}
+            <p className="font-[family-name:var(--font-cormorant)] text-xl leading-snug text-[#272727] text-center px-4 mb-2">
+              {teaserTemido(locale)}
+            </p>
             <Field label={t('motivacion')} text={patron.motivacion} />
             <Field label={t('bajo_presion')} text={patron.bajo_presion} />
             <Field label={t('teme')} text={patron.teme} />
@@ -550,6 +563,7 @@ function TitularesBlock({ inf, dominante, locale }: { inf: InformePaso; dominant
   const titulares = generarTitulares(inf, dominante, locale)
   if (titulares.length === 0) return null
   const [principal, ...resto] = titulares
+  const teaser = generarTeaserGancho(inf, locale)
   return (
     <div className="text-center mb-8">
       <p className="font-[family-name:var(--font-cormorant)] text-2xl leading-snug text-[#272727] px-2">
@@ -564,6 +578,8 @@ function TitularesBlock({ inf, dominante, locale }: { inf: InformePaso; dominant
           ))}
         </div>
       )}
+      {/* FOMO M1: bucle máscara↔real que remite a la lectura de abajo */}
+      <p className="text-sm text-[#c2866b] mt-4 px-4">{teaser}</p>
     </div>
   )
 }

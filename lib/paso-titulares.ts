@@ -112,3 +112,62 @@ export function generarTitulares(inf: InformePaso, dominante: Dim, locale: strin
 
   return [tBrecha, tDominante, tFoco]
 }
+
+// ── FOMO: bucles de curiosidad para tirar del scroll ────────────────────────
+// Nombran algo concreto que está MÁS ABAJO sin desvelarlo. Misma voz calma,
+// sin promesas ni tono de anuncio. Cada uno apunta a una sección distinta para
+// repartir el enganche a lo largo del informe.
+
+// M1 — bajo el titular. Abre el bucle máscara↔real y remite a la lectura de
+// abajo (Narrativa / Dónde te separas). Dinámico según la dirección de la
+// brecha principal. Si hoy vas alineado, el anzuelo es más suave.
+const TEASER_GANCHO: Record<Locale, { exige: string; esconde: string; alineado: string }> = {
+  es: {
+    exige: 'Te muestras distinto de como eres por dentro. Abajo verás dónde.',
+    esconde: 'Guardas cosas que casi no enseñas. Abajo verás cuáles.',
+    alineado: 'Hoy caminas cerca de ti, pero hay matices. Abajo verás cuáles.',
+  },
+  en: {
+    exige: 'You show up different from who you are inside. You’ll see where below.',
+    esconde: 'You hold things you barely show. You’ll see which below.',
+    alineado: 'Today you walk close to yourself, but there are nuances. See them below.',
+  },
+}
+
+export function generarTeaserGancho(inf: InformePaso, locale: string): string {
+  const L = esLocale(locale)
+  const sep = inf.brechas.filter(b => b.direccion !== 'alineado')
+  if (sep.length === 0) return TEASER_GANCHO[L].alineado
+  const dir = sep[0].direccion === 'exige_de_mas' ? 'exige' : 'esconde'
+  return TEASER_GANCHO[L][dir]
+}
+
+// M2 — antes de la lectura del patrón (donde está «Lo que temes»). Un solo
+// teaser, seco, que anticipa el punto incómodo sin resolverlo.
+const TEASER_TEMIDO: Record<Locale, string> = {
+  es: 'Hay un punto donde tu forma de caminar se te vuelve en contra.',
+  en: 'There’s a point where your way of walking turns against you.',
+}
+
+export function teaserTemido(locale: string): string {
+  return TEASER_TEMIDO[esLocale(locale)]
+}
+
+// M3 — bajo la rareza, en la cabecera. Tira hasta el final: el mapa de las 15
+// formas cierra el scroll. Cuanto más rara la forma, más fuerte el anzuelo.
+const TEASER_RAREZA: Record<Locale, Record<'frecuente' | 'habitual' | 'poco', string>> = {
+  es: {
+    frecuente: 'Compartes forma con mucha gente. Al final ves con cuáles.',
+    habitual: 'No es la forma más común. Al final ves entre cuáles estás.',
+    poco: 'Caminas de una forma que comparte poca gente. Al final, cuál.',
+  },
+  en: {
+    frecuente: 'Many people share your way. You’ll see which at the end.',
+    habitual: 'Not the most common way. You’ll see where you land at the end.',
+    poco: 'Few people share your way of walking. Which, at the end.',
+  },
+}
+
+export function teaserRareza(rareza: 'frecuente' | 'habitual' | 'poco', locale: string): string {
+  return TEASER_RAREZA[esLocale(locale)][rareza]
+}
