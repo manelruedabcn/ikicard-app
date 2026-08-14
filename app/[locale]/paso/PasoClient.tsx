@@ -165,6 +165,14 @@ export default function PasoClient({ locale, userId }: Props) {
     // es la asignación precisa (1 de 2.401 firmas).
     const codigo = resolverCodigoPorSegmentos(calcularSegmentos(inf.scores))
     trackEvent('test_completed', { tool: 'paso', pattern: codigo })
+
+    // Registrar el intento para métricas del lead magnet (con cuenta o sin ella).
+    // El servidor decide logueado/anónimo por la sesión. Fire-and-forget.
+    fetch('/api/paso/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ codigo, locale }),
+    }).catch(() => {})
     const payload = {
       codigo_patron: codigo,
       mascara_p: inf.mascara.P, mascara_a: inf.mascara.A, mascara_s: inf.mascara.S, mascara_o: inf.mascara.O,

@@ -123,25 +123,37 @@ export interface StatusCounts {
 }
 
 export interface StatusReport {
-  paso: StatusCounts
+  paso: StatusCounts       // todos los tests (con cuenta o sin ella)
+  pasoAnon: StatusCounts   // solo anónimos (user_id null) — el lead magnet
+  pasoLogged: StatusCounts // solo logueados (user_id no null)
   users: StatusCounts
   from: string // ISO de hace 1 hora (inicio de la ventana incremental)
   to: string   // ISO de ahora
 }
 
+type SinceWindows = { hour: string; today: string; week: string; month: string }
+// Modificador opcional de la query (p. ej. filtrar anónimos/logueados).
+type QueryTweak = (q: PostgrestBuilder) => PostgrestBuilder
+type PostgrestBuilder = ReturnType<ReturnType<ReturnType<typeof createAdminClient>['from']>['select']>
+
 // Cuenta una tabla por ventanas de tiempo (rodantes) usando created_at.
+// `tweak` permite acotar (p. ej. user_id null) sin duplicar código.
 async function countWindows(
   admin: ReturnType<typeof createAdminClient>,
   table: string,
-  since: { hour: string; today: string; week: string; month: string },
+  since: SinceWindows,
+  tweak?: QueryTweak,
 ): Promise<StatusCounts> {
-  const q = () => admin.from(table).select('*', { count: 'exact', head: true })
+  const base = () => {
+    const q = admin.from(table).select('*', { count: 'exact', head: true })
+    return tweak ? tweak(q) : q
+  }
   const [lastHour, today, week, month, total] = await Promise.all([
-    q().gte('created_at', since.hour),
-    q().gte('created_at', since.today),
-    q().gte('created_at', since.week),
-    q().gte('created_at', since.month),
-    q(),
+    base().gte('created_at', since.hour),
+    base().gte('created_at', since.today),
+    base().gte('created_at', since.week),
+    base().gte('created_at', since.month),
+    base(),
   ])
   return {
     lastHour: lastHour.count ?? 0,
@@ -152,9 +164,11 @@ async function countWindows(
   }
 }
 
-// Reporte horario: tests PASO y usuarios, con el incremental de la última hora
-// y acumulados rodantes (hoy, 7 días, 30 días, total). Lo consume el cron de
-// estado, que solo envía a Telegram si hubo movimiento en la última hora.
+// Reporte horario: tests PASO (total + desglose anónimo/logueado) y usuarios,
+// con el incremental de la última hora y acumulados rodantes (hoy, 7 días,
+// 30 días, total). Los tests salen de paso_attempts (incluye anónimos, que son
+// el lead magnet). Lo consume el cron de estado, que solo envía si hubo
+// movimiento en la última hora.
 export async function getStatusReport(): Promise<StatusReport> {
   const admin = createAdminClient()
   const now = new Date()
@@ -170,12 +184,14 @@ export async function getStatusReport(): Promise<StatusReport> {
     month: iso(30 * D),
   }
 
-  const [paso, users] = await Promise.all([
-    countWindows(admin, 'paso_results', since),
+  const [paso, pasoAnon, pasoLogged, users] = await Promise.all([
+    countWindows(admin, 'paso_attempts', since),
+    countWindows(admin, 'paso_attempts', since, q => q.is('user_id', null)),
+    countWindows(admin, 'paso_attempts', since, q => q.not('user_id', 'is', null)),
     countWindows(admin, 'profiles', since),
   ])
 
-  return { paso, users, from: since.hour, to: now.toISOString() }
+  return { paso, pasoAnon, pasoLogged, users, from: since.hour, to: now.toISOString() }
 }
 
 export async function listCatalog(): Promise<{ tools: CatalogTool[]; programs: CatalogProgram[] }> {

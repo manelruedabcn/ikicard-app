@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getStatusReport, type StatusCounts } from '@/lib/admin'
+import { getStatusReport, type StatusCounts, type StatusReport } from '@/lib/admin'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, skipped: true })
   }
 
-  const text = formatReport(report.paso, report.users)
+  const text = formatReport(report)
 
   const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
     method: 'POST',
@@ -51,15 +51,18 @@ function linea(c: StatusCounts): string {
   return `  Hoy: ${c.today}   Semana: ${c.week}   Mes: ${c.month}   Total: ${c.total}`
 }
 
-function formatReport(paso: StatusCounts, users: StatusCounts): string {
-  const cabecera = `📊 IKIGAIER · última hora`
-  const inc = `🆕 ${delta(paso.lastHour)} tests · ${delta(users.lastHour)} usuarios`
+function formatReport(r: StatusReport): string {
+  const { paso, pasoAnon, pasoLogged, users } = r
   return [
-    cabecera,
-    inc,
+    `📊 IKIGAIER · última hora`,
+    `🆕 ${delta(paso.lastHour)} tests (${delta(pasoAnon.lastHour)} anón · ${delta(pasoLogged.lastHour)} con cuenta) · ${delta(users.lastHour)} usuarios`,
     '',
-    '🧭 Tests PASO',
+    '🧭 Tests PASO (todos)',
     linea(paso),
+    '  · Anónimos',
+    linea(pasoAnon),
+    '  · Con cuenta',
+    linea(pasoLogged),
     '',
     '👤 Usuarios',
     linea(users),
