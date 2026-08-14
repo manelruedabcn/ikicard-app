@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
@@ -45,26 +45,12 @@ const LIBRO_LINKS: Record<string, string> = {
   'Camina sin separarte de ti': 'https://amzn.eu/d/01keLRwF',
 }
 
-// Sets del ejemplo interactivo de la intro: cosas fáciles y cotidianas para
-// que la persona practique el gesto "MÁS / MENOS" antes del test real. Se elige
-// uno al azar en cada visita (dinámico). Los ejes P/A/S/O NO intervienen aquí:
-// es solo una práctica del gesto, no puntúa nada.
-interface EjemploItem {
-  e: string
-  n: string
-}
-const EJEMPLOS_ES: EjemploItem[][] = [
-  [{ e: '🍌', n: 'Plátano' }, { e: '🍪', n: 'Galletas' }, { e: '🥩', n: 'Carne' }, { e: '🍚', n: 'Arroz' }],
-  [{ e: '☕', n: 'Café' }, { e: '🍵', n: 'Té' }, { e: '🥤', n: 'Refresco' }, { e: '💧', n: 'Agua' }],
-  [{ e: '🟥', n: 'Rojo' }, { e: '🟩', n: 'Verde' }, { e: '🟦', n: 'Azul' }, { e: '🟨', n: 'Amarillo' }],
-  [{ e: '🐶', n: 'Perro' }, { e: '🐱', n: 'Gato' }, { e: '🐦', n: 'Pájaro' }, { e: '🐟', n: 'Pez' }],
-]
-const EJEMPLOS_EN: EjemploItem[][] = [
-  [{ e: '🍌', n: 'Banana' }, { e: '🍪', n: 'Cookies' }, { e: '🥩', n: 'Meat' }, { e: '🍚', n: 'Rice' }],
-  [{ e: '☕', n: 'Coffee' }, { e: '🍵', n: 'Tea' }, { e: '🥤', n: 'Soda' }, { e: '💧', n: 'Water' }],
-  [{ e: '🟥', n: 'Red' }, { e: '🟩', n: 'Green' }, { e: '🟦', n: 'Blue' }, { e: '🟨', n: 'Yellow' }],
-  [{ e: '🐶', n: 'Dog' }, { e: '🐱', n: 'Cat' }, { e: '🐦', n: 'Bird' }, { e: '🐟', n: 'Fish' }],
-]
+// Ejemplo interactivo de la intro: cosas fáciles y cotidianas para que la
+// persona practique el gesto "MÁS / MENOS" antes del test real. Solo palabras,
+// sin iconos ni color, para no romper la estética. Los ejes P/A/S/O NO
+// intervienen aquí: es solo una práctica del gesto, no puntúa nada.
+const EJEMPLO_ES = ['Café', 'Té', 'Refresco', 'Agua']
+const EJEMPLO_EN = ['Coffee', 'Tea', 'Soda', 'Water']
 
 interface Props {
   locale: string
@@ -84,14 +70,7 @@ export default function PasoClient({ locale, userId }: Props) {
   const informeRef = useRef<HTMLDivElement>(null)
 
   // Ejemplo interactivo de la intro (práctica del gesto MÁS/MENOS, no puntúa).
-  // Se arranca con el primer set (igual en servidor y cliente, sin mismatch de
-  // hidratación) y se aleatoriza en el cliente tras montar.
-  const sets = locale === 'en' ? EJEMPLOS_EN : EJEMPLOS_ES
-  const [ejemplo, setEjemplo] = useState(sets[0])
-  useEffect(() => {
-    setEjemplo(sets[Math.floor(Math.random() * sets.length)])
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  const ejemplo = locale === 'en' ? EJEMPLO_EN : EJEMPLO_ES
   const [ej, setEj] = useState<{ mas?: number; menos?: number }>({})
 
   function pickEj(kind: 'mas' | 'menos', idx: number) {
@@ -225,10 +204,7 @@ export default function PasoClient({ locale, userId }: Props) {
                   key={i}
                   className="flex items-center gap-2 rounded-xl border border-[#272727]/10 bg-[#FDFBF7] px-4 py-2.5"
                 >
-                  <span className="flex-1 flex items-center gap-2 text-left text-[15px] text-[#272727]">
-                    <span className="text-xl leading-none">{it.e}</span>
-                    {it.n}
-                  </span>
+                  <span className="flex-1 text-left text-[15px] text-[#272727]">{it}</span>
                   <ChoiceBtn active={ej.mas === i} variant="mas" onClick={() => pickEj('mas', i)} />
                   <ChoiceBtn active={ej.menos === i} variant="menos" onClick={() => pickEj('menos', i)} />
                 </div>
