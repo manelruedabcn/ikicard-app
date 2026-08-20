@@ -97,7 +97,7 @@ export const PASO_GRUPOS: Grupo[] = [
   },
   {
     "grupo": 8,
-    "P": "Me basto solo",
+    "P": "Me basto y me sobro",
     "A": "Me entusiasmo",
     "S": "Voy con discreción",
     "O": "Me guardo algo"
@@ -111,7 +111,7 @@ export const PASO_GRUPOS: Grupo[] = [
   },
   {
     "grupo": 10,
-    "P": "Soy contundente",
+    "P": "Voy sin dudarlo",
     "A": "Voy con alegría",
     "S": "Me quito importancia",
     "O": "Lo analizo"
@@ -133,9 +133,9 @@ export const PASO_GRUPOS: Grupo[] = [
   {
     "grupo": 13,
     "P": "Le pongo energía",
-    "A": "Soy vivaz",
+    "A": "Tengo chispa",
     "S": "Se puede confiar en mí",
-    "O": "Tengo criterio"
+    "O": "Sé lo que conviene"
   },
   {
     "grupo": 14,
@@ -146,8 +146,8 @@ export const PASO_GRUPOS: Grupo[] = [
   },
   {
     "grupo": 15,
-    "P": "Voy con brío",
-    "A": "Soy natural",
+    "P": "Voy con ganas",
+    "A": "Me muestro tal cual",
     "S": "No presumo",
     "O": "No lo cuento todo"
   },
@@ -162,7 +162,7 @@ export const PASO_GRUPOS: Grupo[] = [
     "grupo": 17,
     "P": "Decido rápido",
     "A": "Animo a los demás",
-    "S": "Aguanto en el tiempo",
+    "S": "Aguanto con el tiempo",
     "O": "Lo hago con esmero"
   },
   {
@@ -176,14 +176,14 @@ export const PASO_GRUPOS: Grupo[] = [
     "grupo": 19,
     "P": "Llevo las riendas",
     "A": "Contagio lo que siento",
-    "S": "Soy predecible",
+    "S": "Se sabe qué esperar de mí",
     "O": "Lo calculo"
   },
   {
     "grupo": 20,
     "P": "Dirijo",
     "A": "Me llevo bien con todos",
-    "S": "Voy con mesura",
+    "S": "Voy sin pasarme",
     "O": "No dejo fallos"
   },
   {
@@ -191,12 +191,12 @@ export const PASO_GRUPOS: Grupo[] = [
     "P": "Digo las cosas claras",
     "A": "Me expreso con calor",
     "S": "Voy con confianza",
-    "O": "Soy ecuánime"
+    "O": "Trato a todos por igual"
   },
   {
     "grupo": 22,
     "P": "Tomo la iniciativa",
-    "A": "Soy cercano",
+    "A": "Doy confianza",
     "S": "Mantengo un ritmo regular",
     "O": "Soy formal"
   },
@@ -212,7 +212,7 @@ export const PASO_GRUPOS: Grupo[] = [
     "P": "No me achico",
     "A": "Hago buenas migas",
     "S": "No me acelero",
-    "O": "Soy reservado"
+    "O": "Me guardo lo mío"
   },
   {
     "grupo": 25,
@@ -232,7 +232,7 @@ export const PASO_GRUPOS: Grupo[] = [
     "grupo": 27,
     "P": "Voy con fuerza",
     "A": "Voy de buen humor",
-    "S": "Soy considerado",
+    "S": "Miro por los demás",
     "O": "Cuido que esté bien hecho"
   },
   {
@@ -240,7 +240,7 @@ export const PASO_GRUPOS: Grupo[] = [
     "P": "No abandono",
     "A": "Inspiro a otros",
     "S": "Tengo paciencia",
-    "O": "Soy imparcial"
+    "O": "Veo las dos partes"
   }
 ]
 
@@ -258,7 +258,7 @@ export const PASO_PATRONES: Patron[] = [
   {
     "codigo": "AAAA",
     "nombre": "Caminante en Compañía",
-    "retrato": "No concibes el camino en soledad. Cada paso cobra sentido cuando hay alguien al lado con quien compartirlo, y tu energía crece con la del grupo. Tu don es unir a la gente; tu aprendizaje, sostener también los tramos que se recorren sin testigos.",
+    "retrato": "Caminas hacia la gente. Los pasos te saben distintos cuando hay alguien al lado con quien compartirlos, y tu energía crece con la del grupo. Tu don es unir a la gente; tu aprendizaje, descubrir que los tramos en soledad también son tuyos y también te sostienen.",
     "motivacion": "Que el camino se comparta. Un logro sin nadie que lo celebre casi no cuenta como logro.",
     "bajo_presion": "Dispersas energía en conversación y validación, y a veces confundes hablar del problema con resolverlo.",
     "teme": "El camino silencioso, sin testigos ni reconocimiento.",
@@ -288,7 +288,7 @@ export const PASO_PATRONES: Patron[] = [
   {
     "codigo": "PA",
     "nombre": "Caminante que Arrastra",
-    "retrato": "Avanzas rápido y no caminas en soledad: llevas a otros en tu impulso. Necesitas tanto llegar como que se note lo lejos que has llegado. Tu fuerza mueve a grupos enteros; tu reto, mirar atrás y preguntar antes de arrastrar.",
+    "retrato": "Avanzas rápido y sueles llevar a otros en tu impulso: pocas veces caminas del todo en soledad. Necesitas tanto llegar como que se note lo lejos que has llegado. Tu fuerza mueve a grupos enteros; tu reto, mirar atrás y preguntar antes de arrastrar.",
     "motivacion": "Moverte rápido y llevar a otros contigo. Necesitas tanto el resultado como el aplauso que lo acompaña.",
     "bajo_presion": "Impones el ritmo sin pedir permiso, y puedes arrollar sin darte cuenta a quien camina más despacio.",
     "teme": "Que el grupo avance sin tu empuje, o que nadie note lo lejos que has llegado.",
@@ -308,7 +308,7 @@ export const PASO_PATRONES: Patron[] = [
   {
     "codigo": "AS",
     "nombre": "Caminante que Acoge",
-    "retrato": "Caminas pendiente de que nadie se quede atrás. El ritmo lo marca quien va más despacio, porque para ti el camino solo vale si se recorre en compañía y en calma. Tu don es acoger; tu aprendizaje, entender que sostener a alguien no siempre es complacerlo.",
+    "retrato": "Caminas pendiente de que nadie se quede atrás. El ritmo lo marca quien va más despacio, porque tiendes a sentir que el camino sabe mejor si se recorre en compañía y en calma. Tu don es acoger; tu aprendizaje, entender que sostener a alguien no siempre es complacerlo.",
     "motivacion": "Que nadie se quede atrás. El camino solo tiene sentido si se recorre en buena compañía y sin prisa.",
     "bajo_presion": "Evitas el conflicto a toda costa, incluso cuando decir algo incómodo sería lo más útil.",
     "teme": "Romper la armonía del grupo, aunque eso signifique callar algo importante.",

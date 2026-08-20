@@ -55,9 +55,10 @@ const EJEMPLO_EN = ['Coffee', 'Tea', 'Soda', 'Water']
 interface Props {
   locale: string
   userId: string | null
+  volver?: string | null
 }
 
-export default function PasoClient({ locale, userId }: Props) {
+export default function PasoClient({ locale, userId, volver = null }: Props) {
   const t = useTranslations('paso')
   const tn = useTranslations('nav')
 
@@ -354,6 +355,7 @@ export default function PasoClient({ locale, userId }: Props) {
           <h1 className="font-[family-name:var(--font-cormorant)] text-4xl text-[#272727]">
             {patron?.nombre}
           </h1>
+          <p className="text-xs leading-relaxed text-[#272727]/45 mt-2 px-4">{t('pattern_framing')}</p>
           <p className="text-sm text-[#272727]/55 mt-2">{t('rareza_' + getRareza(codigo))}</p>
           <p className="text-xs tracking-[0.3em] text-[#272727]/40 mt-2">{firma}</p>
           {/* FOMO M3: anzuelo de rareza que tira hasta el mapa de los 15 (al final) */}
@@ -366,11 +368,19 @@ export default function PasoClient({ locale, userId }: Props) {
             Da el golpe visual y empuja a leer el desarrollo de abajo. */}
         <TitularesBlock inf={inf} dominante={dominante} locale={locale} />
 
-        {/* Descripción básica: el retrato del Caminante, la apertura */}
+        {/* El retrato del Caminante es el yo ADAPTADO (la máscara): describe
+            cómo te MUESTRAS, no quién eres. Se enmarca como tal para que las
+            frases (a veces absolutas) se lean como apariencia, no como veredicto;
+            la brecha con el yo natural la desarrolla NarrativaBlock justo debajo. */}
         {patron?.retrato && (
-          <p className="text-[15px] leading-relaxed text-[#272727]/80 text-center mt-8 mb-10 px-1">
-            {patron.retrato}
-          </p>
+          <div className="mt-8 mb-10 px-1">
+            <p className="text-xs tracking-widest uppercase text-[#c2866b] mb-2 text-center">
+              {t('retrato_eyebrow')}
+            </p>
+            <p className="text-[15px] leading-relaxed text-[#272727]/80 text-center">
+              {patron.retrato}
+            </p>
+          </div>
         )}
 
         {/* Gráfico horizonte: lo más visual del informe */}
@@ -504,6 +514,17 @@ export default function PasoClient({ locale, userId }: Props) {
         <p className="mt-10 text-center text-xs leading-relaxed text-[#272727]/40 px-2">
           {t('nota_espejo')}
         </p>
+
+        {volver && userId && (
+          <div className="mt-8 text-center print:hidden paso-no-export">
+            <Link
+              href={`/${locale}${volver}`}
+              className="inline-block rounded-full bg-[#c2866b] px-8 py-3 text-xs tracking-widest uppercase text-[#FDFBF7] hover:opacity-90"
+            >
+              Volver y seguir
+            </Link>
+          </div>
+        )}
       </div>
     </Shell>
   )

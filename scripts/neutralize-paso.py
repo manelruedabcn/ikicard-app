@@ -75,7 +75,7 @@ PATRONES = {
         "bajo_presion": "Impones el ritmo sin pedir permiso, y puedes arrollar sin darte cuenta a quien camina más despacio.",
         "teme": "Que el grupo avance sin tu empuje, o que nadie note lo lejos que has llegado.",
         "seria_mas_eficaz_si": "Aprendieras a preguntar antes de arrastrar, y a celebrar el paso de otros sin necesitar protagonizarlo.",
-        "retrato": "Avanzas rápido y no caminas en soledad: llevas a otros en tu impulso. Necesitas tanto llegar como que se note lo lejos que has llegado. Tu fuerza mueve a grupos enteros; tu reto, mirar atrás y preguntar antes de arrastrar.",
+        "retrato": "Avanzas rápido y sueles llevar a otros en tu impulso: pocas veces caminas del todo en soledad. Necesitas tanto llegar como que se note lo lejos que has llegado. Tu fuerza mueve a grupos enteros; tu reto, mirar atrás y preguntar antes de arrastrar.",
     },
     "PO": {
         "nombre": "Caminante que Calcula",
@@ -90,7 +90,7 @@ PATRONES = {
         "bajo_presion": "Evitas el conflicto a toda costa, incluso cuando decir algo incómodo sería lo más útil.",
         "teme": "Romper la armonía del grupo, aunque eso signifique callar algo importante.",
         "seria_mas_eficaz_si": "Entendieras que sostener no siempre significa complacer.",
-        "retrato": "Caminas pendiente de que nadie se quede atrás. El ritmo lo marca quien va más despacio, porque para ti el camino solo vale si se recorre en compañía y en calma. Tu don es acoger; tu aprendizaje, entender que sostener a alguien no siempre es complacerlo.",
+        "retrato": "Caminas pendiente de que nadie se quede atrás. El ritmo lo marca quien va más despacio, porque tiendes a sentir que el camino sabe mejor si se recorre en compañía y en calma. Tu don es acoger; tu aprendizaje, entender que sostener a alguien no siempre es complacerlo.",
     },
     "SO": {
         "nombre": "Caminante del Método",
