@@ -11,6 +11,57 @@ dashboard dinámico por usuario. Producto de **Manuel (Manel)**; se trabaja en
 **español**. La voz de todo el copy es la de Manel (calma, honesta, sin tono
 publicitario, muestreada de sus libros/manuscrito).
 
+## Contexto de marca y producto — Ikigai Consciente / IKIGAIER
+
+Este contexto existe para que cualquier trabajo sobre la app mantenga coherencia con el
+sistema, el tono y el producto físico/editorial del que forma parte. Consultar antes de
+tomar decisiones de copy, UX, gamificación o mensajes al usuario.
+
+### Las dos almas del sistema
+
+El marco se sostiene en dos dimensiones complementarias, nunca jerárquicas:
+
+- **Ikigai Activo** — lo que la persona hace y construye: trabajo, proyectos, logros. Es el qué.
+- **Ikigai Consciente** — desde dónde lo hace: presencia, coherencia, no traicionarse en las
+  decisiones pequeñas. Es el cómo/desde dónde.
+
+Un *ikigaier* es quien integra las dos. La app no debe reforzar solo el Activo (productividad,
+logro, métricas de progreso) a costa del Consciente (presencia, pausa, honestidad interna).
+
+### El producto IKIGAIER
+
+Mazo de 72 cartas físico (edición fundacional limitada y numerada a mano) que forma parte del
+ecosistema junto al libro Más allá del Ikigai. Estructura en cuatro fases de 15 cartas
+(Despertar, Descender, Atravesar, Retornar), 8 comodines y 4 tarjetas de instrucciones. Tres
+modos de juego: Oráculo (una carta al día, solo), Viaje (21 días, en solitario, con tres
+umbrales entre fases), Círculo (2-6 personas, sesión guiada). Esta app es la extensión digital
+de ese producto, no un sustituto ni un juego de gamificación genérico.
+
+### Tono y voz — reglas duras para cualquier texto o interacción de la app
+
+- Sobria, adulta, directa. A veces incómoda. Nunca solemne ni motivacional.
+- No promete resultados, no afirma, no celebra en exceso, no usa emojis.
+- No lenguaje de coach ni de "encuentra tu propósito en 5 pasos".
+- No frameworks explicados al usuario. Se siente, no se explica.
+- Confía en que el usuario sabrá qué hacer con cada pregunta, no se le dan respuestas.
+- Prueba de fuego para cualquier texto nuevo: ¿suena a alguien que encontró algo y lo comparte,
+  o a alguien que sabe más que tú y viene a enseñártelo? Solo lo primero vale.
+- Nada de badges, rachas o notificaciones tipo "¡Vamos, tú puedes!". Si hay progreso o
+  gamificación, debe sentirse ritual (umbrales, fases, sello), no como una app de hábitos.
+
+### Público (para decisiones de producto/UX, no para segmentar copy explícitamente)
+
+Tres avatares candidatos, validados uno a la vez: directivo/a en crisis silenciosa (40-58),
+buscador/a cansado/a de fórmulas (30-50), alguien con un proyecto terminado que no suelta por
+perfeccionismo (28-45). Los tres rechazan por igual el tono coach y las fórmulas rápidas.
+
+### Nota
+
+El sistema tiene una capa interna adicional (referencias a Cábala, PNL, y a los autores que
+inspiran la metodología de mentoría 1:1) que es uso interno del autor y nunca se expone en el
+producto, la app ni el copy de cara al usuario. Si el trabajo en este repo toca esa capa,
+tratarla como confidencial de diseño, no como contenido a mostrar.
+
 ## Reglas de oro (no romper)
 
 1. **Audita antes de tocar.** No rompas lo que ya está en producción: **IKICARD**,
