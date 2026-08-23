@@ -224,9 +224,9 @@ confirmar con Manel** — se dejan anotados para no perder el hilo:
    (`github.com/manelruedabcn/ikicard-app`). Las herramientas construidas — PASO,
    Las cuatro estrellas, CAMINO, Máscaras, IKIBOARD — están **aquí**, no en un repo
    aparte. Conviene corregir esa referencia en el Proyecto web.
-2. **Paleta:** la marca "oficial" del mazo es negro `#0A0A0A` + oro `#D4B26A` como
-   ancla. La app HOY usa fondo crema `#FDFBF7`, texto `#272727` y acento terracota
-   `#c2866b` (en el espíritu cálido/editorial, pero sin el ancla negro+oro).
-   Tipografía SÍ alineada: la app ya usa **Inter + Cormorant Garamond**, ambas
-   contempladas en el sistema de marca. Decisión pendiente de Manel: ¿acercar la
-   web a negro+oro, o mantener la paleta cálida actual?
+2. **Paleta (NO es un conflicto — cada cosa tiene la suya, a propósito):** el mazo
+   usa negro `#0A0A0A` + oro `#D4B26A` como ancla; la **web pública (front) ya está
+   acabada** con fondo crema `#FDFBF7`, texto `#272727` y acento terracota `#c2866b`.
+   Son dos paletas distintas e intencionales, no algo pendiente de unificar.
+   Tipografía compartida: **Inter + Cormorant Garamond**. (El *back* está en decisión
+   aparte; no afecta al front, que está cerrado.)
