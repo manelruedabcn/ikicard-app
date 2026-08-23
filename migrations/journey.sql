@@ -7,7 +7,7 @@
 -- Sesión de viaje (una activa por usuario)
 CREATE TABLE IF NOT EXISTS journey_sessions (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES auth.users NOT NULL,
+  user_id UUID REFERENCES auth.users ON DELETE CASCADE NOT NULL,
   started_at TIMESTAMPTZ DEFAULT now(),
   current_day INT DEFAULT 1 CHECK (current_day BETWEEN 1 AND 21),
   status TEXT DEFAULT 'active' CHECK (status IN ('active','paused','completed')),
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS journey_sessions (
 -- Cartas asignadas a cada día/slot del viaje
 CREATE TABLE IF NOT EXISTS journey_cards (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  session_id UUID REFERENCES journey_sessions NOT NULL,
+  session_id UUID REFERENCES journey_sessions ON DELETE CASCADE NOT NULL,
   day INT NOT NULL,
   slot TEXT NOT NULL CHECK (slot IN ('morning','midday','night')),
   card_code TEXT NOT NULL,
@@ -28,11 +28,30 @@ CREATE TABLE IF NOT EXISTS journey_cards (
 -- Dones (una frase por fase completada)
 CREATE TABLE IF NOT EXISTS journey_gifts (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  session_id UUID REFERENCES journey_sessions NOT NULL,
+  session_id UUID REFERENCES journey_sessions ON DELETE CASCADE NOT NULL,
   phase TEXT NOT NULL CHECK (phase IN ('despertar','descender','atravesar','retornar')),
   gift_text TEXT NOT NULL,
   created_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- Puesta al día idempotente sobre instalaciones previas: las FK originales
+-- se crearon sin ON DELETE CASCADE, lo que bloqueaba borrar un usuario o una
+-- sesión. Recreamos las tres con CASCADE. Los nombres son los que Postgres
+-- asigna por defecto (<tabla>_<columna>_fkey).
+ALTER TABLE journey_sessions DROP CONSTRAINT IF EXISTS journey_sessions_user_id_fkey;
+ALTER TABLE journey_sessions
+  ADD CONSTRAINT journey_sessions_user_id_fkey
+  FOREIGN KEY (user_id) REFERENCES auth.users ON DELETE CASCADE;
+
+ALTER TABLE journey_cards DROP CONSTRAINT IF EXISTS journey_cards_session_id_fkey;
+ALTER TABLE journey_cards
+  ADD CONSTRAINT journey_cards_session_id_fkey
+  FOREIGN KEY (session_id) REFERENCES journey_sessions ON DELETE CASCADE;
+
+ALTER TABLE journey_gifts DROP CONSTRAINT IF EXISTS journey_gifts_session_id_fkey;
+ALTER TABLE journey_gifts
+  ADD CONSTRAINT journey_gifts_session_id_fkey
+  FOREIGN KEY (session_id) REFERENCES journey_sessions ON DELETE CASCADE;
 
 -- Row Level Security
 ALTER TABLE journey_sessions ENABLE ROW LEVEL SECURITY;

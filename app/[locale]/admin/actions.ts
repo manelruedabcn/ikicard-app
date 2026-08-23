@@ -24,7 +24,8 @@ export async function grantTool(formData: FormData) {
   const source = String(formData.get('source') || 'manual')
   const expires_at = expiryFromDays(formData.get('days') as string | null)
 
-  await admin.from('entitlements').insert({ user_id, tool_id, source, expires_at })
+  const { error } = await admin.from('entitlements').insert({ user_id, tool_id, source, expires_at })
+  if (error) throw new Error(`No se pudo conceder la herramienta: ${error.message}`)
   revalidatePath('/[locale]/admin', 'page')
 }
 
@@ -38,7 +39,8 @@ export async function grantProgram(formData: FormData) {
   const source = String(formData.get('source') || 'manual')
   const expires_at = expiryFromDays(formData.get('days') as string | null)
 
-  await admin.from('entitlements').insert({ user_id, program_id, source, expires_at })
+  const { error } = await admin.from('entitlements').insert({ user_id, program_id, source, expires_at })
+  if (error) throw new Error(`No se pudo asignar el programa: ${error.message}`)
   revalidatePath('/[locale]/admin', 'page')
 }
 
@@ -48,6 +50,7 @@ export async function revokeEntitlement(formData: FormData) {
   const admin = createAdminClient()
 
   const entitlement_id = String(formData.get('entitlement_id'))
-  await admin.from('entitlements').delete().eq('id', entitlement_id)
+  const { error } = await admin.from('entitlements').delete().eq('id', entitlement_id)
+  if (error) throw new Error(`No se pudo revocar el permiso: ${error.message}`)
   revalidatePath('/[locale]/admin', 'page')
 }

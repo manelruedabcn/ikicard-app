@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { unsubToken } from '@/lib/notify'
+import { verifyUnsubToken } from '@/lib/notify'
 
 // Baja de recordatorios sin sesión, vía enlace firmado del email.
 export async function GET(req: NextRequest) {
@@ -29,15 +29,20 @@ export async function GET(req: NextRequest) {
     { headers: { 'content-type': 'text/html; charset=utf-8' } }
   )
 
-  if (!uid || !t || t !== unsubToken(uid)) return page(bad)
+  if (!uid || !verifyUnsubToken(uid, t)) return page(bad)
 
   const admin = createAdminClient()
   // uid con prefijo "lead:<id>" → baja de email marketing (tabla paso_leads).
   // Sin prefijo → baja de recordatorios del Viaje (perfil logueado).
-  if (uid.startsWith('lead:')) {
-    await admin.from('paso_leads').update({ unsubscribed_at: new Date().toISOString() }).eq('id', uid.slice(5))
-  } else {
-    await admin.from('profiles').update({ notify_opt_out: true }).eq('id', uid)
+  const { error } = uid.startsWith('lead:')
+    ? await admin.from('paso_leads').update({ unsubscribed_at: new Date().toISOString() }).eq('id', uid.slice(5))
+    : await admin.from('profiles').update({ notify_opt_out: true }).eq('id', uid)
+
+  // Si la baja no se pudo registrar, no fingimos éxito: mejor que la persona
+  // reintente (o nos escriba) a decirle "hecho" con el opt-out sin guardar.
+  if (error) {
+    console.error('[unsubscribe] update failed', error.message)
+    return page(bad)
   }
 
   return page(done)

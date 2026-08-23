@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { safeSecretEqual } from '@/lib/secrets'
 
 export const dynamic = 'force-dynamic'
 
@@ -8,7 +9,7 @@ export const dynamic = 'force-dynamic'
 export async function POST(req: Request) {
   // 1) Proteger el endpoint: solo Supabase (que conoce el secreto) puede llamarlo.
   const secret = req.headers.get('x-webhook-secret')
-  if (!secret || secret !== process.env.WEBHOOK_SECRET) {
+  if (!safeSecretEqual(secret, process.env.WEBHOOK_SECRET)) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }
 

@@ -78,6 +78,24 @@ CREATE TABLE IF NOT EXISTS entitlements (
 
 CREATE INDEX IF NOT EXISTS entitlements_user_idx ON entitlements (user_id);
 
+-- Un permiso por (usuario, herramienta) y por (usuario, programa). Sin esto,
+-- el `ON CONFLICT DO NOTHING` del trigger de alta no tiene a qué agarrarse y
+-- podrían colarse permisos duplicados. Deduplicamos antes de crear los índices
+-- (nos quedamos con el más antiguo) para que no fallen sobre datos ya sucios.
+DELETE FROM entitlements e USING entitlements dup
+WHERE e.tool_id IS NOT NULL
+  AND e.user_id = dup.user_id AND e.tool_id = dup.tool_id
+  AND (e.granted_at, e.id) > (dup.granted_at, dup.id);
+DELETE FROM entitlements e USING entitlements dup
+WHERE e.program_id IS NOT NULL
+  AND e.user_id = dup.user_id AND e.program_id = dup.program_id
+  AND (e.granted_at, e.id) > (dup.granted_at, dup.id);
+
+CREATE UNIQUE INDEX IF NOT EXISTS entitlements_user_tool_uidx
+  ON entitlements (user_id, tool_id) WHERE tool_id IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS entitlements_user_program_uidx
+  ON entitlements (user_id, program_id) WHERE program_id IS NOT NULL;
+
 -- ============================================================
 -- FUNCIÓN CENTRAL: get_my_tools()
 -- Único punto que resuelve "qué ve este usuario ahora mismo".

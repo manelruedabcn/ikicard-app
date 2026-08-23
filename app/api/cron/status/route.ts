@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getStatusReport, type StatusCounts, type StatusReport } from '@/lib/admin'
+import { verifyCronSecret } from '@/lib/secrets'
 
 export const dynamic = 'force-dynamic'
 
@@ -7,7 +8,7 @@ export const dynamic = 'force-dynamic'
 // (.github/workflows/status.yml) cada hora en punto. Regla de silencio: si en
 // la última hora NO hubo tests PASO ni usuarios nuevos, no se envía nada.
 export async function POST(req: NextRequest) {
-  if (req.headers.get('x-cron-secret') !== process.env.CRON_SECRET) {
+  if (!verifyCronSecret(req.headers.get('x-cron-secret'))) {
     return NextResponse.json({ ok: false }, { status: 401 })
   }
 

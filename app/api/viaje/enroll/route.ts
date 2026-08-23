@@ -6,7 +6,9 @@ import { unsubUrl } from '@/lib/notify'
 // Envía el email de bienvenida al comenzar el Viaje.
 // Se llama desde el cliente justo después de crear la sesión.
 export async function POST(req: NextRequest) {
-  const { locale } = await req.json().catch(() => ({ locale: 'es' }))
+  const body = await req.json().catch(() => ({}))
+  // Solo idiomas soportados; cualquier otra cosa cae a 'es'.
+  const locale = body?.locale === 'en' ? 'en' : 'es'
 
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -21,7 +23,7 @@ export async function POST(req: NextRequest) {
   if (profile?.notify_opt_out) return NextResponse.json({ ok: true, skipped: true })
 
   try {
-    await sendEnrollmentEmail(user.email, locale || 'es', unsubUrl(user.id, locale || 'es'))
+    await sendEnrollmentEmail(user.email, locale, unsubUrl(user.id, locale))
   } catch (e) {
     // No bloquear el Viaje si el email falla.
     console.error('enrollment email failed', e)
