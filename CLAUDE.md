@@ -103,6 +103,7 @@ Cada herramienta = una migración `migrations/<tool>.sql` + carpeta
 | **Las cuatro estrellas** | `/estrellas` | tu estilo / cómo eres en el mundo | Bilingüe |
 | **CAMINO** | `/camino` | tus capacidades / orientación | Bilingüe |
 | **Máscaras** | `/mascaras` | qué te frena hoy (el espejo) | Bilingüe |
+| **La herida que más pesa** | `/heridas` | de qué te proteges (3 heridas: profesional/relacional/vital) | En prod (ES; EN pendiente) |
 | **IKIBOARD** | `/ikiboard` | **PROYECTO FINAL** — ver abajo | Bilingüe |
 | Taller, Viaje, Oráculo, IKICARD | varios | módulos previos | En prod / activos |
 
