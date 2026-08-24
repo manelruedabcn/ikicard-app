@@ -18,6 +18,8 @@ import {
 } from '@/lib/ikiboard-content'
 import { IKIBOARD_ICONS, iconById, type IkiIcon } from '@/lib/ikiboard-icons'
 import { generarBorrador } from '@/lib/ikiboard-borrador'
+import { generarDeseo, sugerenciaDeAmbito, type SugerenciaAmbito } from '@/lib/ikiboard-deseo'
+import { contentLang } from '@/lib/content-locale'
 import { DIMS, getPatron, type Dim, type InformePaso } from '@/lib/paso-content'
 import { generarNarrativa } from '@/lib/paso-narrativa'
 
@@ -352,6 +354,9 @@ export default function IkiboardClient({ userId, locale, initial }: Props) {
           proposito={content.proposito}
           items={items}
           maskDominant={initial.maskDominant}
+          estrellaDominant={initial.estrellaDominant}
+          caminoDominant={initial.caminoDominant}
+          maskPaso={initial.maskPaso}
           pasoQue={content.paso_que}
           pasoCuando={content.paso_cuando}
           onAdd={addItem}
@@ -1005,6 +1010,9 @@ function Board({
   locale,
   items,
   maskDominant,
+  estrellaDominant,
+  caminoDominant,
+  maskPaso,
   pasoQue,
   pasoCuando,
   onAdd,
@@ -1019,6 +1027,9 @@ function Board({
   proposito?: string
   items: BoardItem[]
   maskDominant: string | null
+  estrellaDominant?: string | null
+  caminoDominant?: string | null
+  maskPaso?: string | null
   pasoQue?: string
   pasoCuando?: string
   onAdd: (a: IkiAmbitoId, ref: string, frase: string, doy: string) => Promise<void>
@@ -1036,12 +1047,22 @@ function Board({
   const ambito = zona ? ambitos.find(a => a.id === zona)! : null
   const mask = maskDominant ? getMasks(locale).find(m => m.code === maskDominant) : null
 
+  // Sugerencias de arranque (editables) por tarjeta de ámbito. Reutiliza el
+  // borrador determinista (Estrella×CAMINO para vocación) y la tabla fija
+  // máscara→tarjeta. No inventa nada nuevo; solo lee lo ya calculado.
+  const borrador = generarBorrador(
+    { estrella: estrellaDominant ?? null, camino: caminoDominant ?? null, maskDominant, maskPaso: maskPaso ?? null },
+    locale
+  )
+  const deseo = generarDeseo(maskDominant, borrador, locale)
+
   if (ambito) {
     return (
       <BoardZone
         locale={locale}
         ambito={ambito}
         items={items.filter(i => i.ambito === ambito.id)}
+        sugerencia={sugerenciaDeAmbito(deseo, ambito.id)}
         onAdd={onAdd}
         onAddPhoto={onAddPhoto}
         onRemove={onRemove}
@@ -1194,6 +1215,7 @@ function BoardZone({
   locale,
   ambito,
   items,
+  sugerencia,
   onAdd,
   onAddPhoto,
   onRemove,
@@ -1204,6 +1226,7 @@ function BoardZone({
   locale: string
   ambito: { id: IkiAmbitoId; label: string; hint: string }
   items: BoardItem[]
+  sugerencia?: SugerenciaAmbito
   onAdd: (a: IkiAmbitoId, ref: string, frase: string, doy: string) => Promise<void>
   onAddPhoto: (a: IkiAmbitoId, file: File, frase: string, doy: string) => Promise<void>
   onRemove: (id: string) => void
@@ -1213,7 +1236,10 @@ function BoardZone({
 }) {
   const c = getIkiboardCopy(locale)
   const board = c.board
-  const [adding, setAdding] = useState(false)
+  // Si la tarjeta está vacía y hay sugerencia de arranque, se abre el
+  // formulario ya prellenado (editable, no se guarda hasta confirmar).
+  const seedable = items.length === 0 && Boolean(sugerencia)
+  const [adding, setAdding] = useState(seedable)
 
   return (
     <div className="w-full max-w-md">
@@ -1297,6 +1323,9 @@ function BoardZone({
         <AddItem
           locale={locale}
           ambito={ambito.id}
+          initialFrase={seedable ? sugerencia?.frase : undefined}
+          initialDoy={seedable ? sugerencia?.queDoy : undefined}
+          esSugerencia={seedable}
           onCancel={() => setAdding(false)}
           onSave={async (ref, frase, doy) => {
             await onAdd(ambito.id, ref, frase, doy)
@@ -1323,18 +1352,25 @@ function BoardZone({
 function AddItem({
   locale,
   ambito,
+  initialFrase,
+  initialDoy,
+  esSugerencia,
   onCancel,
   onSave,
   onSavePhoto,
 }: {
   locale: string
   ambito: IkiAmbitoId
+  initialFrase?: string
+  initialDoy?: string
+  esSugerencia?: boolean
   onCancel: () => void
   onSave: (ref: string, frase: string, doy: string) => Promise<void>
   onSavePhoto: (file: File, frase: string, doy: string) => Promise<void>
 }) {
   const c = getIkiboardCopy(locale)
   const board = c.board
+  const en = contentLang(locale) === 'en'
   // Ofrece primero los iconos afines al ámbito, luego el resto.
   const afines = IKIBOARD_ICONS[ambito] ?? []
   const otros: IkiIcon[] = Object.entries(IKIBOARD_ICONS)
@@ -1345,8 +1381,8 @@ function AddItem({
   const [ref, setRef] = useState(afines[0]?.id ?? iconos[0]?.id ?? '')
   const [imageMode, setImageMode] = useState<'icono' | 'foto'>('icono')
   const [photo, setPhoto] = useState<File | null>(null)
-  const [frase, setFrase] = useState('')
-  const [doy, setDoy] = useState('')
+  const [frase, setFrase] = useState(initialFrase ?? '')
+  const [doy, setDoy] = useState(initialDoy ?? '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -1405,6 +1441,14 @@ function AddItem({
           />
           {photo && <p className="mt-2 text-xs text-[#c2866b]">{photo.name}</p>}
         </div>
+      )}
+
+      {esSugerencia && (
+        <p className="mb-4 rounded-lg bg-[#c2866b]/10 px-3 py-2 text-[11px] leading-relaxed text-[#272727]/60">
+          {en
+            ? 'A starting suggestion. Edit or delete it — it’s only yours once you save.'
+            : 'Una sugerencia para arrancar. Edítala o bórrala — solo será tuya cuando la guardes.'}
+        </p>
       )}
 
       <label className="block text-xs tracking-widest uppercase text-[#272727]/50 mb-1">
