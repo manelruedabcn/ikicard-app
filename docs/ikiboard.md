@@ -142,3 +142,48 @@ eliges el destino y corriges el camino cuando deje de representarte".
    el mapa se corrige.
 6. **Bilingüe ES/EN** por `[locale]`, con el contenido en getters por idioma; la
    lógica va sobre códigos independientes del idioma.
+
+---
+
+## 8. Asistente de icono por tarjeta (decisión 2026-08-25)
+
+Además de elegir icono a mano en el alta, el sistema **propone un icono ya
+puesto** en la tarjeta, a partir de los tests que la persona ya respondió. Cero
+IA, determinista, mismo espíritu que el borrador.
+
+- **Fuente de datos → candidatos:** máscara dominante acota Cuerpo y vida /
+  Vínculos / Lo material; la celda Estrella×CAMINO acota Vocación. De los 17
+  iconos se reduce a **máx. 3-4 candidatos por ámbito**.
+- **Desempate:** si queda más de un candidato razonable, el asistente hace 1-2
+  preguntas cortas **propias de icono** (no las de los tests) para elegir entre
+  esos candidatos.
+- **Salida:** el icono aparece ya puesto, con una línea breve de rationale ("te
+  lo proponemos por tu máscara dominante"), sin nombrar el framework.
+
+**Decisión de diseño (cerrada):** para cambiar el icono → **toque, no arrastre**.
+El drag-and-drop desde un cajón inferior se descartó: frágil en móvil (pelea con
+el scroll) y con gesto de juego que choca con el tono ritual. Se ofrecen los 3-4
+candidatos del ámbito, no los 17.
+
+**Implementado ya en el repo:**
+- `updateItemRef(id, ref)` en `IkiboardClient.tsx`: cambia el icono de un ítem
+  **ya guardado, en el sitio**, sin borrar ni recrear — conserva estado de
+  cercanía, prioridad e historial (`ikiboard_item_reviews`). Solo iconos; una
+  foto se cambia quitándola.
+- `BoardItemCard`: el icono de la tarjeta es un botón que despliega la rejilla de
+  iconos **a ancho completo bajo la fila** (responsive, `grid-cols-6`), afines al
+  ámbito primero. Reversible siempre, sin confirmación.
+- `lib/ikiboard-icono-asistente.ts`: scaffold con
+  `generarIconoSugerido(ambito, datosTests, locale) → { candidatos, icono,
+  rationale, preguntaDesempate? }`. **Lógica completa; faltan solo los datos:**
+  las tablas `CANDIDATOS_POR_MASCARA` / `CANDIDATOS_VOCACION` y
+  `PREGUNTAS_DESEMPATE` están vacías, a cerrar en los próximos días. Cerrarlas es
+  un cambio solo de datos, sin tocar la lógica.
+
+**Aviso — discrepancia con el modelo mental:** el diseño se describió apoyándose
+en `lib/ikiboard-deseo.ts` y en una "Hipótesis de Deseo" con mapeo
+**máscara→ámbito**. **Nada de eso existe en el repo todavía** (ni el archivo, ni
+la tabla máscara→ámbito, ni una "frase de deseo editable" persistida: la `frase`
+por ítem se fija al crear y hoy no es editable). El patrón determinista real y
+vivo es `lib/ikiboard-borrador.ts` — sobre ese se modeló el asistente. Pendiente
+de decidir: si "Hipótesis de Deseo" es algo por construir o vive con otro nombre.

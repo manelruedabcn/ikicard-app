@@ -17,6 +17,7 @@ import {
   type IkiEstado,
 } from '@/lib/ikiboard-content'
 import { IKIBOARD_ICONS, iconById, type IkiIcon } from '@/lib/ikiboard-icons'
+import { contentLang } from '@/lib/content-locale'
 import { generarBorrador } from '@/lib/ikiboard-borrador'
 import { DIMS, getPatron, type Dim, type InformePaso } from '@/lib/paso-content'
 import { generarNarrativa } from '@/lib/paso-narrativa'
@@ -220,6 +221,21 @@ export default function IkiboardClient({ userId, locale, initial }: Props) {
     if (removed?.tipo === 'foto') await supabase.storage.from('ikiboard').remove([removed.ref])
   }
 
+  // Cambiar el icono de un ítem ya guardado, en el sitio: sin borrar ni
+  // recrear, así conserva estado, prioridad y su historial. Solo iconos.
+  async function updateItemRef(id: string, ref: string) {
+    const item = items.find(i => i.id === id)
+    if (!item || item.tipo !== 'icono' || item.ref === ref) return
+    const previous = item.ref
+    const changedAt = new Date().toISOString()
+    setItems(list => list.map(i => (i.id === id ? { ...i, ref } : i)))
+    const { error } = await supabase
+      .from('ikiboard_items')
+      .update({ ref, updated_at: changedAt })
+      .eq('id', id)
+    if (error) setItems(list => list.map(i => (i.id === id ? { ...i, ref: previous } : i)))
+  }
+
   // Cercanía a habitar la foto: la marca la persona a mano.
   async function updateEstado(id: string, estado: IkiEstado) {
     const item = items.find(i => i.id === id)
@@ -359,6 +375,7 @@ export default function IkiboardClient({ userId, locale, initial }: Props) {
           onRemove={removeItem}
           onEstado={updateEstado}
           onPriority={setPriority}
+          onChangeIcon={updateItemRef}
           onMap={() => { setPhase('map'); window.scrollTo({ top: 0 }) }}
           onReview={() => { setPhase('done'); window.scrollTo({ top: 0 }) }}
         />
@@ -999,6 +1016,133 @@ function ItemImage({ item, className }: { item: BoardItem; className?: string })
     : <Icon id={item.ref} className={className} />
 }
 
+// Una tarjeta de deseo guardado: la fila (icono · frase · quitar), y —solo
+// para iconos— un picker a ancho completo que se despliega bajo la fila para
+// cambiar el icono en el sitio, sin borrar ni recrear (conserva estado,
+// prioridad e historial). Debajo, la cercanía. Reversible siempre, sin
+// confirmación. Una foto se cambia quitándola; su icono se muestra estático.
+function BoardItemCard({
+  item,
+  ambito,
+  locale,
+  onRemove,
+  onEstado,
+  onPriority,
+  onChangeIcon,
+}: {
+  item: BoardItem
+  ambito: IkiAmbitoId
+  locale: string
+  onRemove: (id: string) => void
+  onEstado: (id: string, estado: IkiEstado) => void
+  onPriority: (id: string) => void
+  onChangeIcon: (id: string, ref: string) => void
+}) {
+  const c = getIkiboardCopy(locale)
+  const board = c.board
+  const en = contentLang(locale) === 'en'
+  const [swapping, setSwapping] = useState(false)
+  const editable = item.tipo === 'icono'
+
+  // Iconos afines al ámbito primero, luego el resto (mismo orden que el alta).
+  const afines = IKIBOARD_ICONS[ambito] ?? []
+  const otros: IkiIcon[] = Object.entries(IKIBOARD_ICONS)
+    .filter(([k]) => k !== ambito)
+    .flatMap(([, v]) => v)
+  const iconos = [...afines, ...otros]
+
+  return (
+    <div className="rounded-xl border border-[#272727]/12 bg-white/50 p-4">
+      <div className="flex items-start gap-3">
+        {editable ? (
+          <button
+            type="button"
+            onClick={() => setSwapping(s => !s)}
+            aria-expanded={swapping}
+            title={en ? 'Change icon' : 'Cambiar icono'}
+            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors ${
+              swapping ? 'bg-[#c2866b] text-[#FDFBF7]' : 'bg-[#c2866b]/10 text-[#c2866b] hover:bg-[#c2866b]/20'
+            }`}
+          >
+            <ItemImage item={item} className="h-6 w-6" />
+          </button>
+        ) : (
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#c2866b]/10 text-[#c2866b]">
+            <ItemImage item={item} className="h-11 w-11 rounded-full" />
+          </span>
+        )}
+        <div className="min-w-0 flex-1">
+          <p className="font-[family-name:var(--font-cormorant)] text-lg italic text-[#272727] leading-snug">
+            {item.frase || '—'}
+          </p>
+          {item.doy?.trim() && (
+            <p className="text-xs text-[#c2866b] mt-1">{c.ui.boardDoyPrefix} {item.doy}</p>
+          )}
+        </div>
+        <button
+          onClick={() => onRemove(item.id)}
+          className="text-[10px] tracking-widest uppercase text-[#272727]/35 hover:text-[#c2866b] transition-colors"
+        >
+          {board.remove}
+        </button>
+      </div>
+
+      {/* Cambiar el icono en el sitio: rejilla a ancho completo bajo la fila. */}
+      {editable && swapping && (
+        <div className="mt-3 grid grid-cols-6 gap-2 rounded-xl border border-[#c2866b]/25 bg-[#c2866b]/5 p-3">
+          {iconos.map(ic => (
+            <button
+              key={ic.id}
+              type="button"
+              onClick={() => { onChangeIcon(item.id, ic.id); setSwapping(false) }}
+              title={ic.label}
+              className={`flex aspect-square items-center justify-center rounded-lg border transition-colors ${
+                item.ref === ic.id
+                  ? 'border-[#c2866b] bg-[#c2866b] text-[#FDFBF7]'
+                  : 'border-[#272727]/12 bg-white/60 text-[#c2866b] hover:border-[#c2866b]'
+              }`}
+            >
+              <Icon id={ic.id} className="h-5 w-5" />
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Cercanía: cuánto habitas ya esta foto. */}
+      <div className="mt-3 pt-3 border-t border-[#272727]/8">
+        <p className="text-[10px] tracking-widest uppercase text-[#272727]/40 mb-2">
+          {board.cercaniaLabel}
+        </p>
+        <div className="flex gap-1.5">
+          {IKI_ESTADOS.map(e => (
+            <button
+              key={e.id}
+              onClick={() => onEstado(item.id, e.id)}
+              className={`flex-1 rounded-full px-2 py-1.5 text-[11px] tracking-wide transition-colors ${
+                item.estado === e.id
+                  ? 'bg-[#c2866b] text-[#FDFBF7]'
+                  : 'border border-[#272727]/15 text-[#272727]/50 hover:border-[#c2866b]'
+              }`}
+            >
+              {board.estados[e.id]}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={() => onPriority(item.id)}
+          className={`mt-3 w-full rounded-full px-3 py-2 text-[10px] tracking-widest uppercase transition-colors ${
+            item.is_priority
+              ? 'bg-[#272727] text-[#FDFBF7]'
+              : 'border border-[#272727]/12 text-[#272727]/45 hover:border-[#c2866b] hover:text-[#c2866b]'
+          }`}
+        >
+          {item.is_priority ? `✓ ${board.priority}` : board.makePriority}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // Vista álbum: el propósito preside arriba, las 3 zonas como páginas
 // con su cercanía (dashboard, zoom out). Tocar una zona entra (zoom in).
 function Board({
@@ -1012,6 +1156,7 @@ function Board({
   onRemove,
   onEstado,
   onPriority,
+  onChangeIcon,
   onMap,
   onReview,
 }: {
@@ -1026,6 +1171,7 @@ function Board({
   onRemove: (id: string) => void
   onEstado: (id: string, estado: IkiEstado) => void
   onPriority: (id: string) => void
+  onChangeIcon: (id: string, ref: string) => void
   onMap: () => void
   onReview: () => void
 }) {
@@ -1047,6 +1193,7 @@ function Board({
         onRemove={onRemove}
         onEstado={onEstado}
         onPriority={onPriority}
+        onChangeIcon={onChangeIcon}
         onExit={() => setZona(null)}
       />
     )
@@ -1199,6 +1346,7 @@ function BoardZone({
   onRemove,
   onEstado,
   onPriority,
+  onChangeIcon,
   onExit,
 }: {
   locale: string
@@ -1209,6 +1357,7 @@ function BoardZone({
   onRemove: (id: string) => void
   onEstado: (id: string, estado: IkiEstado) => void
   onPriority: (id: string) => void
+  onChangeIcon: (id: string, ref: string) => void
   onExit: () => void
 }) {
   const c = getIkiboardCopy(locale)
@@ -1234,62 +1383,16 @@ function BoardZone({
           <p className="text-center text-sm text-[#272727]/40 py-6">{board.empty}</p>
         )}
         {items.map(i => (
-          <div
+          <BoardItemCard
             key={i.id}
-            className="rounded-xl border border-[#272727]/12 bg-white/50 p-4"
-          >
-            <div className="flex items-start gap-3">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#c2866b]/10 text-[#c2866b]">
-                <ItemImage item={i} className="h-11 w-11 rounded-full" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="font-[family-name:var(--font-cormorant)] text-lg italic text-[#272727] leading-snug">
-                  {i.frase || '—'}
-                </p>
-                {i.doy?.trim() && (
-                  <p className="text-xs text-[#c2866b] mt-1">{c.ui.boardDoyPrefix} {i.doy}</p>
-                )}
-              </div>
-              <button
-                onClick={() => onRemove(i.id)}
-                className="text-[10px] tracking-widest uppercase text-[#272727]/35 hover:text-[#c2866b] transition-colors"
-              >
-                {board.remove}
-              </button>
-            </div>
-
-            {/* Cercanía: cuánto habitas ya esta foto. */}
-            <div className="mt-3 pt-3 border-t border-[#272727]/8">
-              <p className="text-[10px] tracking-widest uppercase text-[#272727]/40 mb-2">
-                {board.cercaniaLabel}
-              </p>
-              <div className="flex gap-1.5">
-                {IKI_ESTADOS.map(e => (
-                  <button
-                    key={e.id}
-                    onClick={() => onEstado(i.id, e.id)}
-                    className={`flex-1 rounded-full px-2 py-1.5 text-[11px] tracking-wide transition-colors ${
-                      i.estado === e.id
-                        ? 'bg-[#c2866b] text-[#FDFBF7]'
-                        : 'border border-[#272727]/15 text-[#272727]/50 hover:border-[#c2866b]'
-                    }`}
-                  >
-                    {board.estados[e.id]}
-                  </button>
-                ))}
-              </div>
-              <button
-                onClick={() => onPriority(i.id)}
-                className={`mt-3 w-full rounded-full px-3 py-2 text-[10px] tracking-widest uppercase transition-colors ${
-                  i.is_priority
-                    ? 'bg-[#272727] text-[#FDFBF7]'
-                    : 'border border-[#272727]/12 text-[#272727]/45 hover:border-[#c2866b] hover:text-[#c2866b]'
-                }`}
-              >
-                {i.is_priority ? `✓ ${board.priority}` : board.makePriority}
-              </button>
-            </div>
-          </div>
+            item={i}
+            ambito={ambito.id}
+            locale={locale}
+            onRemove={onRemove}
+            onEstado={onEstado}
+            onPriority={onPriority}
+            onChangeIcon={onChangeIcon}
+          />
         ))}
       </div>
 
