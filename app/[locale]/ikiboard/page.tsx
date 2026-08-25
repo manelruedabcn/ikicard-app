@@ -39,9 +39,11 @@ export default async function IkiboardPage({
   // Los otros dos instrumentos del cruce (Estrellas + CAMINO). Alimentan
   // el borrador determinista y la zona Vocación. Si aún no se han hecho,
   // vienen null y el recorrido invita a hacerlos. Privados por RLS.
+  // Se piden también las puntuaciones (no solo la dominante): el asistente
+  // de icono de Vocación las necesita para detectar empates entre estrellas.
   const { data: estrella } = await supabase
     .from('estrella_results')
-    .select('dominant')
+    .select('scores, dominant')
     .eq('user_id', user.id)
     .maybeSingle()
 
@@ -78,6 +80,7 @@ export default async function IkiboardPage({
         maskDominant: mask?.dominant ?? null,
         maskPaso: reflection.mask_paso ?? null,
         estrellaDominant: estrella?.dominant ?? null,
+        estrellaScores: (estrella?.scores as Record<string, number>) ?? null,
         caminoDominant: camino?.dominant ?? null,
         pasoResult: paso ?? null,
         items: items ?? [],

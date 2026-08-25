@@ -189,17 +189,23 @@ módulo (`REGLAS_ICONO_MASCARA`, `ICONO_POR_ESTRELLA`, `DESEMPATE_VOCACION`):
   más altas empatan, pregunta de desempate; por defecto gana la de mayor prioridad
   del test (Explorador > Comunicador > Protector > Visionario).
 - **`lugar` no se sugiere nunca** (decisión); sigue solo en la rejilla manual.
-- Los **47 casos posibles** del spec verificados en runtime (49/49 asserts). Copy
-  de rationale en ES (voz de Manel, canónica); **EN pendiente** — hoy cae a una
-  línea neutra.
+- Los **47 casos posibles** del spec verificados en runtime (49/49 asserts, ES y EN).
 
-**Pendiente para que funcione de cara al usuario (cableado, no criterio):**
-1. `app/[locale]/ikiboard/page.tsx` hoy solo pide `estrella?.dominant`; para que
-   el desempate de Vocación se active necesita también `scores` (ya existe en
-   `estrella_results.scores`). Sin scores, Vocación siempre da la dominante clara.
-2. La UI (AddItem / tarjeta) aún **no llama** al asistente ni pinta la sugerencia,
-   el rationale o la pregunta de desempate. `updateItemRef` ya permite fijar el
-   icono elegido en el sitio.
+**Bilingüe.** Cada cadena lleva `{ es, en }` co-locado; el getter resuelve por
+`contentLang`. Se usan las etiquetas EN reales de la app (máscaras: The Demanding
+One, The Controller, The Manipulator, The Judge, The People-Pleaser, The Victim,
+The Impostor; estrellas: Explorer, Communicator, Protector, Visionary). El **copy
+EN son traducciones de trabajo**: sustituir por el §4 validado cuando se integre.
+
+**Cableado (hecho).**
+1. `app/[locale]/ikiboard/page.tsx` pide `estrella_results.select('scores,
+   dominant')` y pasa `estrellaScores` al cliente → el desempate de Vocación puede
+   dispararse.
+2. `BoardZone` calcula la sugerencia del ámbito y la pasa a `AddItem`, que pinta el
+   icono ya puesto, la frase de rationale y —si hay— la pregunta de desempate como
+   opción editable (nunca paso obligatorio). La rejilla manual sigue debajo ("o
+   elige otro"). Al guardar, el icono elegido queda en el ítem; `updateItemRef`
+   permite cambiarlo luego en el sitio.
 
 **Aviso — discrepancia resuelta parcialmente:** el spec menciona
 `lib/ikiboard-deseo.ts` y "Hipótesis de Deseo" (mapeo máscara→ámbito). Ese archivo
