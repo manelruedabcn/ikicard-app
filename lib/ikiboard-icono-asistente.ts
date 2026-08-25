@@ -1,185 +1,266 @@
 // ============================================================
 // ASISTENTE DE ICONO — propone un icono ya puesto por ámbito.
-// Cero IA, determinista, mismo espíritu que ikiboard-borrador.ts:
-// no inventa; lee lo que la persona ya respondió y acota la
-// biblioteca de 17 iconos a 3-4 candidatos por ámbito.
+// Cero IA, determinista: no inventa; lee lo que la persona ya
+// respondió (máscara dominante · estrella dominante) y devuelve un
+// icono de la biblioteca de 17, con su rationale en la voz de Manel.
 //
-//   Cuerpo y vida / Vínculos / Lo material  → máscara dominante
-//   Vocación                                → celda Estrella×CAMINO
+//   Cuerpo y vida / Vínculos / Lo material → máscara dominante
+//   Vocación                               → estrella dominante
 //
-// Si tras acotar queda un solo candidato razonable, ese es el
-// icono. Si quedan varios, el asistente devuelve UNA pregunta
-// corta propia de icono (no las de los tests principales) para
-// desempatar entre esos candidatos. La salida se pinta ya puesta
-// en la tarjeta, con una línea de rationale, y el usuario puede
-// cambiarla o quitarla siempre (sin confirmación).
+// Si en un ámbito la máscara no está mapeada, esa tarjeta no recibe
+// sugerencia (se comporta como hoy). Vocación siempre sugiere: la
+// estrella dominante siempre existe si se hizo el test.
 //
-// Puro y determinista: mismas entradas → misma sugerencia.
-// Bilingüe: la lógica va sobre códigos; solo el texto cambia por
-// locale (contentLang), igual que el resto del contenido.
+// Cuando quedan dos candidatos razonables, se ofrece UNA pregunta
+// corta propia de icono para desempatar; la respuesta (un id de
+// icono) cierra la elección. La salida se pinta ya puesta en la
+// tarjeta y el usuario la puede cambiar o quitar siempre.
 //
-// NOTA (scaffolding): las tablas CANDIDATOS_* y PREGUNTAS_* están
-// vacías a propósito. La maquinaria ya está completa; cerrar los
-// candidatos y las preguntas de desempate en los próximos días es
-// un cambio SOLO de datos, sin tocar esta lógica (crece por
-// módulos, no por ifs). Fuente: docs/fuentes.md · docs/ikiboard.md.
+// Criterio cerrado y validado por Manel (2026-08-25). Fuente:
+// docs/ikiboard.md §8. El icono `lugar` no se sugiere nunca a
+// propósito: queda solo en la rejilla manual de Lo material.
+//
+// NOTA idioma: los rationale son la voz de Manel en ES (canónica).
+// Falta la traducción EN; mientras tanto, en locale 'en' el rationale
+// visible cae a una línea neutra. TODO(i18n): getter EN por ámbito.
 // ============================================================
 
 import type { IkiAmbitoId } from './ikiboard-content'
-import type { MaskCode } from './masks-content'
 import type { EstrellaCode } from './estrellas-content'
-import type { CaminoCode } from './camino-content'
-import { ALL_ICONS } from './ikiboard-icons'
+import { computeDominant } from './estrellas-content'
 import { contentLang } from './content-locale'
 
-// Lo que el asistente necesita de los tests. Todo puede venir null:
-// si falta el dato de un ámbito, no se sugiere nada (se cae al modo
-// manual de siempre) y el tablero sigue funcionando.
-export interface IconoAsistenteInput {
-  // Cuerpo y vida / Vínculos / Lo material salen de la máscara.
-  maskDominant: MaskCode | string | null
-  // Vocación sale del cruce Estrella (fila) × CAMINO (columna).
-  estrella: EstrellaCode | string | null
-  camino: CaminoCode | string | null
-  // Respuestas ya dadas a preguntas de desempate propias de icono,
-  // por id de pregunta → id de opción elegida. Vacío la primera vez.
-  desempate?: Record<string, string>
-}
-
-// Una pregunta corta de desempate, propia del icono (no la de un
-// test). Cada opción resuelve directamente a un id de icono de la
-// biblioteca, para que la respuesta cierre la elección sin más pasos.
-export interface PreguntaDesempate {
-  id: string
-  pregunta: string
-  opciones: { id: string; label: string; icono: string }[]
-}
-
-// La sugerencia que consume la UI. `icono` viene relleno cuando el
-// asistente pudo decidir solo; si hace falta desempatar, `icono` es
-// null y llega `preguntaDesempate`. `candidatos` son ids de la
-// biblioteca (máx 3-4) por si la UI quiere ofrecerlos como atajo.
-export interface IconoSugerido {
-  candidatos: string[]
-  icono: string | null
+// Un icono con la razón por la que se propone.
+export interface Candidato {
+  icono: string
   rationale: string
+}
+
+// Pregunta corta de desempate, propia del icono (no la de un test).
+// Cada opción resuelve directamente a un id de icono, para que la
+// respuesta cierre la elección sin más pasos.
+export interface PreguntaDesempate {
+  texto: string
+  opciones: { etiqueta: string; icono: string }[]
+}
+
+// La sugerencia que consume la UI. `icono` viene relleno con el
+// candidato por defecto; si hay desempate y aún no se respondió,
+// `preguntaDesempate` acompaña. `candidatos` es la lista corta por si
+// la UI quiere ofrecerlos como atajo.
+export interface IconoSugerido {
+  candidatos: Candidato[]
+  icono: string | null
+  rationale: string | null
   preguntaDesempate?: PreguntaDesempate
 }
 
-// -------------------- Tablas de datos (a cerrar) --------------------
-// Candidatos por ámbito, indexados por el código del test que manda
-// en ese ámbito. Ids deben existir en IKIBOARD_ICONS. Máx 3-4.
-
-// Cuerpo y vida / Vínculos / Lo material: máscara dominante → candidatos.
-// TODO(candidatos): cerrar en los próximos días (3-4 ids por máscara).
-const CANDIDATOS_POR_MASCARA: Partial<Record<IkiAmbitoId, Partial<Record<MaskCode, string[]>>>> = {
-  cuerpo: {},
-  vinculos: {},
-  material: {},
+// Lo que el asistente necesita de los tests. Todo puede venir vacío:
+// si falta el dato de un ámbito, no se sugiere nada.
+export interface IconoAsistenteInput {
+  // Cuerpo y vida / Vínculos / Lo material salen de aquí.
+  maskDominant: string | null
+  // Vocación: las puntuaciones por frase del test de estrellas
+  // (estrella_results.scores, forma {"1":4,...}). Se usa para elegir
+  // dominante y detectar empates. Si no hay, Vocación no sugiere.
+  estrellaScores?: Record<string, number> | null
+  // Id de icono elegido en la pregunta de desempate, si ya se respondió.
+  respuestaDesempate?: string | null
 }
 
-// Vocación: celda Estrella×CAMINO → candidatos. Clave `${estrella}:${camino}`.
-// TODO(candidatos): cerrar en los próximos días (3-4 ids por celda relevante).
-const CANDIDATOS_VOCACION: Record<string, string[]> = {}
+// -------------------- Tablas de datos (criterio cerrado) --------------------
 
-// Preguntas de desempate por ámbito. Se usa la primera cuyas opciones
-// caigan dentro de los candidatos vivos. TODO(preguntas): cerrar luego.
-const PREGUNTAS_DESEMPATE: Partial<Record<IkiAmbitoId, PreguntaDesempate[]>> = {
-  cuerpo: [],
-  vinculos: [],
-  material: [],
-  vocacion: [],
+type ReglaIconoMascara = {
+  ambito: IkiAmbitoId
+  principal: Candidato
+  alternativo: Candidato
+  preguntaDesempate: { texto: string; opcionPrincipal: string; opcionAlternativo: string }
 }
 
-// -------------------- Lógica (cerrada) --------------------
+// Clave = máscara dominante, en minúsculas (mask.dominant). Las máscaras
+// que no aparecen no generan sugerencia en ningún ámbito.
+export const REGLAS_ICONO_MASCARA: Record<string, ReglaIconoMascara> = {
+  exigente: {
+    ambito: 'cuerpo',
+    principal: { icono: 'luna', rationale: 'Te lo proponemos por tu máscara dominante, la Exigente: rara vez te das permiso para parar sin haberlo merecido antes.' },
+    alternativo: { icono: 'sol', rationale: 'Te lo proponemos por tu máscara dominante, la Exigente: a veces lo que hace falta no es parar, sino empezar algo sin exigirte que salga perfecto.' },
+    preguntaDesempate: { texto: '¿Lo que más te cuesta darte hoy es parar, o es empezar sin la presión de hacerlo bien?', opcionPrincipal: 'Parar', opcionAlternativo: 'Empezar' },
+  },
+  victima: {
+    ambito: 'cuerpo',
+    principal: { icono: 'hoja', rationale: 'Te lo proponemos por tu máscara dominante, la Víctima: una hoja pequeña, prueba de que algo sigue creciendo aunque no lo controles todo.' },
+    alternativo: { icono: 'corazon', rationale: 'Te lo proponemos por tu máscara dominante, la Víctima: tu cuerpo sigue ahí, acompañándote, aunque hoy sientas que nada depende de ti.' },
+    preguntaDesempate: { texto: '¿Necesitas hoy una señal de que algo crece, o de que tu cuerpo todavía te sostiene?', opcionPrincipal: 'Crece', opcionAlternativo: 'Sostiene' },
+  },
+  manipuladora: {
+    ambito: 'vinculos',
+    principal: { icono: 'chat', rationale: 'Te lo proponemos por tu máscara dominante, la Manipuladora: dices lo que piensas, no lo que crees que el otro quiere oír.' },
+    alternativo: { icono: 'personas', rationale: 'Te lo proponemos por tu máscara dominante, la Manipuladora: te dejas ver tal cual eres, no solo la versión calculada.' },
+    preguntaDesempate: { texto: '¿Lo que te falta es decir una verdad concreta a alguien, o dejarte ver así delante de más de una persona?', opcionPrincipal: 'Verdad concreta', opcionAlternativo: 'Delante de varios' },
+  },
+  jueza: {
+    ambito: 'vinculos',
+    principal: { icono: 'manos', rationale: 'Te lo proponemos por tu máscara dominante, la Jueza: te acercas sin medir antes si el otro se lo merece.' },
+    alternativo: { icono: 'personas', rationale: 'Te lo proponemos por tu máscara dominante, la Jueza: sueltas la distancia de seguridad con la gente, no solo con una persona.' },
+    preguntaDesempate: { texto: '¿Lo que buscas es acercarte a alguien en concreto, o soltar la guardia con la gente en general?', opcionPrincipal: 'Alguien', opcionAlternativo: 'En general' },
+  },
+  complaciente: {
+    ambito: 'vinculos',
+    principal: { icono: 'regalo', rationale: 'Te lo proponemos por tu máscara dominante, la Complaciente: puedes dar sin que eso signifique desaparecer un poco cada vez.' },
+    alternativo: { icono: 'personas', rationale: 'Te lo proponemos por tu máscara dominante, la Complaciente: puedes formar parte sin borrarte para encajar.' },
+    preguntaDesempate: { texto: '¿Lo que quieres marcar es que puedes dar sin perderte, o que puedes estar sin desaparecer?', opcionPrincipal: 'Dar', opcionAlternativo: 'Estar' },
+  },
+  controladora: {
+    ambito: 'material',
+    principal: { icono: 'llave', rationale: 'Te lo proponemos por tu máscara dominante, la Controladora: tienes lo que necesitas, sin tener que vigilarlo todo el tiempo.' },
+    alternativo: { icono: 'casa', rationale: 'Te lo proponemos por tu máscara dominante, la Controladora: puedes soltar el control de una cosa y comprobar que sigue en pie.' },
+    preguntaDesempate: { texto: '¿Lo que necesitas soltar es la vigilancia sobre algo concreto, o la sensación de que todo depende de ti en casa?', opcionPrincipal: 'Algo concreto', opcionAlternativo: 'En casa' },
+  },
+  impostora: {
+    ambito: 'material',
+    principal: { icono: 'coche', rationale: 'Te lo proponemos por tu máscara dominante, la Impostora: lo que tienes es tuyo, no un préstamo que te puedan quitar.' },
+    alternativo: { icono: 'montana', rationale: 'Te lo proponemos por tu máscara dominante, la Impostora: ya llegaste hasta aquí, y eso no te lo puede descontar nadie.' },
+    preguntaDesempate: { texto: '¿Lo que quieres afirmar es que lo tuyo es tuyo sin condiciones, o que ya llegaste hasta aquí por ti mismo?', opcionPrincipal: 'Tuyo', opcionAlternativo: 'Llegaste' },
+  },
+}
+
+// Vocación: mapeo directo estrella dominante → icono.
+export const ICONO_POR_ESTRELLA: Record<EstrellaCode, Candidato> = {
+  explorador: { icono: 'idea', rationale: 'Te lo proponemos por tu perfil Explorador: te mueve la curiosidad de descubrir, no la ruta ya trazada.' },
+  comunicador: { icono: 'pluma', rationale: 'Te lo proponemos por tu perfil Comunicador: lo tuyo se dice, se comparte, se pone en palabras.' },
+  protector: { icono: 'maletin', rationale: 'Te lo proponemos por tu perfil Protector: tu trabajo tiene sentido cuando cuida de alguien más.' },
+  visionario: { icono: 'diana', rationale: 'Te lo proponemos por tu perfil Visionario: apuntas lejos, con una idea clara de adónde quieres llegar.' },
+}
+
+// Orden del propio test (no de "mejor a peor"): rompe el empate cuando la
+// persona no responde la pregunta de desempate de Vocación.
+const PRIORIDAD_ESTRELLA: EstrellaCode[] = ['explorador', 'comunicador', 'protector', 'visionario']
+
+const DESEMPATE_VOCACION: Array<{
+  par: [EstrellaCode, EstrellaCode]
+  texto: string
+  opcionA: { etiqueta: string; estrella: EstrellaCode }
+  opcionB: { etiqueta: string; estrella: EstrellaCode }
+}> = [
+  { par: ['explorador', 'comunicador'], texto: '¿lo tuyo es descubrir algo nuevo, o contarlo?', opcionA: { etiqueta: 'Descubrir', estrella: 'explorador' }, opcionB: { etiqueta: 'Contarlo', estrella: 'comunicador' } },
+  { par: ['explorador', 'protector'], texto: '¿lo tuyo es explorar terreno nuevo, o cuidar de quien tienes cerca?', opcionA: { etiqueta: 'Explorar', estrella: 'explorador' }, opcionB: { etiqueta: 'Cuidar', estrella: 'protector' } },
+  { par: ['explorador', 'visionario'], texto: '¿te mueve la curiosidad del camino, o la claridad de adónde quieres llegar?', opcionA: { etiqueta: 'El camino', estrella: 'explorador' }, opcionB: { etiqueta: 'Adónde llegar', estrella: 'visionario' } },
+  { par: ['comunicador', 'protector'], texto: '¿lo tuyo es compartir lo que piensas, o sostener a quien lo necesita?', opcionA: { etiqueta: 'Compartir', estrella: 'comunicador' }, opcionB: { etiqueta: 'Sostener', estrella: 'protector' } },
+  { par: ['comunicador', 'visionario'], texto: '¿lo tuyo es la palabra, o el objetivo al que apunta esa palabra?', opcionA: { etiqueta: 'La palabra', estrella: 'comunicador' }, opcionB: { etiqueta: 'El objetivo', estrella: 'visionario' } },
+  { par: ['protector', 'visionario'], texto: '¿lo tuyo es cuidar de cerca, o apuntar lejos?', opcionA: { etiqueta: 'Cerca', estrella: 'protector' }, opcionB: { etiqueta: 'Lejos', estrella: 'visionario' } },
+]
+
+// -------------------- Lógica (determinista) --------------------
 
 // Devuelve el icono sugerido para un ámbito a partir de los tests.
-// Puro y determinista. Si no hay material, candidatos vacíos e
-// `icono` null: la UI cae al selector manual de siempre.
+// Puro: mismas entradas → misma sugerencia.
 export function generarIconoSugerido(
   ambito: IkiAmbitoId,
   datosTests: IconoAsistenteInput,
   locale = 'es'
 ): IconoSugerido {
-  const en = contentLang(locale) === 'en'
+  return ambito === 'vocacion'
+    ? resolverVocacion(datosTests, locale)
+    : resolverMascara(ambito, datosTests, locale)
+}
 
-  // 1) Acotar la biblioteca a los candidatos del ámbito, según el test
-  //    que manda en él, y quedarnos solo con ids que existan de verdad.
-  const brutos = ambito === 'vocacion'
-    ? candidatosVocacion(datosTests)
-    : candidatosPorMascara(ambito, datosTests.maskDominant)
-  const candidatos = brutos.filter(existeIcono).slice(0, 4)
+const VACIO: IconoSugerido = { candidatos: [], icono: null, rationale: null }
 
-  const rationale = textoRationale(ambito, en)
+// Cuerpo/Vínculos/Material: la máscara dominante manda, si está mapeada
+// y su ámbito coincide con el pedido.
+function resolverMascara(
+  ambito: IkiAmbitoId,
+  datos: IconoAsistenteInput,
+  locale: string
+): IconoSugerido {
+  const regla = datos.maskDominant ? REGLAS_ICONO_MASCARA[datos.maskDominant] : undefined
+  if (!regla || regla.ambito !== ambito) return VACIO
 
-  // 2) Sin candidatos → nada que proponer (modo manual).
-  if (candidatos.length === 0) {
-    return { candidatos, icono: null, rationale }
+  const candidatos = [regla.principal, regla.alternativo]
+  const pregunta: PreguntaDesempate = {
+    texto: regla.preguntaDesempate.texto,
+    opciones: [
+      { etiqueta: regla.preguntaDesempate.opcionPrincipal, icono: regla.principal.icono },
+      { etiqueta: regla.preguntaDesempate.opcionAlternativo, icono: regla.alternativo.icono },
+    ],
+  }
+  return resolverConRespuesta(candidatos, pregunta, datos.respuestaDesempate, locale, ambito)
+}
+
+// Vocación: la estrella con más puntuación. Si las dos más altas empatan,
+// pregunta de desempate con la de mayor prioridad como salida por defecto.
+function resolverVocacion(datos: IconoAsistenteInput, locale: string): IconoSugerido {
+  if (!datos.estrellaScores) return VACIO
+  const { totals } = computeDominant(datos.estrellaScores)
+  const top1 = totals[0]
+  const top2 = totals[1]
+  if (!top1 || top1.total <= 0) return VACIO
+
+  const dom = top1.code as EstrellaCode
+  const hayEmpate = top2 && top2.total === top1.total
+
+  if (!hayEmpate) {
+    const cand = ICONO_POR_ESTRELLA[dom]
+    return { candidatos: [cand], icono: cand.icono, rationale: rationale(cand, locale, 'vocacion') }
   }
 
-  // 3) Un solo candidato → ese es el icono, sin preguntar.
-  if (candidatos.length === 1) {
-    return { candidatos, icono: candidatos[0], rationale }
-  }
+  // Empate entre las dos más altas: se busca el par y se ordena por
+  // prioridad del test (Explorador > Comunicador > Protector > Visionario).
+  const a = dom
+  const b = top2.code as EstrellaCode
+  const [porDefecto, otra] = ordenarPorPrioridad(a, b)
+  const entry = DESEMPATE_VOCACION.find(e => contienePar(e.par, a, b))
+  const candDef = ICONO_POR_ESTRELLA[porDefecto]
+  const candOtra = ICONO_POR_ESTRELLA[otra]
+  const candidatos = [candDef, candOtra]
 
-  // 4) Varios candidatos: ¿ya hay respuesta de desempate que resuelva?
-  const pregunta = elegirPregunta(ambito, candidatos)
-  if (pregunta) {
-    const elegido = datosTests.desempate?.[pregunta.id]
-    const opcion = elegido
-      ? pregunta.opciones.find(o => o.id === elegido && candidatos.includes(o.icono))
-      : undefined
-    if (opcion) {
-      return { candidatos, icono: opcion.icono, rationale }
+  const pregunta: PreguntaDesempate | undefined = entry && {
+    texto: entry.texto,
+    opciones: [
+      { etiqueta: entry.opcionA.etiqueta, icono: ICONO_POR_ESTRELLA[entry.opcionA.estrella].icono },
+      { etiqueta: entry.opcionB.etiqueta, icono: ICONO_POR_ESTRELLA[entry.opcionB.estrella].icono },
+    ],
+  }
+  if (!pregunta) {
+    return { candidatos, icono: candDef.icono, rationale: rationale(candDef, locale, 'vocacion') }
+  }
+  return resolverConRespuesta(candidatos, pregunta, datos.respuestaDesempate, locale, 'vocacion')
+}
+
+// Común: si hay respuesta y cae en un candidato, ese es el icono (sin
+// pregunta). Si no, el primer candidato es la salida por defecto y la
+// pregunta acompaña.
+function resolverConRespuesta(
+  candidatos: Candidato[],
+  pregunta: PreguntaDesempate,
+  respuesta: string | null | undefined,
+  locale: string,
+  ambito: IkiAmbitoId
+): IconoSugerido {
+  if (respuesta) {
+    const elegido = candidatos.find(c => c.icono === respuesta)
+    if (elegido) {
+      return { candidatos, icono: elegido.icono, rationale: rationale(elegido, locale, ambito) }
     }
-    // Aún sin respuesta: pedir el desempate.
-    return { candidatos, icono: null, rationale, preguntaDesempate: pregunta }
   }
-
-  // 5) Varios candidatos y sin pregunta que los separe: proponemos el
-  //    primero (determinista) y dejamos el resto como atajo en la UI.
-  return { candidatos, icono: candidatos[0], rationale }
+  const def = candidatos[0]
+  return { candidatos, icono: def.icono, rationale: rationale(def, locale, ambito), preguntaDesempate: pregunta }
 }
 
-// -------------------- Auxiliares --------------------
-
-function candidatosPorMascara(
-  ambito: IkiAmbitoId,
-  maskDominant: string | null
-): string[] {
-  if (!maskDominant) return []
-  return CANDIDATOS_POR_MASCARA[ambito]?.[maskDominant as MaskCode] ?? []
+// Ordena dos estrellas por el orden fijo del test.
+function ordenarPorPrioridad(a: EstrellaCode, b: EstrellaCode): [EstrellaCode, EstrellaCode] {
+  return PRIORIDAD_ESTRELLA.indexOf(a) <= PRIORIDAD_ESTRELLA.indexOf(b) ? [a, b] : [b, a]
 }
 
-function candidatosVocacion(input: IconoAsistenteInput): string[] {
-  if (!input.estrella || !input.camino) return []
-  return CANDIDATOS_VOCACION[`${input.estrella}:${input.camino}`] ?? []
+function contienePar(par: [EstrellaCode, EstrellaCode], a: EstrellaCode, b: EstrellaCode): boolean {
+  return (par[0] === a && par[1] === b) || (par[0] === b && par[1] === a)
 }
 
-// Primera pregunta del ámbito cuyas opciones apunten a candidatos vivos.
-function elegirPregunta(
-  ambito: IkiAmbitoId,
-  candidatos: string[]
-): PreguntaDesempate | undefined {
-  const preguntas = PREGUNTAS_DESEMPATE[ambito] ?? []
-  return preguntas.find(p =>
-    p.opciones.some(o => candidatos.includes(o.icono))
-  )
-}
-
-function existeIcono(id: string): boolean {
-  return ALL_ICONS.some(i => i.id === id)
-}
-
-// Línea breve de rationale, en la voz del método (sin nombrar el
-// framework: solo "tu máscara", "tu estilo y tus capacidades").
-function textoRationale(ambito: IkiAmbitoId, en: boolean): string {
-  if (ambito === 'vocacion') {
-    return en
-      ? 'Suggested from where your style and your capabilities meet.'
-      : 'Te lo proponemos por dónde se encuentran tu estilo y tus capacidades.'
-  }
-  return en
-    ? 'Suggested from your dominant mask.'
-    : 'Te lo proponemos por tu máscara dominante.'
+// El rationale visible. ES = voz de Manel (canónica). EN aún sin traducir:
+// línea neutra por ámbito hasta cerrar el copy EN. TODO(i18n).
+function rationale(cand: Candidato, locale: string, ambito: IkiAmbitoId): string {
+  if (contentLang(locale) !== 'en') return cand.rationale
+  return ambito === 'vocacion'
+    ? 'Suggested from your dominant star.'
+    : 'Suggested from your dominant mask.'
 }

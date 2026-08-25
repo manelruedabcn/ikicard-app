@@ -173,17 +173,36 @@ candidatos del ámbito, no los 17.
 - `BoardItemCard`: el icono de la tarjeta es un botón que despliega la rejilla de
   iconos **a ancho completo bajo la fila** (responsive, `grid-cols-6`), afines al
   ámbito primero. Reversible siempre, sin confirmación.
-- `lib/ikiboard-icono-asistente.ts`: scaffold con
-  `generarIconoSugerido(ambito, datosTests, locale) → { candidatos, icono,
-  rationale, preguntaDesempate? }`. **Lógica completa; faltan solo los datos:**
-  las tablas `CANDIDATOS_POR_MASCARA` / `CANDIDATOS_VOCACION` y
-  `PREGUNTAS_DESEMPATE` están vacías, a cerrar en los próximos días. Cerrarlas es
-  un cambio solo de datos, sin tocar la lógica.
+- `lib/ikiboard-icono-asistente.ts`: `generarIconoSugerido(ambito, datosTests,
+  locale) → { candidatos, icono, rationale, preguntaDesempate? }`.
 
-**Aviso — discrepancia con el modelo mental:** el diseño se describió apoyándose
-en `lib/ikiboard-deseo.ts` y en una "Hipótesis de Deseo" con mapeo
-**máscara→ámbito**. **Nada de eso existe en el repo todavía** (ni el archivo, ni
-la tabla máscara→ámbito, ni una "frase de deseo editable" persistida: la `frase`
-por ítem se fija al crear y hoy no es editable). El patrón determinista real y
-vivo es `lib/ikiboard-borrador.ts` — sobre ese se modeló el asistente. Pendiente
-de decidir: si "Hipótesis de Deseo" es algo por construir o vive con otro nombre.
+**Criterio cerrado y validado (2026-08-25).** Las tablas ya están completas en el
+módulo (`REGLAS_ICONO_MASCARA`, `ICONO_POR_ESTRELLA`, `DESEMPATE_VOCACION`):
+
+- **Cuerpo/Vínculos/Material → máscara dominante.** 7 máscaras mapeadas; cada una
+  activa **un** ámbito (Exigente/Víctima→Cuerpo, Manipuladora/Jueza/Complaciente→
+  Vínculos, Controladora/Impostora→Material). Las otras tarjetas de esa persona
+  quedan sin sugerencia. Cada regla: principal + alternativo + pregunta de
+  desempate.
+- **Vocación → estrella dominante.** Mapeo directo (Explorador→idea,
+  Comunicador→pluma, Protector→maletín, Visionario→diana). Si las dos estrellas
+  más altas empatan, pregunta de desempate; por defecto gana la de mayor prioridad
+  del test (Explorador > Comunicador > Protector > Visionario).
+- **`lugar` no se sugiere nunca** (decisión); sigue solo en la rejilla manual.
+- Los **47 casos posibles** del spec verificados en runtime (49/49 asserts). Copy
+  de rationale en ES (voz de Manel, canónica); **EN pendiente** — hoy cae a una
+  línea neutra.
+
+**Pendiente para que funcione de cara al usuario (cableado, no criterio):**
+1. `app/[locale]/ikiboard/page.tsx` hoy solo pide `estrella?.dominant`; para que
+   el desempate de Vocación se active necesita también `scores` (ya existe en
+   `estrella_results.scores`). Sin scores, Vocación siempre da la dominante clara.
+2. La UI (AddItem / tarjeta) aún **no llama** al asistente ni pinta la sugerencia,
+   el rationale o la pregunta de desempate. `updateItemRef` ya permite fijar el
+   icono elegido en el sitio.
+
+**Aviso — discrepancia resuelta parcialmente:** el spec menciona
+`lib/ikiboard-deseo.ts` y "Hipótesis de Deseo" (mapeo máscara→ámbito). Ese archivo
+sigue **sin existir**; el mapeo máscara→ámbito vive ahora dentro de
+`REGLAS_ICONO_MASCARA` (cada regla lleva su `ambito`). El patrón determinista de
+referencia es `lib/ikiboard-borrador.ts`.
