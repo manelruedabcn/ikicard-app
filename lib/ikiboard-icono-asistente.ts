@@ -23,7 +23,8 @@
 // Bilingüe: cada cadena lleva { es, en } co-locado y el getter la
 // resuelve por locale (contentLang). Se usan las etiquetas EN reales
 // de la app para máscaras (The Demanding One…) y estrellas (Explorer…).
-// El copy EN son traducciones de trabajo; sustituir por el §4 validado.
+// Copy EN = §4 validado por Manel (2026-08-26), reemplaza la traducción
+// de trabajo. Los ids de icono y la lógica no cambian.
 // ============================================================
 
 import type { IkiAmbitoId } from './ikiboard-content'
@@ -85,51 +86,51 @@ const REGLAS_ICONO_MASCARA: Record<string, ReglaIconoMascara> = {
     ambito: 'cuerpo',
     principal: { icono: 'luna', rationale: {
       es: 'Te lo proponemos por tu máscara dominante, la Exigente: rara vez te das permiso para parar sin haberlo merecido antes.',
-      en: 'We suggest it because of your dominant mask, The Demanding One: you rarely let yourself stop without having earned it first.' } },
+      en: 'We\'re suggesting this from your dominant mask, The Demanding One: you rarely let yourself stop without having earned it first.' } },
     alternativo: { icono: 'sol', rationale: {
       es: 'Te lo proponemos por tu máscara dominante, la Exigente: a veces lo que hace falta no es parar, sino empezar algo sin exigirte que salga perfecto.',
-      en: 'We suggest it because of your dominant mask, The Demanding One: sometimes what you need isn’t to stop, but to begin something without demanding it turn out perfect.' } },
+      en: 'We\'re suggesting this from your dominant mask, The Demanding One: sometimes what you need isn\'t to stop, but to start something without demanding it come out perfect.' } },
     pregunta: {
-      texto: { es: '¿Lo que más te cuesta darte hoy es parar, o es empezar sin la presión de hacerlo bien?', en: 'What’s hardest to give yourself today — stopping, or beginning without the pressure to do it well?' },
-      opcionPrincipal: { es: 'Parar', en: 'Stop' },
-      opcionAlternativo: { es: 'Empezar', en: 'Begin' } },
+      texto: { es: '¿Lo que más te cuesta darte hoy es parar, o es empezar sin la presión de hacerlo bien?', en: 'What\'s harder for you to give yourself today: stopping, or starting without the pressure to get it right?' },
+      opcionPrincipal: { es: 'Parar', en: 'Stopping' },
+      opcionAlternativo: { es: 'Empezar', en: 'Starting' } },
   },
   victima: {
     ambito: 'cuerpo',
     principal: { icono: 'hoja', rationale: {
       es: 'Te lo proponemos por tu máscara dominante, la Víctima: una hoja pequeña, prueba de que algo sigue creciendo aunque no lo controles todo.',
-      en: 'We suggest it because of your dominant mask, The Victim: a small leaf, proof that something keeps growing even when you don’t control everything.' } },
+      en: 'We\'re suggesting this from your dominant mask, The Victim: a small leaf, proof that something keeps growing even when you don\'t control all of it.' } },
     alternativo: { icono: 'corazon', rationale: {
       es: 'Te lo proponemos por tu máscara dominante, la Víctima: tu cuerpo sigue ahí, acompañándote, aunque hoy sientas que nada depende de ti.',
-      en: 'We suggest it because of your dominant mask, The Victim: your body is still here, with you, even if today it feels like nothing depends on you.' } },
+      en: 'We\'re suggesting this from your dominant mask, The Victim: your body is still there, staying with you, even on days it feels like nothing depends on you.' } },
     pregunta: {
-      texto: { es: '¿Necesitas hoy una señal de que algo crece, o de que tu cuerpo todavía te sostiene?', en: 'Do you need a sign today that something is growing, or that your body still holds you up?' },
+      texto: { es: '¿Necesitas hoy una señal de que algo crece, o de que tu cuerpo todavía te sostiene?', en: 'Do you need a sign today that something is growing, or that your body is still holding you up?' },
       opcionPrincipal: { es: 'Crece', en: 'Growing' },
-      opcionAlternativo: { es: 'Sostiene', en: 'Holds me' } },
+      opcionAlternativo: { es: 'Sostiene', en: 'Holding you up' } },
   },
   manipuladora: {
     ambito: 'vinculos',
     principal: { icono: 'chat', rationale: {
       es: 'Te lo proponemos por tu máscara dominante, la Manipuladora: dices lo que piensas, no lo que crees que el otro quiere oír.',
-      en: 'We suggest it because of your dominant mask, The Manipulator: you say what you think, not what you believe the other wants to hear.' } },
+      en: 'We\'re suggesting this from your dominant mask, The Manipulator: you say what you think, not what you believe the other person wants to hear.' } },
     alternativo: { icono: 'personas', rationale: {
       es: 'Te lo proponemos por tu máscara dominante, la Manipuladora: te dejas ver tal cual eres, no solo la versión calculada.',
-      en: 'We suggest it because of your dominant mask, The Manipulator: you let yourself be seen as you are, not just the calculated version.' } },
+      en: 'We\'re suggesting this from your dominant mask, The Manipulator: you let yourself be seen as you are, not just the calculated version.' } },
     pregunta: {
-      texto: { es: '¿Lo que te falta es decir una verdad concreta a alguien, o dejarte ver así delante de más de una persona?', en: 'Is what you’re missing to tell one person a concrete truth, or to let yourself be seen like that in front of several?' },
-      opcionPrincipal: { es: 'Verdad concreta', en: 'A concrete truth' },
+      texto: { es: '¿Lo que te falta es decir una verdad concreta a alguien, o dejarte ver así delante de más de una persona?', en: 'What\'s missing: telling one person a concrete truth, or letting yourself be seen like that in front of more than one?' },
+      opcionPrincipal: { es: 'Verdad concreta', en: 'Concrete truth' },
       opcionAlternativo: { es: 'Delante de varios', en: 'In front of several' } },
   },
   jueza: {
     ambito: 'vinculos',
     principal: { icono: 'manos', rationale: {
       es: 'Te lo proponemos por tu máscara dominante, la Jueza: te acercas sin medir antes si el otro se lo merece.',
-      en: 'We suggest it because of your dominant mask, The Judge: you get close without first measuring whether the other deserves it.' } },
+      en: 'We\'re suggesting this from your dominant mask, The Judge: you reach out without weighing first whether the other person deserves it.' } },
     alternativo: { icono: 'personas', rationale: {
       es: 'Te lo proponemos por tu máscara dominante, la Jueza: sueltas la distancia de seguridad con la gente, no solo con una persona.',
-      en: 'We suggest it because of your dominant mask, The Judge: you drop the safe distance with people, not just with one person.' } },
+      en: 'We\'re suggesting this from your dominant mask, The Judge: you drop the safety distance with people in general, not just with one.' } },
     pregunta: {
-      texto: { es: '¿Lo que buscas es acercarte a alguien en concreto, o soltar la guardia con la gente en general?', en: 'Are you looking to get close to one particular person, or to lower your guard with people in general?' },
+      texto: { es: '¿Lo que buscas es acercarte a alguien en concreto, o soltar la guardia con la gente en general?', en: 'Are you looking to get closer to someone specific, or to drop your guard with people in general?' },
       opcionPrincipal: { es: 'Alguien', en: 'Someone' },
       opcionAlternativo: { es: 'En general', en: 'In general' } },
   },
@@ -137,39 +138,39 @@ const REGLAS_ICONO_MASCARA: Record<string, ReglaIconoMascara> = {
     ambito: 'vinculos',
     principal: { icono: 'regalo', rationale: {
       es: 'Te lo proponemos por tu máscara dominante, la Complaciente: puedes dar sin que eso signifique desaparecer un poco cada vez.',
-      en: 'We suggest it because of your dominant mask, The People-Pleaser: you can give without it meaning you disappear a little each time.' } },
+      en: 'We\'re suggesting this from your dominant mask, The People-Pleaser: you can give without that meaning you disappear a little each time.' } },
     alternativo: { icono: 'personas', rationale: {
       es: 'Te lo proponemos por tu máscara dominante, la Complaciente: puedes formar parte sin borrarte para encajar.',
-      en: 'We suggest it because of your dominant mask, The People-Pleaser: you can be part of things without erasing yourself to fit in.' } },
+      en: 'We\'re suggesting this from your dominant mask, The People-Pleaser: you can belong without erasing yourself to fit in.' } },
     pregunta: {
-      texto: { es: '¿Lo que quieres marcar es que puedes dar sin perderte, o que puedes estar sin desaparecer?', en: 'What do you want to mark — that you can give without losing yourself, or that you can be there without disappearing?' },
+      texto: { es: '¿Lo que quieres marcar es que puedes dar sin perderte, o que puedes estar sin desaparecer?', en: 'What do you want to mark: that you can give without losing yourself, or that you can be present without disappearing?' },
       opcionPrincipal: { es: 'Dar', en: 'Give' },
-      opcionAlternativo: { es: 'Estar', en: 'Be there' } },
+      opcionAlternativo: { es: 'Estar', en: 'Be present' } },
   },
   controladora: {
     ambito: 'material',
     principal: { icono: 'llave', rationale: {
       es: 'Te lo proponemos por tu máscara dominante, la Controladora: tienes lo que necesitas, sin tener que vigilarlo todo el tiempo.',
-      en: 'We suggest it because of your dominant mask, The Controller: you have what you need, without having to watch over it all the time.' } },
+      en: 'We\'re suggesting this from your dominant mask, The Controller: you already have what you need, without having to watch over it constantly.' } },
     alternativo: { icono: 'casa', rationale: {
       es: 'Te lo proponemos por tu máscara dominante, la Controladora: puedes soltar el control de una cosa y comprobar que sigue en pie.',
-      en: 'We suggest it because of your dominant mask, The Controller: you can let go of controlling one thing and see that it stays standing.' } },
+      en: 'We\'re suggesting this from your dominant mask, The Controller: you can let go of control over one thing and see that it\'s still standing.' } },
     pregunta: {
-      texto: { es: '¿Lo que necesitas soltar es la vigilancia sobre algo concreto, o la sensación de que todo depende de ti en casa?', en: 'What do you need to let go of — keeping watch over one particular thing, or the sense that everything at home depends on you?' },
-      opcionPrincipal: { es: 'Algo concreto', en: 'One thing' },
+      texto: { es: '¿Lo que necesitas soltar es la vigilancia sobre algo concreto, o la sensación de que todo depende de ti en casa?', en: 'What do you need to let go of: watching over something specific, or the sense that everything at home depends on you?' },
+      opcionPrincipal: { es: 'Algo concreto', en: 'Something specific' },
       opcionAlternativo: { es: 'En casa', en: 'At home' } },
   },
   impostora: {
     ambito: 'material',
     principal: { icono: 'coche', rationale: {
       es: 'Te lo proponemos por tu máscara dominante, la Impostora: lo que tienes es tuyo, no un préstamo que te puedan quitar.',
-      en: 'We suggest it because of your dominant mask, The Impostor: what you have is yours, not a loan someone can take back.' } },
+      en: 'We\'re suggesting this from your dominant mask, The Impostor: what you have is yours, not a loan someone can take back.' } },
     alternativo: { icono: 'montana', rationale: {
       es: 'Te lo proponemos por tu máscara dominante, la Impostora: ya llegaste hasta aquí, y eso no te lo puede descontar nadie.',
-      en: 'We suggest it because of your dominant mask, The Impostor: you already made it this far, and no one can subtract that from you.' } },
+      en: 'We\'re suggesting this from your dominant mask, The Impostor: you already made it here, and no one can discount that.' } },
     pregunta: {
-      texto: { es: '¿Lo que quieres afirmar es que lo tuyo es tuyo sin condiciones, o que ya llegaste hasta aquí por ti mismo?', en: 'What do you want to affirm — that what’s yours is yours without conditions, or that you got here on your own?' },
-      opcionPrincipal: { es: 'Tuyo', en: 'It’s yours' },
+      texto: { es: '¿Lo que quieres afirmar es que lo tuyo es tuyo sin condiciones, o que ya llegaste hasta aquí por ti mismo?', en: 'What do you want to affirm: that what\'s yours is yours, no conditions, or that you made it here on your own?' },
+      opcionPrincipal: { es: 'Tuyo', en: 'Yours' },
       opcionAlternativo: { es: 'Llegaste', en: 'You made it' } },
   },
 }
@@ -178,16 +179,16 @@ const REGLAS_ICONO_MASCARA: Record<string, ReglaIconoMascara> = {
 const ICONO_POR_ESTRELLA: Record<EstrellaCode, CandidatoBi> = {
   explorador: { icono: 'idea', rationale: {
     es: 'Te lo proponemos por tu perfil Explorador: te mueve la curiosidad de descubrir, no la ruta ya trazada.',
-    en: 'We suggest it because of your Explorer profile: you’re driven by the curiosity to discover, not by the route already drawn.' } },
+    en: 'We\'re suggesting this from your Explorer profile: you\'re driven by the curiosity to discover, not the route already mapped out.' } },
   comunicador: { icono: 'pluma', rationale: {
     es: 'Te lo proponemos por tu perfil Comunicador: lo tuyo se dice, se comparte, se pone en palabras.',
-    en: 'We suggest it because of your Communicator profile: what’s yours gets said, shared, put into words.' } },
+    en: 'We\'re suggesting this from your Communicator profile: what\'s yours gets said, shared, put into words.' } },
   protector: { icono: 'maletin', rationale: {
     es: 'Te lo proponemos por tu perfil Protector: tu trabajo tiene sentido cuando cuida de alguien más.',
-    en: 'We suggest it because of your Protector profile: your work makes sense when it takes care of someone else.' } },
+    en: 'We\'re suggesting this from your Protector profile: your work matters when it takes care of someone else.' } },
   visionario: { icono: 'diana', rationale: {
     es: 'Te lo proponemos por tu perfil Visionario: apuntas lejos, con una idea clara de adónde quieres llegar.',
-    en: 'We suggest it because of your Visionary profile: you aim far, with a clear idea of where you want to get to.' } },
+    en: 'We\'re suggesting this from your Visionary profile: you aim far, with a clear sense of where you want to land.' } },
 }
 
 // Orden del propio test (no de "mejor a peor"): rompe el empate cuando la
@@ -200,17 +201,17 @@ const DESEMPATE_VOCACION: Array<{
   opcionA: { etiqueta: Loc; estrella: EstrellaCode }
   opcionB: { etiqueta: Loc; estrella: EstrellaCode }
 }> = [
-  { par: ['explorador', 'comunicador'], texto: { es: '¿lo tuyo es descubrir algo nuevo, o contarlo?', en: 'is yours to discover something new, or to tell it?' },
-    opcionA: { etiqueta: { es: 'Descubrir', en: 'Discover' }, estrella: 'explorador' }, opcionB: { etiqueta: { es: 'Contarlo', en: 'Tell it' }, estrella: 'comunicador' } },
-  { par: ['explorador', 'protector'], texto: { es: '¿lo tuyo es explorar terreno nuevo, o cuidar de quien tienes cerca?', en: 'is yours to explore new ground, or to care for those close to you?' },
-    opcionA: { etiqueta: { es: 'Explorar', en: 'Explore' }, estrella: 'explorador' }, opcionB: { etiqueta: { es: 'Cuidar', en: 'Care' }, estrella: 'protector' } },
-  { par: ['explorador', 'visionario'], texto: { es: '¿te mueve la curiosidad del camino, o la claridad de adónde quieres llegar?', en: 'are you driven by the curiosity of the path, or the clarity of where you want to arrive?' },
-    opcionA: { etiqueta: { es: 'El camino', en: 'The path' }, estrella: 'explorador' }, opcionB: { etiqueta: { es: 'Adónde llegar', en: 'Where to arrive' }, estrella: 'visionario' } },
-  { par: ['comunicador', 'protector'], texto: { es: '¿lo tuyo es compartir lo que piensas, o sostener a quien lo necesita?', en: 'is yours to share what you think, or to hold up those who need it?' },
-    opcionA: { etiqueta: { es: 'Compartir', en: 'Share' }, estrella: 'comunicador' }, opcionB: { etiqueta: { es: 'Sostener', en: 'Hold up' }, estrella: 'protector' } },
-  { par: ['comunicador', 'visionario'], texto: { es: '¿lo tuyo es la palabra, o el objetivo al que apunta esa palabra?', en: 'is yours the word, or the goal that word points to?' },
+  { par: ['explorador', 'comunicador'], texto: { es: '¿lo tuyo es descubrir algo nuevo, o contarlo?', en: 'Is it about discovering something new, or telling it?' },
+    opcionA: { etiqueta: { es: 'Descubrir', en: 'Discovering' }, estrella: 'explorador' }, opcionB: { etiqueta: { es: 'Contarlo', en: 'Telling it' }, estrella: 'comunicador' } },
+  { par: ['explorador', 'protector'], texto: { es: '¿lo tuyo es explorar terreno nuevo, o cuidar de quien tienes cerca?', en: 'Is it about exploring new ground, or taking care of who\'s close to you?' },
+    opcionA: { etiqueta: { es: 'Explorar', en: 'Exploring' }, estrella: 'explorador' }, opcionB: { etiqueta: { es: 'Cuidar', en: 'Taking care' }, estrella: 'protector' } },
+  { par: ['explorador', 'visionario'], texto: { es: '¿te mueve la curiosidad del camino, o la claridad de adónde quieres llegar?', en: 'Are you driven by the curiosity of the path, or the clarity of where you want to land?' },
+    opcionA: { etiqueta: { es: 'El camino', en: 'The path' }, estrella: 'explorador' }, opcionB: { etiqueta: { es: 'Adónde llegar', en: 'Where to land' }, estrella: 'visionario' } },
+  { par: ['comunicador', 'protector'], texto: { es: '¿lo tuyo es compartir lo que piensas, o sostener a quien lo necesita?', en: 'Is it about sharing what you think, or holding up whoever needs it?' },
+    opcionA: { etiqueta: { es: 'Compartir', en: 'Sharing' }, estrella: 'comunicador' }, opcionB: { etiqueta: { es: 'Sostener', en: 'Holding up' }, estrella: 'protector' } },
+  { par: ['comunicador', 'visionario'], texto: { es: '¿lo tuyo es la palabra, o el objetivo al que apunta esa palabra?', en: 'Is it the word, or the goal that word points to?' },
     opcionA: { etiqueta: { es: 'La palabra', en: 'The word' }, estrella: 'comunicador' }, opcionB: { etiqueta: { es: 'El objetivo', en: 'The goal' }, estrella: 'visionario' } },
-  { par: ['protector', 'visionario'], texto: { es: '¿lo tuyo es cuidar de cerca, o apuntar lejos?', en: 'is yours to care up close, or to aim far?' },
+  { par: ['protector', 'visionario'], texto: { es: '¿lo tuyo es cuidar de cerca, o apuntar lejos?', en: 'Is it about caring up close, or aiming far?' },
     opcionA: { etiqueta: { es: 'Cerca', en: 'Up close' }, estrella: 'protector' }, opcionB: { etiqueta: { es: 'Lejos', en: 'Far' }, estrella: 'visionario' } },
 ]
 
