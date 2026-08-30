@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-// Callback de OAuth (Google). El proveedor devuelve aquí un `code` que se
-// canjea por una sesión; luego se redirige a `next` (el dashboard con su
-// idioma). Vive fuera de [locale] y está excluida del middleware de next-intl,
-// así que no recibe prefijo de idioma.
+// Callback compartido: OAuth (Google) y confirmación de email/alta por
+// contraseña (LoginForm pasa emailRedirectTo=aquí en ambos casos). En los dos
+// flujos llega un `code` que se canjea por una sesión; luego se redirige a
+// `next` (el dashboard con su idioma). Vive fuera de [locale] y está excluida
+// del middleware de next-intl, así que no recibe prefijo de idioma.
 // Solo aceptamos rutas relativas del propio sitio como destino. Un `next`
 // como "//evil.com" o "/\evil.com" saldría fuera al concatenarlo con origin;
 // exigimos que empiece por un único "/" seguido de un carácter que no sea "/"

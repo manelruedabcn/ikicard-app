@@ -46,7 +46,18 @@ export default function LoginForm({ locale }: { locale: string }) {
         router.refresh()
       }
     } else if (mode === 'register') {
-      const { error } = await supabase.auth.signUp({ email, password })
+      // Igual que en Google: forzamos el destino del enlace de confirmación a
+      // nuestro propio callback. Sin esto, Supabase usa el Site URL del
+      // panel (a menudo desactualizado o solo el dominio raíz), el enlace no
+      // llega a /auth/callback, y la sesión nunca se canjea — aunque el email
+      // sí queda confirmado en Supabase, así que parece que "no funciona".
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/${locale}/dashboard`,
+        },
+      })
       if (error) {
         setError(error.message)
       } else {
