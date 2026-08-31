@@ -23,7 +23,9 @@ export interface AdminUser {
   email: string
   display_name: string | null
   created_at: string
-  tools: { entitlement_id: string; tool_name: string; source: string; expires_at: string | null }[]
+  email_confirmed: boolean
+  paso_codigo: string | null
+  tools: { entitlement_id: string; tool_id: string; tool_name: string; source: string; expires_at: string | null }[]
 }
 
 export interface CatalogTool {
@@ -50,7 +52,7 @@ export async function listUsers(): Promise<AdminUser[]> {
 
   const { data: ents } = await admin
     .from('entitlements')
-    .select('id, user_id, source, expires_at, tools(name)')
+    .select('id, user_id, tool_id, source, expires_at, tools(name)')
 
   const entsByUser = new Map<string, AdminUser['tools']>()
   for (const e of ents ?? []) {
@@ -60,6 +62,7 @@ export async function listUsers(): Promise<AdminUser[]> {
     const tool = Array.isArray(rel) ? rel[0] : rel
     list.push({
       entitlement_id: e.id,
+      tool_id: e.tool_id,
       tool_name: tool?.name ?? '—',
       source: e.source,
       expires_at: e.expires_at,
@@ -67,11 +70,25 @@ export async function listUsers(): Promise<AdminUser[]> {
     entsByUser.set(e.user_id, list)
   }
 
+  // Estado de PASO por usuario: la fila más reciente si hizo el test
+  // logueado (o lo sincronizó al entrar). Usado por el CRM del admin para
+  // distinguir "resuelto" de "sin hacer" sin otra consulta.
+  const { data: pasoRows } = await admin
+    .from('paso_results')
+    .select('user_id, codigo_patron, created_at')
+    .order('created_at', { ascending: false })
+  const pasoByUser = new Map<string, string>()
+  for (const r of pasoRows ?? []) {
+    if (!pasoByUser.has(r.user_id)) pasoByUser.set(r.user_id, r.codigo_patron)
+  }
+
   return users.map(u => ({
     id: u.id,
     email: u.email ?? '',
     display_name: nameById.get(u.id) ?? null,
     created_at: u.created_at,
+    email_confirmed: !!u.email_confirmed_at,
+    paso_codigo: pasoByUser.get(u.id) ?? null,
     tools: entsByUser.get(u.id) ?? [],
   }))
 }

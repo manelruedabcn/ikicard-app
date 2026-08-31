@@ -4,7 +4,8 @@ import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import { isCurrentUserAdmin, listUsers, listCatalog, getAdminStats } from '@/lib/admin'
-import { grantTool, grantProgram, revokeEntitlement } from './actions'
+import { grantTool, grantProgram } from './actions'
+import ToolTick from './ToolTick'
 
 export default async function AdminPage({ params: { locale } }: { params: { locale: string } }) {
   const supabase = createClient()
@@ -33,47 +34,60 @@ export default async function AdminPage({ params: { locale } }: { params: { loca
         <div className="flex flex-col gap-6">
           {users.map(u => (
             <div key={u.id} className="border border-[#272727]/15 rounded-xl p-6">
-              <div className="flex items-baseline justify-between mb-4">
+              <div className="flex items-baseline justify-between mb-3">
                 <div>
                   <p className="text-[#272727] font-medium">{u.display_name || u.email.split('@')[0]}</p>
                   <p className="text-xs text-[#272727]/50">{u.email}</p>
                 </div>
               </div>
 
-              {/* Permisos actuales */}
-              {u.tools.length === 0 ? (
-                <p className="text-xs text-[#272727]/40 mb-4">{t('no_tools')}</p>
-              ) : (
-                <ul className="flex flex-col gap-2 mb-4">
-                  {u.tools.map(tool => (
-                    <li key={tool.entitlement_id} className="flex items-center justify-between text-sm">
-                      <span className="text-[#272727]/80">
-                        {tool.tool_name}
-                        <span className="text-xs text-[#272727]/40 ml-2">
-                          {tool.source}
-                          {tool.expires_at
-                            ? ` · ${t('until')} ${new Date(tool.expires_at).toLocaleDateString(locale)}`
-                            : ` · ${t('forever')}`}
-                        </span>
-                      </span>
-                      <form action={revokeEntitlement}>
-                        <input type="hidden" name="entitlement_id" value={tool.entitlement_id} />
-                        <button className="text-xs text-[#c2866b] hover:underline">{t('revoke')}</button>
-                      </form>
-                    </li>
-                  ))}
-                </ul>
-              )}
+              {/* Dónde está: confirmación y Paso, de un vistazo */}
+              <div className="flex flex-wrap gap-2 mb-4">
+                <span
+                  className={`text-xs px-2 py-1 rounded-full ${
+                    u.email_confirmed ? 'bg-[#c2866b]/10 text-[#c2866b]' : 'bg-[#272727]/10 text-[#272727]/50'
+                  }`}
+                >
+                  {/* Textos fijos en español (vista interna, solo para ti) en vez de
+                      claves de traducción nuevas — evita tocar messages/*.json */}
+                  {u.email_confirmed ? 'Confirmado' : 'Sin confirmar'}
+                </span>
+                <span
+                  className={`text-xs px-2 py-1 rounded-full ${
+                    u.paso_codigo ? 'bg-[#c2866b]/10 text-[#c2866b]' : 'bg-[#272727]/10 text-[#272727]/50'
+                  }`}
+                >
+                  {u.paso_codigo ? `Paso: ${u.paso_codigo}` : 'Paso: sin hacer'}
+                </span>
+              </div>
 
-              {/* Asignar herramienta */}
-              <form action={grantTool} className="flex flex-wrap items-end gap-2 border-t border-[#272727]/10 pt-4">
+              {/* Herramientas: marca o desmarca para conceder/revocar al momento */}
+              <div className="flex flex-wrap gap-x-5 gap-y-2 border-t border-[#272727]/10 pt-4">
+                {catalog.tools.map(tool => {
+                  const ent = u.tools.find(x => x.tool_id === tool.id)
+                  return (
+                    <label key={tool.id} className="flex items-center gap-1.5 text-sm text-[#272727]/80 cursor-pointer">
+                      <ToolTick userId={u.id} toolId={tool.id} entitlementId={ent?.entitlement_id ?? null} />
+                      {tool.name}
+                      {ent?.expires_at && (
+                        <span className="text-[10px] text-[#c2866b]">
+                          · {t('until')} {new Date(ent.expires_at).toLocaleDateString(locale)}
+                        </span>
+                      )}
+                    </label>
+                  )
+                })}
+              </div>
+
+              {/* Caso avanzado: conceder con caducidad o fuente concreta (p. ej. "paid" 30 días) */}
+              <form action={grantTool} className="flex flex-wrap items-end gap-2 mt-3 pt-3">
                 <input type="hidden" name="user_id" value={u.id} />
-                <select name="tool_id" required className="text-sm border border-[#272727]/20 rounded px-2 py-1 bg-white">
+                <select name="tool_id" required className="text-xs border border-[#272727]/20 rounded px-2 py-1 bg-white">
                   {catalog.tools.map(tool => (
                     <option key={tool.id} value={tool.id}>{tool.name}</option>
                   ))}
                 </select>
-                <select name="source" className="text-sm border border-[#272727]/20 rounded px-2 py-1 bg-white">
+                <select name="source" className="text-xs border border-[#272727]/20 rounded px-2 py-1 bg-white">
                   <option value="manual">manual</option>
                   <option value="free">free</option>
                   <option value="paid">paid</option>
@@ -84,9 +98,9 @@ export default async function AdminPage({ params: { locale } }: { params: { loca
                   type="number"
                   min="1"
                   placeholder={t('days_placeholder')}
-                  className="text-sm border border-[#272727]/20 rounded px-2 py-1 w-28 bg-white"
+                  className="text-xs border border-[#272727]/20 rounded px-2 py-1 w-24 bg-white"
                 />
-                <button className="text-xs tracking-widest bg-[#272727] text-[#FDFBF7] px-4 py-2 rounded hover:bg-[#c2866b] transition-colors">
+                <button className="text-xs tracking-widest text-[#272727]/60 border border-[#272727]/20 px-3 py-1.5 rounded hover:border-[#c2866b] hover:text-[#c2866b] transition-colors">
                   {t('grant_tool')}
                 </button>
               </form>
