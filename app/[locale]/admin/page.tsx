@@ -59,6 +59,15 @@ export default async function AdminPage({ params: { locale } }: { params: { loca
                 >
                   {u.paso_codigo ? `Paso: ${u.paso_codigo}` : 'Paso: sin hacer'}
                 </span>
+                <span
+                  className={`text-xs px-2 py-1 rounded-full ${
+                    u.herida_done ? 'bg-[#c2866b]/10 text-[#c2866b]' : 'bg-[#272727]/10 text-[#272727]/50'
+                  }`}
+                >
+                  {u.herida_done
+                    ? `Heridas: ${u.herida_dominant ?? 'equilibrado'}`
+                    : 'Heridas: sin hacer'}
+                </span>
               </div>
 
               {/* Herramientas: marca o desmarca para conceder/revocar al momento */}

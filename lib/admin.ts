@@ -25,6 +25,8 @@ export interface AdminUser {
   created_at: string
   email_confirmed: boolean
   paso_codigo: string | null
+  herida_done: boolean
+  herida_dominant: string | null
   tools: { entitlement_id: string; tool_id: string; tool_name: string; source: string; expires_at: string | null }[]
 }
 
@@ -82,6 +84,14 @@ export async function listUsers(): Promise<AdminUser[]> {
     if (!pasoByUser.has(r.user_id)) pasoByUser.set(r.user_id, r.codigo_patron)
   }
 
+  // Estado de HERIDAS por usuario: una fila por usuario (se sobreescribe al
+  // repetir), así que basta con leerla tal cual.
+  const { data: heridaRows } = await admin.from('herida_results').select('user_id, dominant')
+  const heridaByUser = new Map<string, string | null>()
+  for (const r of heridaRows ?? []) {
+    heridaByUser.set(r.user_id, r.dominant) // dominant puede ser null (caso "todo bajo")
+  }
+
   return users.map(u => ({
     id: u.id,
     email: u.email ?? '',
@@ -89,6 +99,8 @@ export async function listUsers(): Promise<AdminUser[]> {
     created_at: u.created_at,
     email_confirmed: !!u.email_confirmed_at,
     paso_codigo: pasoByUser.get(u.id) ?? null,
+    herida_done: heridaByUser.has(u.id),
+    herida_dominant: heridaByUser.get(u.id) ?? null,
     tools: entsByUser.get(u.id) ?? [],
   }))
 }
