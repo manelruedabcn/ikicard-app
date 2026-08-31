@@ -18,9 +18,14 @@ veces sin romper nada).
    5. `migrations/ikiboard.sql`   *(registra la herramienta + tabla ikiboard)*
    6. `migrations/ikiboard_items.sql`   *(ikiboard_items + ikiboard_item_reviews)*
    7. `migrations/ikiboard_storage.sql` *(bucket privado ikiboard + RLS de Storage)*
+   8. `migrations/heridas.sql`    *(registra la herramienta + crea herida_results)*
 
    IKIBOARD LEE de estrella_results / camino_results / mask_results / paso_results,
    por eso esas van antes. (paso.sql ya está en producción.)
+
+   `heridas.sql` es independiente: crea su propia tabla y solo LEE mask_results
+   para el cruce herida × máscara (opcional; funciona sin él). Puede correrse en
+   cualquier momento después de `platform.sql`.
 
 ## Parte B — Conceder acceso a IKIBOARD
 
