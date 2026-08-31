@@ -104,7 +104,7 @@ Cada herramienta = una migración `migrations/<tool>.sql` + carpeta
 | **CAMINO** | `/camino` | tus capacidades / orientación | Bilingüe |
 | **Máscaras** | `/mascaras` | qué te frena hoy (el espejo) | Bilingüe |
 | **IKIBOARD** | `/ikiboard` | **PROYECTO FINAL** — ver abajo | Bilingüe |
-| **La herida dominante** | `/pains` | qué herida pesa más ahora (filtro previo a mentoría 1:1) | Bilingüe |
+| **La herida dominante** | `/heridas` | de qué te proteges, antes de Máscaras (cruza con su resultado) | Bilingüe (EN = ES por ahora) |
 | Taller, Viaje, Oráculo, IKICARD | varios | módulos previos | En prod / activos |
 
 ### IKIBOARD = el proyecto final ("el libro de fotos de tu futuro")
@@ -145,8 +145,12 @@ Decisión: el contenido vive en **`.ts`**, no en `messages/*.json`. Cada
 ## Estado de despliegue
 
 PASO ya en producción. Falta subir la plataforma + módulos nuevos
-(mascaras → estrellas → camino → ikiboard → pains). **Migración Supabase siempre
+(mascaras → estrellas → camino → ikiboard → heridas). **Migración Supabase siempre
 antes que el código.** Ver memoria `project_deploy_pendiente`.
+
+Nota: "pains" fue un primer intento de esta misma herramienta (mismo test,
+mismas 15 frases), construido en paralelo y ya retirado del repo el
+2026-08-31 — se mantiene solo "heridas", más avanzada (cruza con Máscaras).
 
 ## Convenciones al trabajar
 
