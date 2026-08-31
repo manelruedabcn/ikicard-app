@@ -67,3 +67,32 @@ where t.code = 'ikiboard'
 
 No hace falta redeploy de la web para esto: las migraciones son cambios en la base
 de datos. El código que las usa ya está desplegado.
+
+---
+
+## Parte D — Desplegar "La herida dominante" (`/pains`)
+
+Añadido después de IKIBOARD. Mismo patrón: migración antes que código, y sin
+redeploy de la web hace falta para la parte de base de datos.
+
+1. En el SQL Editor de Supabase, ejecuta `migrations/pains.sql` *(registra la
+   herramienta en el catálogo + crea `pain_results`)*.
+2. Concede el permiso, igual que con IKIBOARD en la Parte B pero con
+   `t.code = 'pains'`:
+
+   ```sql
+   insert into entitlements (user_id, tool_id, source)
+   select u.id, t.id, 'manual'
+   from auth.users u
+   cross join tools t
+   where u.email = 'TU_CORREO@ejemplo.com'
+     and t.code = 'pains'
+     and not exists (
+       select 1 from entitlements e
+       where e.user_id = u.id and e.tool_id = t.id
+     );
+   ```
+
+3. Entra en la app con tu usuario → el dashboard debe mostrar **La herida
+   dominante** → abre `/pains`, completa el test y confirma que el resultado
+   persiste al recargar (RLS + `pain_results`).
