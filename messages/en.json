@@ -14,7 +14,19 @@
     "welcome_back": "Welcome back.",
     "prepared": "Here's what's prepared for you today.",
     "empty": "Nothing is prepared for you yet. Check back soon.",
-    "expires": "Available until {date}"
+    "expires": "Available until {date}",
+    "language": "Change language",
+    "tools": {
+      "paso": { "name": "PASO", "description": "Discover how you move through life" },
+      "ikicard": { "name": "IKICARD", "description": "IKICARD oracle cards" },
+      "viaje21": { "name": "21-Day Journey", "description": "The 21-day journey" },
+      "mascaras": { "name": "What mask rules your life?", "description": "Discover what holds you back within" },
+      "estrellas": { "name": "The Four Stars", "description": "Discover how you show up and relate to others" },
+      "camino": { "name": "CAMINO Test", "description": "Discover your dominant career orientation" },
+      "heridas": { "name": "The wound that weighs most", "description": "Discover what is weighing on you deep down right now" },
+      "taller": { "name": "Workshop", "description": "Walk without leaving yourself behind" },
+      "ikiboard": { "name": "IKIBOARD", "description": "Your living board: align who you are with what you want" }
+    }
   },
   "viaje": {
     "start_title": "The 20-day Journey",

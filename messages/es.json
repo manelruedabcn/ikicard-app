@@ -14,7 +14,19 @@
     "welcome_back": "Bienvenido de nuevo.",
     "prepared": "Hoy tienes preparado esto para ti.",
     "empty": "Aún no hay nada preparado para ti. Vuelve pronto.",
-    "expires": "Disponible hasta el {date}"
+    "expires": "Disponible hasta el {date}",
+    "language": "Cambiar idioma",
+    "tools": {
+      "paso": { "name": "PASO", "description": "Descubre cómo caminas" },
+      "ikicard": { "name": "IKICARD", "description": "Cartas del oráculo IKICARD" },
+      "viaje21": { "name": "Viaje de 21 días", "description": "El recorrido de 21 días" },
+      "mascaras": { "name": "¿Qué máscara gobierna tu vida?", "description": "Descubre qué te frena por dentro" },
+      "estrellas": { "name": "Las cuatro estrellas", "description": "Descubre tu estilo de estar y relacionarte" },
+      "camino": { "name": "Test CAMINO", "description": "Descubre tu orientación profesional dominante" },
+      "heridas": { "name": "La herida que más pesa", "description": "Descubre qué pesa de fondo ahora mismo" },
+      "taller": { "name": "Taller", "description": "Camina sin separarte de ti" },
+      "ikiboard": { "name": "IKIBOARD", "description": "Tu tablero vivo: alinea quién eres con lo que quieres" }
+    }
   },
   "viaje": {
     "start_title": "El Viaje de 20 días",
