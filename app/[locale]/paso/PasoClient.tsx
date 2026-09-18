@@ -1053,7 +1053,7 @@ function Shell({
           href={`/${locale}/${userId ? 'dashboard' : 'login'}`}
           className="text-xs text-[#272727]/40 hover:text-[#c2866b] transition-colors tracking-wide"
         >
-          ← {tn('title')}
+          ← {userId ? tn('platform') : tn('title')}
         </Link>
       </div>
       {children}

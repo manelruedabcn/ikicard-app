@@ -340,7 +340,7 @@ function Shell({
           href={`/${locale}/dashboard`}
           className="text-xs text-[#272727]/40 hover:text-[#c2866b] transition-colors tracking-wide"
         >
-          ← {tn('title')}
+          ← {tn('platform')}
         </Link>
         <button
           onClick={logout}
