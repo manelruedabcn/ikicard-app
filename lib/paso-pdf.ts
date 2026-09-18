@@ -20,7 +20,11 @@ function prepararClon(doc: Document) {
   })
 }
 
-export async function generarPasoPdf(el: HTMLElement, fileName = 'PASO.pdf') {
+export async function generarPasoPdf(
+  el: HTMLElement,
+  fileName = 'PASO.pdf',
+  mode: 'download' | 'share' = 'download',
+) {
   const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
     import('html2canvas'),
     import('jspdf'),
@@ -57,13 +61,18 @@ export async function generarPasoPdf(el: HTMLElement, fileName = 'PASO.pdf') {
   const blob = pdf.output('blob')
   const file = new File([blob], fileName, { type: 'application/pdf' })
 
-  // Móvil: menú nativo de compartir (guardar en Archivos, enviar, etc.).
+  // Compartir: adjunta el PDF real cuando el sistema admite archivos.
+  // Descargar: nunca abre el panel de compartir; guarda directamente.
   const nav = navigator as Navigator & {
     canShare?: (data?: ShareData) => boolean
   }
-  if (nav.canShare && nav.canShare({ files: [file] })) {
+  if (mode === 'share' && nav.share && nav.canShare && nav.canShare({ files: [file] })) {
     try {
-      await nav.share({ files: [file] })
+      await nav.share({
+        title: 'Mi informe PASO · IKIGAIER',
+        text: 'Este es mi informe personal PASO.',
+        files: [file],
+      })
       return
     } catch (e) {
       // Si la persona cancela el diálogo, no seguimos con la descarga.
@@ -71,7 +80,7 @@ export async function generarPasoPdf(el: HTMLElement, fileName = 'PASO.pdf') {
     }
   }
 
-  // Escritorio o navegadores sin compartir archivos: descarga directa.
+  // Descarga explícita o fallback si el dispositivo no comparte archivos.
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url

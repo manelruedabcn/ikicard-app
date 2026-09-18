@@ -84,23 +84,17 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
     })
   }
 
-  async function compartir(nombrePatron: string) {
-    trackEvent('share', { tool: 'paso' })
-    const url = 'https://www.ikigaier.com'
-    const data = {
-      title: t('share_title'),
-      text: `${t('share_text', { patron: nombrePatron })} ${url}`,
-      url,
-    }
+  async function compartir() {
+    if (!informeRef.current || generandoPdf) return
+    setGenerandoPdf(true)
+    trackEvent('share', { tool: 'paso', content: 'personal_pdf' })
     try {
-      if (navigator.share) {
-        await navigator.share(data)
-      } else {
-        await navigator.clipboard.writeText(data.text)
-        alert(t('share_copied'))
-      }
+      await generarPasoPdf(informeRef.current, 'Mi informe PASO - IKIGAIER.pdf', 'share')
     } catch {
-      // La persona cerró el diálogo de compartir: no hacemos nada.
+      // Último recurso: descarga el PDF; nunca sustituimos el informe por un enlace genérico.
+      await generarPasoPdf(informeRef.current, 'Mi informe PASO - IKIGAIER.pdf', 'download')
+    } finally {
+      setGenerandoPdf(false)
     }
   }
 
@@ -109,7 +103,7 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
     setGenerandoPdf(true)
     trackEvent('pdf_download', { tool: 'paso' })
     try {
-      await generarPasoPdf(informeRef.current)
+      await generarPasoPdf(informeRef.current, 'Mi informe PASO - IKIGAIER.pdf', 'download')
     } catch {
       // Último recurso si la generación falla (navegador muy antiguo):
       // el diálogo de impresión del sistema.
@@ -451,10 +445,11 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
             Archivos o compartirlo. Sin cuenta: se lleva el resultado tal cual. */}
         <div className="mt-4 text-center print:hidden paso-no-export">
           <button
-            onClick={() => compartir(patron?.nombre ?? '')}
+            onClick={compartir}
+            disabled={generandoPdf}
             className="w-full py-3 bg-[#c2866b] text-[#FDFBF7] text-xs tracking-widest hover:bg-[#272727] transition-colors"
           >
-            {t('share_button')}
+            {generandoPdf ? t('pdf_generating') : t('share_button')}
           </button>
           <button
             onClick={guardarPdf}
