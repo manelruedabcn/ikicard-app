@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import { isCurrentUserAdmin, listUsers, listCatalog, getAdminStats, listTallerRegistros } from '@/lib/admin'
@@ -21,8 +22,10 @@ export default async function AdminPage({ params: { locale } }: { params: { loca
   return (
     <div className="min-h-screen bg-[#FDFBF7] px-4 py-12">
       <div className="max-w-3xl mx-auto">
-        <h1 className="font-[family-name:var(--font-cormorant)] text-3xl text-[#272727] mb-2">{t('title')}</h1>
-        <p className="text-sm text-[#272727]/60 mb-8">{t('subtitle', { count: users.length })}</p>
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+          <div><h1 className="font-[family-name:var(--font-cormorant)] text-3xl text-[#272727] mb-2">{t('title')}</h1><p className="text-sm text-[#272727]/60">{t('subtitle', { count: users.length })}</p></div>
+          <Link href={`/${locale}/admin/crm`} className="rounded-full bg-[#272727] px-5 py-2.5 text-xs tracking-wide text-white hover:bg-[#c2866b]">Abrir CRM de contactos</Link>
+        </div>
 
         {/* Métricas clave de uso */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-12">

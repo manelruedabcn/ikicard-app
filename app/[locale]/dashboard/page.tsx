@@ -8,6 +8,7 @@ import { getMyTools } from '@/lib/entitlements'
 import PasoResultSync from './PasoResultSync'
 import TimezoneSync from './TimezoneSync'
 import SignOutButton from './SignOutButton'
+import { isCurrentUserAdmin } from '@/lib/admin'
 
 export default async function DashboardPage({ params: { locale } }: { params: { locale: string } }) {
   const supabase = createClient()
@@ -27,6 +28,7 @@ export default async function DashboardPage({ params: { locale } }: { params: { 
 
   // Herramientas desbloqueadas (dinámico, según permisos)
   const tools = await getMyTools()
+  const isAdmin = await isCurrentUserAdmin()
   const otherLocale = locale === 'es' ? 'en' : 'es'
 
   return (
@@ -57,6 +59,11 @@ export default async function DashboardPage({ params: { locale } }: { params: { 
           <p className="text-[#272727]/60 mt-1">{t('welcome_back')}</p>
           {tools.length > 0 && (
             <p className="text-[#272727]/60 mt-4 text-sm">{t('prepared')}</p>
+          )}
+          {isAdmin && (
+            <Link href={`/${locale}/admin`} className="mt-4 inline-block text-xs tracking-wide text-[#c2866b] hover:underline">
+              Administración →
+            </Link>
           )}
         </div>
 

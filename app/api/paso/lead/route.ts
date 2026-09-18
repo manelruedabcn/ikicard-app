@@ -5,6 +5,7 @@ import { DIMS, PASO_PATRONES, type Dim, type InformePaso } from '@/lib/paso-cont
 import { calcularSegmentos, resolverCodigoPorSegmentos } from '@/lib/paso-segments'
 import { sendResultEmail, sendLeadWelcomeEmail } from '@/lib/email'
 import { unsubUrl } from '@/lib/notify'
+import { syncCrmContact } from '@/lib/crm-sync'
 
 export const dynamic = 'force-dynamic'
 
@@ -106,6 +107,16 @@ export async function POST(req: Request) {
     console.error('[paso lead] upsert error:', error.message)
     return NextResponse.json({ ok: false, error: 'insert failed' }, { status: 500 })
   }
+
+  await syncCrmContact({
+    userId,
+    email: emailRaw,
+    sourceType: 'paso',
+    sourceId: lead?.id,
+    sourceDetail: { codigo, locale },
+    marketingConsent: consent,
+    unsubscribedAt: lead?.unsubscribed_at,
+  }).catch(err => console.error('[paso lead] crm sync error:', err))
 
   // Envío transaccional: confirmamos éxito solo cuando Resend acepta el informe.
   try {

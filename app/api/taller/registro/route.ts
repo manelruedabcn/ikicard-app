@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendWorkshopAdminEmail } from '@/lib/email'
+import { syncCrmContact } from '@/lib/crm-sync'
 
 export const dynamic = 'force-dynamic'
 
@@ -79,6 +80,17 @@ export async function POST(req: Request) {
     console.error('[taller registro] upsert error:', error.message)
     return NextResponse.json({ ok: false, error: 'insert failed' }, { status: 500, headers })
   }
+
+  await syncCrmContact({
+    firstName: nombre,
+    email: isEmail ? contactoNormalizado : null,
+    phone: isPhone ? contactoNormalizado : null,
+    sourceType: 'taller',
+    sourceId: data.id,
+    sourceDetail: { event_code: EVENT_CODE, estado: 'pendiente' },
+    sourceCreatedAt: data.created_at,
+    marketingConsent: false,
+  }).catch(err => console.error('[taller registro] crm sync error:', err))
 
   await sendWorkshopAdminEmail({ nombre, contacto, tipoContacto, createdAt: data.created_at }).catch(err => {
     console.error('[taller registro] notification error:', err)

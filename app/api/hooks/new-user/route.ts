@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { safeSecretEqual } from '@/lib/secrets'
+import { syncCrmContact } from '@/lib/crm-sync'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,6 +38,14 @@ export async function POST(req: Request) {
   }
 
   const name = record.display_name || email.split('@')[0]
+  await syncCrmContact({
+    userId: record.id,
+    firstName: name,
+    email: email === '—' ? null : email,
+    sourceType: 'registro',
+    sourceId: record.id,
+  }).catch(err => console.error('[new-user hook] crm sync error:', err))
+
   const text = `🎉 Nuevo registro en IKIGAIER\n\n👤 ${name}\n✉️ ${email}`
 
   // 4) Enviar el mensaje a Telegram.
