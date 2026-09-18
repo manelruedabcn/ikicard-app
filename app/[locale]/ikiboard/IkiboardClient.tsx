@@ -18,7 +18,7 @@ import {
 } from '@/lib/ikiboard-content'
 import { IKIBOARD_ICONS, iconById, type IkiIcon } from '@/lib/ikiboard-icons'
 import { generarBorrador } from '@/lib/ikiboard-borrador'
-import { DIMS, getPatron, type Dim, type InformePaso } from '@/lib/paso-content'
+import { DIMS, getLocalizedPatron, type Dim, type InformePaso } from '@/lib/paso-content'
 import { generarNarrativa } from '@/lib/paso-narrativa'
 
 interface PasoResult {
@@ -498,7 +498,7 @@ function pasoReading(row: PasoResult, locale: string) {
   }
   const narrativa = generarNarrativa(informe, locale)
   return {
-    name: getPatron(row.codigo_patron)?.nombre ?? getIkiboardCopy(locale).ui.pasoFallbackName,
+    name: getLocalizedPatron(row.codigo_patron, locale)?.nombre ?? getIkiboardCopy(locale).ui.pasoFallbackName,
     summary: narrativa.sintesis || narrativa.intro,
   }
 }

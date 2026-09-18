@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
-import { PASO_PATRONES, getPatron } from '@/lib/paso-content'
+import { getPasoPatterns, getLocalizedPatron } from '@/lib/paso-content'
 import { getRareza } from '@/lib/paso-rareza'
 
 export const dynamic = 'force-dynamic'
@@ -27,7 +27,7 @@ export default async function FormaPage({
   params: { locale: string; codigo: string }
 }) {
   const code = decodeURIComponent(codigo).toUpperCase()
-  const patron = getPatron(code)
+  const patron = getLocalizedPatron(code, locale)
   if (!patron) notFound()
 
   const t = await getTranslations('paso')
@@ -35,7 +35,7 @@ export default async function FormaPage({
   const rareza = getRareza(code)
 
   const orden = { frecuente: 0, habitual: 1, poco: 2 } as const
-  const mapa = [...PASO_PATRONES].sort(
+  const mapa = [...getPasoPatterns(locale)].sort(
     (a, b) => orden[getRareza(a.codigo)] - orden[getRareza(b.codigo)],
   )
 

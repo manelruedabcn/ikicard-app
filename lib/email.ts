@@ -1,5 +1,5 @@
 import { Resend } from 'resend'
-import { DIMS, PASO_PATRONES, getPatron, type Dim, type InformePaso } from '@/lib/paso-content'
+import { DIMS, getPasoPatterns, getLocalizedPatron, type Dim, type InformePaso } from '@/lib/paso-content'
 import { calcularSegmentos, firmaTexto } from '@/lib/paso-segments'
 import { generarNarrativa } from '@/lib/paso-narrativa'
 import { generarTitulares } from '@/lib/paso-titulares'
@@ -180,7 +180,7 @@ export async function sendLeadWelcomeEmail(to: string, locale: string, unsubUrl:
 // estable de su Caminante, pero ya no sustituye al informe completo.
 export async function sendResultEmail(to: string, locale: string, codigo: string, inf: InformePaso) {
   const l = lang(locale)
-  const patron = getPatron(codigo)
+  const patron = getLocalizedPatron(codigo, l)
   const nombre = patron?.nombre ?? ''
   const url = `${APP_URL}/${l}/paso/forma/${encodeURIComponent(codigo)}`
   const segmentos = calcularSegmentos(inf.scores)
@@ -242,7 +242,7 @@ export async function sendResultEmail(to: string, locale: string, codigo: string
         ['Sustain', 'Hold your pace, calm and steadiness.'],
         ['Observe', 'Look, analyse and care for detail.'],
       ]
-  const mapHtml = PASO_PATRONES.map(p => `<li style="margin:0 0 5px;${p.codigo === codigo ? 'font-weight:bold;color:#272727;' : 'color:#77706a;'}">${p.codigo === codigo ? '● ' : ''}${escapeHtml(p.nombre)}</li>`).join('')
+  const mapHtml = getPasoPatterns(l).map(p => `<li style="margin:0 0 5px;${p.codigo === codigo ? 'font-weight:bold;color:#272727;' : 'color:#77706a;'}">${p.codigo === codigo ? '● ' : ''}${escapeHtml(p.nombre)}</li>`).join('')
 
   const c = l === 'en'
     ? {

@@ -317,9 +317,9 @@ function Result({
     setGenerandoPdf(true)
     trackEvent('share', { tool: 'mascaras', content: 'personal_pdf' })
     try {
-      await generarMascarasPdf(informeRef.current, 'Mi informe de Mascaras - IKIGAIER.pdf', 'share')
+      await generarMascarasPdf(informeRef.current, en ? 'My Masks Report - IKIGAIER.pdf' : 'Mi informe de Mascaras - IKIGAIER.pdf', 'share', locale)
     } catch {
-      await generarMascarasPdf(informeRef.current, 'Mi informe de Mascaras - IKIGAIER.pdf', 'download')
+      await generarMascarasPdf(informeRef.current, en ? 'My Masks Report - IKIGAIER.pdf' : 'Mi informe de Mascaras - IKIGAIER.pdf', 'download', locale)
     } finally {
       setGenerandoPdf(false)
     }
@@ -330,7 +330,7 @@ function Result({
     setGenerandoPdf(true)
     trackEvent('pdf_download', { tool: 'mascaras' })
     try {
-      await generarMascarasPdf(informeRef.current, 'Mi informe de Mascaras - IKIGAIER.pdf', 'download')
+      await generarMascarasPdf(informeRef.current, en ? 'My Masks Report - IKIGAIER.pdf' : 'Mi informe de Mascaras - IKIGAIER.pdf', 'download', locale)
     } catch {
       // Último recurso si la generación falla (navegador muy antiguo).
       window.print()

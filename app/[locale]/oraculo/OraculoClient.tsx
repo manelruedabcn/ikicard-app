@@ -103,14 +103,14 @@ export default function OraculoClient({ userId, locale, todaySessions, history, 
     trackEvent('share', { tool: 'oraculo' })
     const shareData = {
       title: 'IKICARD',
-      text: `Mi carta de hoy — app.ikigaier.com`,
+      text: locale === 'en' ? 'My card for today — app.ikigaier.com' : 'Mi carta de hoy — app.ikigaier.com',
       url: 'https://app.ikigaier.com',
     }
     if (navigator.share) {
       await navigator.share(shareData)
     } else {
       await navigator.clipboard.writeText('https://app.ikigaier.com')
-      alert('Enlace copiado')
+      alert(locale === 'en' ? 'Link copied' : 'Enlace copiado')
     }
   }
 

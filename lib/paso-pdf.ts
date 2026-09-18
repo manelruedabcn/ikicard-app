@@ -24,6 +24,7 @@ export async function generarPasoPdf(
   el: HTMLElement,
   fileName = 'PASO.pdf',
   mode: 'download' | 'share' = 'download',
+  locale = 'es',
 ) {
   const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
     import('html2canvas'),
@@ -69,8 +70,8 @@ export async function generarPasoPdf(
   if (mode === 'share' && nav.share && nav.canShare && nav.canShare({ files: [file] })) {
     try {
       await nav.share({
-        title: 'Mi informe PASO · IKIGAIER',
-        text: 'Este es mi informe personal PASO.',
+        title: locale === 'en' ? 'My PASO Report · IKIGAIER' : 'Mi informe PASO · IKIGAIER',
+        text: locale === 'en' ? 'This is my personal PASO report.' : 'Este es mi informe personal PASO.',
         files: [file],
       })
       return

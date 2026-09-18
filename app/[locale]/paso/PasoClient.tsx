@@ -7,12 +7,12 @@ import { createClient } from '@/lib/supabase/client'
 import { trackEvent } from '@/lib/analytics'
 import { generarPasoPdf } from '@/lib/paso-pdf'
 import {
-  PASO_GRUPOS,
-  PASO_PATRONES,
   DIMS,
   TOTAL_GRUPOS,
   calcularInformePaso,
-  getPatron,
+  getPasoGroups,
+  getPasoPatterns,
+  getLocalizedPatron,
   type Dim,
   type Answer,
   type InformePaso,
@@ -61,6 +61,7 @@ interface Props {
 export default function PasoClient({ locale, userId, volver = null }: Props) {
   const t = useTranslations('paso')
   const tn = useTranslations('nav')
+  const pasoGroups = getPasoGroups(locale)
 
   const [stage, setStage] = useState<Stage>('intro')
   const [step, setStep] = useState(0) // grupo actual (0-27)
@@ -89,10 +90,10 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
     setGenerandoPdf(true)
     trackEvent('share', { tool: 'paso', content: 'personal_pdf' })
     try {
-      await generarPasoPdf(informeRef.current, 'Mi informe PASO - IKIGAIER.pdf', 'share')
+      await generarPasoPdf(informeRef.current, locale === 'en' ? 'My PASO Report - IKIGAIER.pdf' : 'Mi informe PASO - IKIGAIER.pdf', 'share', locale)
     } catch {
       // Último recurso: descarga el PDF; nunca sustituimos el informe por un enlace genérico.
-      await generarPasoPdf(informeRef.current, 'Mi informe PASO - IKIGAIER.pdf', 'download')
+      await generarPasoPdf(informeRef.current, locale === 'en' ? 'My PASO Report - IKIGAIER.pdf' : 'Mi informe PASO - IKIGAIER.pdf', 'download', locale)
     } finally {
       setGenerandoPdf(false)
     }
@@ -103,7 +104,7 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
     setGenerandoPdf(true)
     trackEvent('pdf_download', { tool: 'paso' })
     try {
-      await generarPasoPdf(informeRef.current, 'Mi informe PASO - IKIGAIER.pdf', 'download')
+      await generarPasoPdf(informeRef.current, locale === 'en' ? 'My PASO Report - IKIGAIER.pdf' : 'Mi informe PASO - IKIGAIER.pdf', 'download', locale)
     } catch {
       // Último recurso si la generación falla (navegador muy antiguo):
       // el diálogo de impresión del sistema.
@@ -125,7 +126,7 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
   }
 
   async function finish() {
-    const list: Answer[] = PASO_GRUPOS.map(g => ({
+    const list: Answer[] = pasoGroups.map(g => ({
       grupo: g.grupo,
       mas: answers[g.grupo]!.mas!,
       menos: answers[g.grupo]!.menos!,
@@ -224,7 +225,7 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
 
   // ---------- TEST ----------
   if (stage === 'test') {
-    const g = PASO_GRUPOS[step]
+    const g = pasoGroups[step]
     const cur = answers[g.grupo] || {}
     const complete = !!cur.mas && !!cur.menos
     const isLast = step === TOTAL_GRUPOS - 1
@@ -317,7 +318,7 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
   const segmentos = calcularSegmentos(inf.scores)
   const firma = firmaTexto(segmentos)
   const codigo = resolverCodigoPorSegmentos(segmentos)
-  const patron = getPatron(codigo)
+  const patron = getLocalizedPatron(codigo, locale)
   // Eje dominante POR SEGMENTOS (zona más alta, empate → orden P-A-S-O): la misma
   // fuente que da el nombre del Caminante, para que el titular no lo contradiga.
   const dominante = DIMS.reduce((a, b) => (segmentos[a] >= segmentos[b] ? a : b))
@@ -410,7 +411,7 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
 
         {/* Mapa de las 15 formas de caminar: sitúa tu tipo entre todos.
             Refuerza que no es una etiqueta, sino una de muchas formas. */}
-        <MapaCaminantes codigoActual={codigo} t={t} />
+        <MapaCaminantes codigoActual={codigo} t={t} locale={locale} />
 
         {/* Libro recomendado. Si hay enlace de compra, el título es clicable
             (abre Amazon en pestaña nueva) y se muestra un CTA. El enlace <a>
@@ -516,7 +517,7 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
               href={`/${locale}${volver}`}
               className="inline-block rounded-full bg-[#c2866b] px-8 py-3 text-xs tracking-widest uppercase text-[#FDFBF7] hover:opacity-90"
             >
-              Volver y seguir
+              {locale === 'en' ? 'Back and continue' : 'Volver y seguir'}
             </Link>
           </div>
         )}
@@ -701,12 +702,14 @@ function TitularesBlock({ inf, dominante, locale }: { inf: InformePaso; dominant
 function MapaCaminantes({
   codigoActual,
   t,
+  locale,
 }: {
   codigoActual: string
   t: (k: string, v?: Record<string, string | number>) => string
+  locale: string
 }) {
   const orden = { frecuente: 0, habitual: 1, poco: 2 } as const
-  const lista = [...PASO_PATRONES].sort(
+  const lista = [...getPasoPatterns(locale)].sort(
     (a, b) => orden[getRareza(a.codigo)] - orden[getRareza(b.codigo)]
   )
   return (

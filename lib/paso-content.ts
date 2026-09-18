@@ -2,6 +2,8 @@
 // Regenerar con scripts/gen-paso.py si cambian los datos de origen.
 // Lógica de cálculo portada de paso-logic.js (validada en prototipo).
 
+import { PASO_GROUPS_EN, PASO_PATTERNS_EN } from './paso-content-en'
+
 export type Dim = 'P' | 'A' | 'S' | 'O'
 export const DIMS: Dim[] = ['P', 'A', 'S', 'O']
 export const TOTAL_GRUPOS = 28
@@ -506,4 +508,20 @@ export function calcularInformePaso(answers: Answer[]): InformePaso {
 
 export function getPatron(codigo: string): Patron | undefined {
   return PASO_PATRONES.find(p => p.codigo === codigo)
+}
+
+// Localised content getters. Scoring always uses the stable dimension codes,
+// so the chosen language cannot change a result.
+export function getPasoGroups(locale: string): Grupo[] {
+  if (locale !== 'en') return PASO_GRUPOS
+  return PASO_GROUPS_EN
+}
+
+export function getPasoPatterns(locale: string): Patron[] {
+  if (locale !== 'en') return PASO_PATRONES
+  return PASO_PATTERNS_EN
+}
+
+export function getLocalizedPatron(codigo: string, locale: string): Patron | undefined {
+  return getPasoPatterns(locale).find(p => p.codigo === codigo)
 }
