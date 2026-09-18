@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
-import { isCurrentUserAdmin, listUsers, listCatalog, getAdminStats } from '@/lib/admin'
+import { isCurrentUserAdmin, listUsers, listCatalog, getAdminStats, listTallerRegistros } from '@/lib/admin'
 import { grantTool, grantProgram } from './actions'
 import ToolTick from './ToolTick'
 
@@ -14,7 +14,9 @@ export default async function AdminPage({ params: { locale } }: { params: { loca
   if (!(await isCurrentUserAdmin())) redirect(`/${locale}/dashboard`)
 
   const t = await getTranslations('admin')
-  const [users, catalog, stats] = await Promise.all([listUsers(), listCatalog(), getAdminStats()])
+  const [users, catalog, stats, tallerRegistros] = await Promise.all([
+    listUsers(), listCatalog(), getAdminStats(), listTallerRegistros(),
+  ])
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] px-4 py-12">
@@ -29,7 +31,44 @@ export default async function AdminPage({ params: { locale } }: { params: { loca
           <StatCard value={stats.pasoWeek} label={t('stat_paso_week')} />
           <StatCard value={stats.journeysStarted} label={t('stat_journeys')} />
           <StatCard value={stats.users} label={t('stat_users')} />
+          <StatCard value={tallerRegistros.length} label="Inscritos · taller 29/9" highlight />
         </div>
+
+        <section className="mb-12">
+          <div className="flex items-end justify-between gap-4 mb-4">
+            <div>
+              <h2 className="font-[family-name:var(--font-cormorant)] text-2xl text-[#272727]">Taller · 29 de septiembre</h2>
+              <p className="text-xs text-[#272727]/50">Inscripciones por orden de llegada</p>
+            </div>
+            <span className="text-sm text-[#c2866b]">{tallerRegistros.length} inscritos</span>
+          </div>
+          <div className="overflow-x-auto border border-[#272727]/15 rounded-xl bg-white">
+            <table className="w-full text-sm">
+              <thead className="bg-[#272727] text-[#FDFBF7] text-left">
+                <tr>
+                  <th className="px-4 py-3 font-medium">Nombre</th>
+                  <th className="px-4 py-3 font-medium">Contacto</th>
+                  <th className="px-4 py-3 font-medium">Estado</th>
+                  <th className="px-4 py-3 font-medium">Fecha</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tallerRegistros.length === 0 ? (
+                  <tr><td colSpan={4} className="px-4 py-6 text-center text-[#272727]/45">Todavía no hay inscripciones.</td></tr>
+                ) : tallerRegistros.map(r => (
+                  <tr key={r.id} className="border-t border-[#272727]/10">
+                    <td className="px-4 py-3 text-[#272727]">{r.nombre}</td>
+                    <td className="px-4 py-3 text-[#272727]/70">{r.contacto}</td>
+                    <td className="px-4 py-3 text-[#c2866b]">{r.estado}</td>
+                    <td className="px-4 py-3 text-[#272727]/55 whitespace-nowrap">
+                      {new Date(r.created_at).toLocaleString('es-ES', { timeZone: 'Europe/Madrid' })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
 
         <div className="flex flex-col gap-6">
           {users.map(u => (

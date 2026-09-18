@@ -204,3 +204,33 @@ export async function sendResultEmail(to: string, locale: string, codigo: string
     `),
   })
 }
+
+// ── Aviso interno · nueva inscripción a taller ───────────────
+export async function sendWorkshopAdminEmail(input: {
+  nombre: string
+  contacto: string
+  tipoContacto: string
+  createdAt: string
+}) {
+  const notifyTo = process.env.WORKSHOP_NOTIFY_EMAIL || 'manelrueda@gmail.com'
+  const safe = (s: string) => s.replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;',
+  })[c] || c)
+
+  return resend.emails.send({
+    from: FROM,
+    to: notifyTo,
+    subject: `Nueva inscripción al taller · ${input.nombre}`,
+    html: shell(`
+      <h1 style="font-size:26px;font-weight:normal;text-align:center;margin:0 0 20px;">Nueva inscripción</h1>
+      <p style="font-size:15px;line-height:1.8;color:rgba(39,39,39,0.8);">
+        <strong>Nombre:</strong> ${safe(input.nombre)}<br>
+        <strong>Contacto:</strong> ${safe(input.contacto)}<br>
+        <strong>Tipo:</strong> ${safe(input.tipoContacto)}<br>
+        <strong>Taller:</strong> 29 de septiembre · 19:00 h · Vilanova i la Geltrú<br>
+        <strong>Registro:</strong> ${safe(new Date(input.createdAt).toLocaleString('es-ES', { timeZone: 'Europe/Madrid' }))}
+      </p>
+      ${button(`${APP_URL}/es/admin`, 'VER INSCRIPCIONES')}
+    `),
+  })
+}

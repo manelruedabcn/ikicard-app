@@ -113,6 +113,29 @@ export interface AdminStats {
   users: number
 }
 
+export interface TallerRegistro {
+  id: string
+  nombre: string
+  contacto: string
+  tipo_contacto: 'email' | 'telefono'
+  estado: 'pendiente' | 'confirmado' | 'asistio' | 'cancelado'
+  created_at: string
+}
+
+export async function listTallerRegistros(): Promise<TallerRegistro[]> {
+  const admin = createAdminClient()
+  const { data, error } = await admin
+    .from('taller_registros')
+    .select('id, nombre, contacto, tipo_contacto, estado, created_at')
+    .eq('event_code', 'taller-2026-09-29-vilanova')
+    .order('created_at', { ascending: false })
+  if (error) {
+    console.error('[admin taller] list error:', error.message)
+    return []
+  }
+  return (data ?? []) as TallerRegistro[]
+}
+
 // Métricas globales de uso (vista de dueño). Usa el cliente admin para contar
 // TODOS los registros saltándose la RLS. Solo se invoca desde /admin, ya
 // protegido por isCurrentUserAdmin().
