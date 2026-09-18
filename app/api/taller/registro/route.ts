@@ -80,7 +80,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: 'insert failed' }, { status: 500, headers })
   }
 
-  sendWorkshopAdminEmail({ nombre, contacto, tipoContacto, createdAt: data.created_at }).catch(err => {
+  await sendWorkshopAdminEmail({ nombre, contacto, tipoContacto, createdAt: data.created_at }).catch(err => {
     console.error('[taller registro] notification error:', err)
   })
 
