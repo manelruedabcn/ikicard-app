@@ -2,6 +2,7 @@
   "nav": {
     "title": "IKIGAIER",
     "tagline": "Busca tu propósito",
+    "platform": "Mi plataforma",
     "logout": "Salir"
   },
   "dashboard": {

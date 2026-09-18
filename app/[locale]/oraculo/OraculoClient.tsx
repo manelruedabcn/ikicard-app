@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
@@ -116,11 +117,21 @@ export default function OraculoClient({ userId, locale, todaySessions, history, 
   return (
     <div className="min-h-screen flex flex-col items-center bg-[#FDFBF7] px-4 py-8">
       {/* Header */}
-      <div className="w-full max-w-lg flex items-center justify-between mb-8">
-        <h1 className="font-[family-name:var(--font-cormorant)] text-2xl tracking-widest text-[#272727]">
+      <div className="w-full max-w-lg flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
+        <Link
+          href={`/${locale}/dashboard`}
+          aria-label={tn('platform')}
+          className="self-start font-[family-name:var(--font-cormorant)] text-2xl tracking-widest text-[#272727] hover:text-[#c2866b] transition-colors"
+        >
           {tn('title')}
-        </h1>
-        <div className="flex items-center gap-4">
+        </Link>
+        <div className="flex items-center gap-3 sm:gap-4 flex-wrap sm:justify-end">
+          <Link
+            href={`/${locale}/dashboard`}
+            className="text-xs text-[#272727] hover:text-[#c2866b] transition-colors tracking-wide"
+          >
+            ← {tn('platform')}
+          </Link>
           <div className="flex gap-2">
             {languages.map(lang => (
               <button
