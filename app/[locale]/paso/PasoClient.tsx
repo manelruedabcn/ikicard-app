@@ -496,7 +496,7 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
             <div className="space-y-5">
               {/* Captura de email (lead magnet): promesa abierta de recibir las
                   herramientas de IKIGAIER. Single opt-in con checkbox explícito. */}
-              <LeadCapture codigo={codigo} locale={locale} />
+              <LeadCapture codigo={codigo} locale={locale} informe={inf} />
               <div className="rounded-xl bg-[#272727]/[0.03] px-5 py-5">
                 <p className="text-sm text-[#272727]/70 mb-4">{t('cta_account')}</p>
                 <Link
@@ -564,7 +564,7 @@ function ChoiceBtn({
 // marcarlo. Copy inline (es/en).
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-function LeadCapture({ codigo, locale }: { codigo: string; locale: string }) {
+function LeadCapture({ codigo, locale, informe }: { codigo: string; locale: string; informe: InformePaso }) {
   const es = locale !== 'en'
   const [email, setEmail] = useState('')
   const [consent, setConsent] = useState(false)
@@ -573,22 +573,22 @@ function LeadCapture({ codigo, locale }: { codigo: string; locale: string }) {
   const copy = es
     ? {
         title: '¿Te envío tu resultado por correo?',
-        body: 'Te llega un enlace a tu forma de caminar para volver a ella cuando quieras.',
+        body: 'Te envío el informe personal completo que estás viendo, con tu lectura, tus brechas y tu firma.',
         placeholder: 'tu@correo.com',
         consent: 'Quiero recibir más información del universo IKIGAIER (nuevas herramientas). Puedo darme de baja cuando quiera.',
         button: 'Enviarme mi resultado',
         sending: 'Enviando…',
-        done: 'Hecho. Revisa tu correo: te envío tu forma.',
+        done: 'Hecho. Revisa tu correo: te he enviado tu informe personal completo.',
         error: 'No se pudo enviar. Inténtalo de nuevo.',
       }
     : {
         title: 'Shall I email you your result?',
-        body: "You'll get a link to your way of walking, to come back to it whenever you like.",
+        body: "You'll receive the complete personal report you're viewing, including your reading, gaps and signature.",
         placeholder: 'you@email.com',
         consent: 'I want to receive more from the IKIGAIER universe (new tools). I can unsubscribe anytime.',
         button: 'Email me my result',
         sending: 'Sending…',
-        done: 'Done. Check your inbox: your shape is on its way.',
+        done: 'Done. Check your inbox: your complete personal report is on its way.',
         error: 'Could not send. Please try again.',
       }
 
@@ -610,7 +610,18 @@ function LeadCapture({ codigo, locale }: { codigo: string; locale: string }) {
       const res = await fetch('/api/paso/lead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), codigo, locale, consent }),
+        body: JSON.stringify({
+          email: email.trim(),
+          codigo,
+          locale,
+          consent,
+          resultado: {
+            mascara: informe.mascara,
+            natural: informe.natural,
+            scores: informe.scores,
+            puntoCiego: informe.puntoCiego,
+          },
+        }),
       })
       setStatus(res.ok ? 'done' : 'error')
     } catch {

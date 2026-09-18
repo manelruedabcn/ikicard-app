@@ -19,6 +19,8 @@ CREATE TABLE IF NOT EXISTS paso_leads (
   codigo_patron TEXT,
   locale TEXT,
   source TEXT,
+  -- resultado personal completo usado para regenerar el informe enviado
+  resultado JSONB,
   -- consentimiento explícito del checkbox (base legal del envío)
   consent BOOLEAN NOT NULL DEFAULT false,
   unsubscribed_at TIMESTAMPTZ,
@@ -35,3 +37,6 @@ CREATE UNIQUE INDEX IF NOT EXISTS paso_leads_email_idx ON paso_leads (email);
 -- RLS) inserta y lee, desde el servidor. Así el endpoint controla el alta
 -- y la tabla no es spameable ni legible desde el cliente.
 ALTER TABLE paso_leads ENABLE ROW LEVEL SECURITY;
+
+-- Instalaciones existentes: añadir la columna sin perder leads previos.
+ALTER TABLE paso_leads ADD COLUMN IF NOT EXISTS resultado JSONB;
