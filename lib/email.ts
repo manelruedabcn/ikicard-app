@@ -1,5 +1,5 @@
 import { Resend } from 'resend'
-import { DIMS, getPatron, type Dim, type InformePaso } from '@/lib/paso-content'
+import { DIMS, PASO_PATRONES, getPatron, type Dim, type InformePaso } from '@/lib/paso-content'
 import { calcularSegmentos, firmaTexto } from '@/lib/paso-segments'
 import { generarNarrativa } from '@/lib/paso-narrativa'
 import { generarTitulares } from '@/lib/paso-titulares'
@@ -229,6 +229,20 @@ export async function sendResultEmail(to: string, locale: string, codigo: string
     [labels.fear, patron.teme],
     [labels.effective, patron.seria_mas_eficaz_si],
   ].map(([label, text]) => `<div style="margin:0 0 18px;"><p style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#c2866b;margin:0 0 5px;">${escapeHtml(label)}</p><p style="font-size:14px;line-height:1.65;margin:0;color:#403b37;">${escapeHtml(text)}</p></div>`).join('') : ''
+  const pasoMeaning = l === 'es'
+    ? [
+        ['Pisar firme', 'Decidir, avanzar y afrontar lo difícil.'],
+        ['Acompañar', 'Conectar, expresarte y caminar con la gente.'],
+        ['Sostener', 'Mantener el paso, la calma y la constancia.'],
+        ['Observar', 'Mirar, analizar y cuidar el detalle.'],
+      ]
+    : [
+        ['Press on', 'Decide, move forward and face what is difficult.'],
+        ['Accompany', 'Connect, express yourself and walk with people.'],
+        ['Sustain', 'Hold your pace, calm and steadiness.'],
+        ['Observe', 'Look, analyse and care for detail.'],
+      ]
+  const mapHtml = PASO_PATRONES.map(p => `<li style="margin:0 0 5px;${p.codigo === codigo ? 'font-weight:bold;color:#272727;' : 'color:#77706a;'}">${p.codigo === codigo ? '● ' : ''}${escapeHtml(p.nombre)}</li>`).join('')
 
   const c = l === 'en'
     ? {
@@ -263,7 +277,9 @@ export async function sendResultEmail(to: string, locale: string, codigo: string
         ${narrativa.invitacion ? `<p style="font-family:Georgia,serif;font-size:20px;color:#c2866b;">${escapeHtml(narrativa.invitacion)}</p>` : ''}
       </div>
       <div style="background:#f5f1eb;padding:18px 20px;margin:24px 0;"><p style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 12px;">${labels.gap}</p><ul style="font-size:13px;line-height:1.55;color:#5c554f;margin:0;padding-left:18px;">${gapRows}</ul></div>
+      <div style="background:#faf7f2;padding:18px 20px;margin:24px 0;"><p style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 12px;">${l === 'es' ? 'Qué mide PASO' : 'What PASO measures'}</p>${pasoMeaning.map(([name, text]) => `<p style="font-size:13px;line-height:1.55;margin:0 0 10px;color:#5c554f;"><strong>${escapeHtml(name)}</strong><br>${escapeHtml(text)}</p>`).join('')}</div>
       ${patternFields}
+      <div style="background:#f5f1eb;padding:18px 20px;margin:24px 0;"><p style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 12px;">${l === 'es' ? 'Las 15 formas de caminar' : 'The 15 ways of walking'}</p><ul style="font-size:13px;line-height:1.45;margin:0;padding-left:18px;">${mapHtml}</ul></div>
       ${patron?.libro_recomendado ? `<div style="border:1px solid #e1c7ba;background:#fbf4f0;padding:18px;text-align:center;margin:28px 0;"><p style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#c2866b;margin:0 0 8px;">${labels.book}</p><p style="font-family:Georgia,serif;font-size:21px;margin:0;">${escapeHtml(patron.libro_recomendado)}</p></div>` : ''}
       ${button(url, labels.cta)}
       <p style="font-size:12px;color:rgba(39,39,39,0.5);text-align:center;margin-top:8px;">${labels.note}</p>
