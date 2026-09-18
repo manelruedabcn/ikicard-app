@@ -242,7 +242,7 @@ export async function sendResultEmail(to: string, locale: string, codigo: string
         intro: 'Esta es la lectura personal que dibujan tus respuestas:',
       }
 
-  return resend.emails.send({
+  const delivery = await resend.emails.send({
     from: FROM,
     to,
     subject: c.subject,
@@ -269,6 +269,8 @@ export async function sendResultEmail(to: string, locale: string, codigo: string
       <p style="font-size:12px;color:rgba(39,39,39,0.5);text-align:center;margin-top:8px;">${labels.note}</p>
     `),
   })
+  if (delivery.error) throw new Error(delivery.error.message)
+  return delivery
 }
 
 // ── Aviso interno · nueva inscripción a taller ───────────────
