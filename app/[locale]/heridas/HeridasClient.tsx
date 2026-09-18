@@ -360,9 +360,19 @@ function Result({
     setGenerandoPdf(true)
     trackEvent('share', { tool: 'heridas', content: 'personal_pdf' })
     try {
-      await generarHeridasPdf(informeRef.current, 'Mi informe de Heridas - IKIGAIER.pdf', 'share')
+      await generarHeridasPdf(
+        informeRef.current,
+        en ? 'My Wounds Report - IKIGAIER.pdf' : 'Mi informe de Heridas - IKIGAIER.pdf',
+        'share',
+        locale
+      )
     } catch {
-      await generarHeridasPdf(informeRef.current, 'Mi informe de Heridas - IKIGAIER.pdf', 'download')
+      await generarHeridasPdf(
+        informeRef.current,
+        en ? 'My Wounds Report - IKIGAIER.pdf' : 'Mi informe de Heridas - IKIGAIER.pdf',
+        'download',
+        locale
+      )
     } finally {
       setGenerandoPdf(false)
     }
@@ -373,7 +383,12 @@ function Result({
     setGenerandoPdf(true)
     trackEvent('pdf_download', { tool: 'heridas' })
     try {
-      await generarHeridasPdf(informeRef.current, 'Mi informe de Heridas - IKIGAIER.pdf', 'download')
+      await generarHeridasPdf(
+        informeRef.current,
+        en ? 'My Wounds Report - IKIGAIER.pdf' : 'Mi informe de Heridas - IKIGAIER.pdf',
+        'download',
+        locale
+      )
     } catch {
       // Último recurso si la generación falla (navegador muy antiguo).
       window.print()

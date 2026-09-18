@@ -5,10 +5,7 @@
 //
 // Bilingüe: contenido en español (voz del manuscrito) e inglés,
 // elegido por locale con contentLang(). La lógica (ids, bandas,
-// suma por bloque, empate) NO depende del idioma. La traducción al
-// inglés todavía no está hecha: hasta que exista, el getter EN cae
-// al dataset ES para no dejar huecos (contentLang ya cae a 'es' en
-// cualquier locale que no sea 'en').
+// suma por bloque, empate) NO depende del idioma.
 // ============================================================
 
 import { contentLang } from './content-locale'
@@ -108,9 +105,83 @@ const STATEMENTS_ES: WoundStatement[] = [
   },
 ]
 
-// Traducción al inglés pendiente: mismo array, mismos ids/bloques.
-// Mientras no exista, se reutiliza el ES (ver getters).
-const STATEMENTS_EN: WoundStatement[] = STATEMENTS_ES
+const STATEMENTS_EN: WoundStatement[] = [
+  {
+    id: 'prof_1',
+    block: 'profesional',
+    text: 'When I think about the rest of my working life, I feel more uneasy than excited.',
+  },
+  {
+    id: 'prof_2',
+    block: 'profesional',
+    text: 'I feel that my work environment is changing faster than I can keep up with.',
+  },
+  {
+    id: 'prof_3',
+    block: 'profesional',
+    text: 'If I stopped producing or working tomorrow, I would not know which part of me would still remain.',
+  },
+  {
+    id: 'prof_4',
+    block: 'profesional',
+    text: 'I feel that someone with far less experience than me could achieve results similar to mine.',
+  },
+  {
+    id: 'prof_5',
+    block: 'profesional',
+    text: 'I miss feeling needed professionally in the way I once took for granted.',
+  },
+  {
+    id: 'rel_1',
+    block: 'relacional',
+    text: 'The people I once truly talked to have gradually disappeared from my life—not through a falling-out, but through distance over time.',
+  },
+  {
+    id: 'rel_2',
+    block: 'relacional',
+    text: 'As the people close to me increasingly live lives of their own, I notice an emptiness that was not there before.',
+  },
+  {
+    id: 'rel_3',
+    block: 'relacional',
+    text: 'I could count on one hand the people I would call in the middle of the night, and it was not always like this.',
+  },
+  {
+    id: 'rel_4',
+    block: 'relacional',
+    text: 'I miss having someone depend on me in the way they once did.',
+  },
+  {
+    id: 'rel_5',
+    block: 'relacional',
+    text: 'I maintain relationships more out of habit than from a connection that still feels alive.',
+  },
+  {
+    id: 'vit_1',
+    block: 'vital',
+    text: 'I have achieved much of what I set out to do, yet I still feel an emptiness I cannot fully explain.',
+  },
+  {
+    id: 'vit_2',
+    block: 'vital',
+    text: 'The loss, decline or absence of someone from the generation before mine has made me feel that the line is moving forward and I am next.',
+  },
+  {
+    id: 'vit_3',
+    block: 'vital',
+    text: 'I think about how much time I have left more than I used to—not dramatically, but it is present.',
+  },
+  {
+    id: 'vit_4',
+    block: 'vital',
+    text: 'I wonder whether everything I have built has meaning beyond how it looks from the outside.',
+  },
+  {
+    id: 'vit_5',
+    block: 'vital',
+    text: 'When something makes me think about the time I have left, I quickly change the subject or distract myself.',
+  },
+]
 
 // Nombres de cada herida para la lectura del resultado.
 //   name  = etiqueta corta ("Profesional") para el mapa de las tres.
@@ -128,7 +199,11 @@ const WOUNDS_ES: WoundMeta[] = [
   { code: 'vital', name: 'Vital', label: 'la vital' },
 ]
 
-const WOUNDS_EN: WoundMeta[] = WOUNDS_ES
+const WOUNDS_EN: WoundMeta[] = [
+  { code: 'profesional', name: 'Professional', label: 'the professional wound' },
+  { code: 'relacional', name: 'Relational', label: 'the relational wound' },
+  { code: 'vital', name: 'Existential', label: 'the existential wound' },
+]
 
 // Gancho de entrada. La Guía no da título/gancho de cara al público:
 // estos textos son el envoltorio mínimo, en registro sobrio, para
@@ -140,7 +215,12 @@ const INTRO_ES = {
     'Responde quién eres hoy, en la mayoría de tus días, no quién te gustaría ser. Puntúa cada frase del 1 al 5: 1 = casi nunca, 5 = casi siempre. Léelas sin pensar demasiado.',
 }
 
-const INTRO_EN = INTRO_ES
+const INTRO_EN = {
+  title: 'The wound that weighs most',
+  hook: 'What are you protecting yourself from, before you even know how? Fifteen statements, three areas: work, relationships and time.',
+  instructions:
+    'Answer as the person you are today, on most days—not as the person you would like to be. Rate each statement from 1 to 5: 1 = almost never, 5 = almost always. Read them without overthinking.',
+}
 
 // Lectura del resultado por banda (umbrales de la Guía). Independiente
 // del idioma. Suma por bloque, rango 5-25:
@@ -169,7 +249,11 @@ const BANDS_ES: Record<Band, string> = {
   dominante: 'es la que más está gobernando la insatisfacción de fondo ahora mismo',
 }
 
-const BANDS_EN: Record<Band, string> = BANDS_ES
+const BANDS_EN: Record<Band, string> = {
+  baja: 'does not seem to be weighing heavily right now',
+  activa: 'is active, although you may not have named it yet',
+  dominante: 'is shaping the underlying dissatisfaction most strongly right now',
+}
 
 // Copys de resultado (texto validado de la Guía, sección 3 del spec).
 // Los tres dominantes + los tres casos especiales.
@@ -198,14 +282,28 @@ const RESULT_ES: ResultCopy = {
     'Las tres heridas están pesando a la vez ahora mismo, y es más habitual de lo que parece: cuando la herida vital está activa, suele arrastrar también a la profesional y la relacional. Aun así, hay una que puntúa más alta que las otras dos — empieza por ahí.',
 }
 
-const RESULT_EN: ResultCopy = RESULT_ES
+const RESULT_EN: ResultCopy = {
+  profesional:
+    'Right now, what weighs most seems to lie in your professional life. It is not simply tiredness from work: it is the feeling that what you do no longer gives back what it once did. It deserves attention, not a quick answer.',
+  relacional:
+    'Right now, what weighs most seems to lie in your relationships. Nothing dramatic needs to have happened: sometimes it is simply the quiet erosion of no longer being present in the conversations that mattered. It deserves attention, not a quick answer.',
+  vital:
+    'Right now, what weighs most seems harder to name: time, what can no longer be changed, the feeling of having achieved things and still carrying an emptiness that does not add up. It is the most uncomfortable of the three, and the one we are least likely to face directly. It deserves attention, not a quick answer.',
+  tie: (a, b) =>
+    `Today, no single wound is speaking loudest: two are asking for attention at the same time—${a} and ${b}. You do not need to decide which one is “the real one”. Start with the one whose statements made you most uncomfortable.`,
+  allLow:
+    'None of the three seems to be weighing heavily right now, or perhaps this is the first time you have paused to look at them this clearly. It may be worth taking this test again in a few months.',
+  allHigh:
+    'All three wounds are weighing on you at once right now, and that is more common than it may seem: when the existential wound is active, it often pulls the professional and relational wounds with it. Even so, one scores higher than the other two—start there.',
+}
 
 // Cierre sin juicio / aviso de lectura (sección 6 del spec). Debe quedar
 // visible en el flujo, no como letra pequeña escondida.
 const DISCLAIMER_ES =
   'Es un cuestionario de autoinforme, no un diagnóstico clínico cerrado. Las tres heridas casi nunca aparecen del todo aisladas. Alguna frase puede no aplicar igual a todo el mundo (quien no tiene hijos o pareja puede puntuar bajo en relacional sin que ese terreno esté resuelto): lee el resultado junto con lo que ya sabes de ti, no solo el número.'
 
-const DISCLAIMER_EN = DISCLAIMER_ES
+const DISCLAIMER_EN =
+  'This is a self-report questionnaire, not a definitive clinical diagnosis. The three wounds rarely appear in complete isolation. Some statements may not apply equally to everyone (someone without children or a partner may score low on the relational wound without that area being resolved): read the result alongside what you already know about yourself, not just the number.'
 
 // Cruce con máscaras (sección 5 del spec). No repite preguntas: enlaza.
 //   invite     = si el usuario aún no tiene resultado de máscaras.
@@ -215,10 +313,14 @@ const DISCLAIMER_EN = DISCLAIMER_ES
 const CROSS_INVITE_ES =
   'Saber qué herida pesa es la mitad del diagnóstico. La otra mitad es saber cómo te proteges de sentirla. Eso lo responde el test de las máscaras.'
 
-const CROSS_INVITE_EN = CROSS_INVITE_ES
+const CROSS_INVITE_EN =
+  'Knowing which wound weighs most is half the picture. The other half is understanding how you protect yourself from feeling it. The masks test explores that.'
 
 const crossConnectionEs = (maskName: string) =>
   `Tiene sentido que ${maskName} aparezca con fuerza — suele ser una de las formas de protegerse de esto.`
+
+const crossConnectionEn = (maskName: string) =>
+  `It makes sense that ${maskName} appears strongly—it is often one of the ways we protect ourselves from this.`
 
 // Hipótesis de cruce herida → máscaras (razonada, no dato). Manipuladora
 // es transversal: no se liga a ninguna herida, así que no dispara conexión.
@@ -247,7 +349,15 @@ const REFLECTION_ES: WoundReflection[] = [
   },
 ]
 
-const REFLECTION_EN: WoundReflection[] = REFLECTION_ES
+const REFLECTION_EN: WoundReflection[] = [
+  { id: 'herida_cual', prompt: 'My dominant wound right now is…', hint: '' },
+  { id: 'herida_recordo', prompt: 'The last thing that brought it sharply to mind was…', hint: '' },
+  {
+    id: 'herida_gesto',
+    prompt: 'One small gesture I can make to begin tending to it this week:',
+    hint: '',
+  },
+]
 
 // ------------------------------------------------------------
 // Getters por idioma del contenido.
@@ -274,9 +384,9 @@ export function getCrossInvite(locale: string): string {
   return contentLang(locale) === 'en' ? CROSS_INVITE_EN : CROSS_INVITE_ES
 }
 export function crossConnection(maskName: string, locale: string): string {
-  // Solo hay una redacción por idioma; hoy ambas caen al ES.
-  void locale
-  return crossConnectionEs(maskName)
+  return contentLang(locale) === 'en'
+    ? crossConnectionEn(maskName)
+    : crossConnectionEs(maskName)
 }
 export function getReflection(locale: string): WoundReflection[] {
   return contentLang(locale) === 'en' ? REFLECTION_EN : REFLECTION_ES

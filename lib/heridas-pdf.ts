@@ -21,7 +21,12 @@ function prepararClon(doc: Document) {
   })
 }
 
-export async function generarHeridasPdf(el: HTMLElement, fileName = 'Herida-dominante.pdf', mode: 'download' | 'share' = 'download') {
+export async function generarHeridasPdf(
+  el: HTMLElement,
+  fileName = 'Herida-dominante.pdf',
+  mode: 'download' | 'share' = 'download',
+  locale = 'es'
+) {
   const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
     import('html2canvas'),
     import('jspdf'),
@@ -64,7 +69,11 @@ export async function generarHeridasPdf(el: HTMLElement, fileName = 'Herida-domi
   }
   if (mode === 'share' && nav.share && nav.canShare && nav.canShare({ files: [file] })) {
     try {
-      await nav.share({ title: 'Mi informe de Heridas · IKIGAIER', text: 'Este es mi informe personal.', files: [file] })
+      await nav.share({
+        title: locale === 'en' ? 'My Wounds Report · IKIGAIER' : 'Mi informe de Heridas · IKIGAIER',
+        text: locale === 'en' ? 'This is my personal report.' : 'Este es mi informe personal.',
+        files: [file],
+      })
       return
     } catch (e) {
       // Si la persona cancela el diálogo, no seguimos con la descarga.
