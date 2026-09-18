@@ -313,24 +313,15 @@ function Result({
   const mask = masks.find(m => m.code === dominant)!
 
   async function compartir() {
-    trackEvent('share', { tool: 'mascaras' })
-    const url = 'https://www.ikigaier.com'
-    const data = {
-      title: en ? 'Which mask governs your life?' : '¿Qué máscara gobierna tu vida?',
-      text: en
-        ? `I found out my dominant mask is ${mask.name}. See yours at ${url}`
-        : `Descubrí que mi máscara dominante es ${mask.name}. Mira la tuya en ${url}`,
-      url,
-    }
+    if (!informeRef.current || generandoPdf) return
+    setGenerandoPdf(true)
+    trackEvent('share', { tool: 'mascaras', content: 'personal_pdf' })
     try {
-      if (navigator.share) {
-        await navigator.share(data)
-      } else {
-        await navigator.clipboard.writeText(data.text)
-        alert(en ? 'Link copied' : 'Enlace copiado')
-      }
+      await generarMascarasPdf(informeRef.current, 'Mi informe de Mascaras - IKIGAIER.pdf', 'share')
     } catch {
-      // La persona cerró el diálogo de compartir: no hacemos nada.
+      await generarMascarasPdf(informeRef.current, 'Mi informe de Mascaras - IKIGAIER.pdf', 'download')
+    } finally {
+      setGenerandoPdf(false)
     }
   }
 
@@ -339,7 +330,7 @@ function Result({
     setGenerandoPdf(true)
     trackEvent('pdf_download', { tool: 'mascaras' })
     try {
-      await generarMascarasPdf(informeRef.current)
+      await generarMascarasPdf(informeRef.current, 'Mi informe de Mascaras - IKIGAIER.pdf', 'download')
     } catch {
       // Último recurso si la generación falla (navegador muy antiguo).
       window.print()
@@ -501,14 +492,14 @@ function Result({
           onClick={compartir}
           className="w-full py-3 bg-[#c2866b] text-[#FDFBF7] text-xs tracking-widest uppercase hover:bg-[#272727] transition-colors"
         >
-          {en ? 'Share' : 'Compartir'}
+          {generandoPdf ? (en ? 'Generating…' : 'Generando…') : (en ? 'Share my report' : 'Compartir mi informe')}
         </button>
         <button
           onClick={guardarPdf}
           disabled={generandoPdf}
           className="w-full py-3 mt-3 border border-[#272727] text-[#272727] text-xs tracking-widest uppercase hover:bg-[#272727] hover:text-[#FDFBF7] transition-colors disabled:opacity-40"
         >
-          {generandoPdf ? (en ? 'Generating…' : 'Generando…') : (en ? 'Save as PDF' : 'Guardar en PDF')}
+          {generandoPdf ? (en ? 'Generating…' : 'Generando…') : (en ? 'Download my report as PDF' : 'Descargar mi informe en PDF')}
         </button>
         <p className="text-xs text-[#272727]/40 mt-2">{en ? 'Your result, to take with you or return to.' : 'Tu resultado, para llevártelo o volver a él.'}</p>
       </div>

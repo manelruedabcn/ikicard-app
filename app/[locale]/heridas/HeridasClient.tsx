@@ -356,24 +356,15 @@ function Result({
       : null
 
   async function compartir() {
-    trackEvent('share', { tool: 'heridas' })
-    const url = 'https://www.ikigaier.com'
-    const data = {
-      title: en ? 'The wound that weighs most' : 'La herida que más pesa',
-      text: en
-        ? `I took the dominant-wound test. See yours at ${url}`
-        : `Hice el test de la herida dominante. Mira el tuyo en ${url}`,
-      url,
-    }
+    if (!informeRef.current || generandoPdf) return
+    setGenerandoPdf(true)
+    trackEvent('share', { tool: 'heridas', content: 'personal_pdf' })
     try {
-      if (navigator.share) {
-        await navigator.share(data)
-      } else {
-        await navigator.clipboard.writeText(data.text)
-        alert(en ? 'Link copied' : 'Enlace copiado')
-      }
+      await generarHeridasPdf(informeRef.current, 'Mi informe de Heridas - IKIGAIER.pdf', 'share')
     } catch {
-      // La persona cerró el diálogo de compartir: no hacemos nada.
+      await generarHeridasPdf(informeRef.current, 'Mi informe de Heridas - IKIGAIER.pdf', 'download')
+    } finally {
+      setGenerandoPdf(false)
     }
   }
 
@@ -382,7 +373,7 @@ function Result({
     setGenerandoPdf(true)
     trackEvent('pdf_download', { tool: 'heridas' })
     try {
-      await generarHeridasPdf(informeRef.current)
+      await generarHeridasPdf(informeRef.current, 'Mi informe de Heridas - IKIGAIER.pdf', 'download')
     } catch {
       // Último recurso si la generación falla (navegador muy antiguo).
       window.print()
@@ -492,7 +483,7 @@ function Result({
             onClick={compartir}
             className="w-full py-3 bg-[#c2866b] text-[#FDFBF7] text-xs tracking-widest uppercase hover:bg-[#272727] transition-colors"
           >
-            {en ? 'Share' : 'Compartir'}
+            {generandoPdf ? (en ? 'Generating…' : 'Generando…') : (en ? 'Share my report' : 'Compartir mi informe')}
           </button>
           <button
             onClick={guardarPdf}
@@ -504,8 +495,8 @@ function Result({
                 ? 'Generating…'
                 : 'Generando…'
               : en
-                ? 'Save as PDF'
-                : 'Guardar en PDF'}
+                ? 'Download my report as PDF'
+                : 'Descargar mi informe en PDF'}
           </button>
           <p className="text-xs text-[#272727]/40 mt-2">
             {en
