@@ -90,10 +90,10 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
     setGenerandoPdf(true)
     trackEvent('share', { tool: 'paso', content: 'personal_pdf' })
     try {
-      await generarPasoPdf(informeRef.current, locale === 'en' ? 'My PASO Report - IKIGAIER.pdf' : 'Mi informe PASO - IKIGAIER.pdf', 'share', locale)
+      await generarPasoPdf(informeRef.current, locale === 'en' ? 'My PASO Report - IKIGAIER.pdf' : 'Mi informe PASO - IKIGAIER.pdf', 'share', locale, pdfMeta())
     } catch {
       // Último recurso: descarga el PDF; nunca sustituimos el informe por un enlace genérico.
-      await generarPasoPdf(informeRef.current, locale === 'en' ? 'My PASO Report - IKIGAIER.pdf' : 'Mi informe PASO - IKIGAIER.pdf', 'download', locale)
+      await generarPasoPdf(informeRef.current, locale === 'en' ? 'My PASO Report - IKIGAIER.pdf' : 'Mi informe PASO - IKIGAIER.pdf', 'download', locale, pdfMeta())
     } finally {
       setGenerandoPdf(false)
     }
@@ -104,13 +104,24 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
     setGenerandoPdf(true)
     trackEvent('pdf_download', { tool: 'paso' })
     try {
-      await generarPasoPdf(informeRef.current, locale === 'en' ? 'My PASO Report - IKIGAIER.pdf' : 'Mi informe PASO - IKIGAIER.pdf', 'download', locale)
+      await generarPasoPdf(informeRef.current, locale === 'en' ? 'My PASO Report - IKIGAIER.pdf' : 'Mi informe PASO - IKIGAIER.pdf', 'download', locale, pdfMeta())
     } catch {
       // Último recurso si la generación falla (navegador muy antiguo):
       // el diálogo de impresión del sistema.
       window.print()
     } finally {
       setGenerandoPdf(false)
+    }
+  }
+
+  function pdfMeta() {
+    if (!informe) return {}
+    const zonas = calcularSegmentos(informe.scores)
+    const codigo = resolverCodigoPorSegmentos(zonas)
+    return {
+      pattern: getLocalizedPatron(codigo, locale)?.nombre,
+      signature: firmaTexto(zonas),
+      rarity: t('rareza_' + getRareza(codigo)),
     }
   }
 
