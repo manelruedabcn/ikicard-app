@@ -864,12 +864,17 @@ function FirmaBlock({
       <p className="text-sm leading-relaxed text-[#272727]/70 mb-4">{t('firma_desc')}</p>
       <div className="flex flex-col gap-3">
         {DIMS.map(d => (
-          <div key={d} className="flex items-center gap-3">
-            <EjeLabel
-              label={t('dim_' + d)}
-              className="w-24 shrink-0 text-[#272727] font-[family-name:var(--font-cormorant)] text-lg"
-            />
-            <div className="flex-1 flex gap-1">
+          <div key={d} className="flex flex-col gap-1.5">
+            <div className="flex items-baseline justify-between gap-3">
+              <EjeLabel
+                label={t('dim_' + d)}
+                className="text-[#272727] font-[family-name:var(--font-cormorant)] text-lg"
+              />
+              <span className="text-[10px] tracking-wide uppercase text-[#272727]/45">
+                {t('firma_zona', { n: segmentos[d] })}
+              </span>
+            </div>
+            <div className="flex gap-1">
               {zonas.map(z => {
                 const active = z === segmentos[d]
                 const isEq = z === ZONA_EQUILIBRIO
@@ -888,9 +893,6 @@ function FirmaBlock({
                 )
               })}
             </div>
-            <span className="w-4 shrink-0 text-right text-xs text-[#272727]/50 tabular-nums">
-              {segmentos[d]}
-            </span>
           </div>
         ))}
       </div>
