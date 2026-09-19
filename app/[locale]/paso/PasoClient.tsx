@@ -120,7 +120,6 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
     const codigo = resolverCodigoPorSegmentos(zonas)
     return {
       pattern: getLocalizedPatron(codigo, locale)?.nombre,
-      signature: firmaTexto(zonas),
       rarity: t('rareza_' + getRareza(codigo)),
     }
   }
@@ -389,6 +388,9 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
           </div>
         )}
 
+        {/* La persona debe conocer los cuatro ejes antes de leer la curva. */}
+        <QueEsPasoBlock t={t} />
+
         {/* Gráfico horizonte: lo más visual del informe */}
         <HorizonGraph inf={inf} labels={DIMS.map(d => t('dim_' + d))} t={t} />
 
@@ -402,9 +404,6 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
 
         {/* Tu firma: la asignación precisa por zonas (1 de 2.401) */}
         <FirmaBlock segmentos={segmentos} t={t} />
-
-        {/* Qué mide PASO: marco fijo (las cuatro formas de caminar) */}
-        <QueEsPasoBlock t={t} />
 
         {/* Lectura del patrón */}
         {patron && (
@@ -795,7 +794,7 @@ function BrechasBlock({
     alineado: t('dir_alineado'),
   }
   return (
-    <div className="mt-8 rounded-xl bg-[#272727]/[0.03] px-5 py-5">
+    <div className="mt-8 mb-6 rounded-xl border border-[#272727]/10 bg-[#272727]/[0.025] px-5 py-5 paso-avoid-break">
       <p className="text-xs tracking-widest uppercase text-[#272727]/40 mb-4">
         {t('separas_title')}
       </p>
@@ -913,7 +912,7 @@ function QueEsPasoBlock({
         {t('que_es_title')}
       </p>
       <p className="text-sm leading-relaxed text-[#272727]/70 mb-5">{t('que_es_intro')}</p>
-      <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-2 gap-x-5 gap-y-4">
         {DIMS.map(d => (
           <div key={d} className="flex flex-col gap-0.5">
             <EjeLabel
