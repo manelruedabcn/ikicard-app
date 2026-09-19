@@ -855,47 +855,48 @@ function FirmaBlock({
   segmentos: Record<Dim, number>
   t: (k: string, v?: Record<string, string | number>) => string
 }) {
-  const zonas = Array.from({ length: NUM_ZONAS }, (_, k) => k + 1)
+  const W = 320
+  const H = 225
+  const plotTop = 22
+  const plotBottom = 172
+  const barWidth = 38
+  const positions = [72, 132, 192, 252]
+  const y = (z: number) => plotBottom - (z / NUM_ZONAS) * (plotBottom - plotTop)
+  const dominante = DIMS.reduce((a, b) => (segmentos[a] >= segmentos[b] ? a : b))
   return (
-    <div className="mt-8 rounded-xl bg-[#272727]/[0.03] px-5 py-5">
+    <div className="mt-8 rounded-xl bg-[#272727]/[0.03] px-5 py-5 paso-avoid-break">
       <p className="text-xs tracking-widest uppercase text-[#272727]/40 mb-1">
         {t('firma_title')}
       </p>
       <p className="text-sm leading-relaxed text-[#272727]/70 mb-4">{t('firma_desc')}</p>
-      <div className="flex flex-col gap-3">
-        {DIMS.map(d => (
-          <div key={d} className="flex flex-col gap-1.5">
-            <div className="flex items-baseline justify-between gap-3">
-              <EjeLabel
-                label={t('dim_' + d)}
-                className="text-[#272727] font-[family-name:var(--font-cormorant)] text-lg"
-              />
-              <span className="text-[10px] tracking-wide uppercase text-[#272727]/45">
-                {t('firma_zona', { n: segmentos[d] })}
-              </span>
-            </div>
-            <div className="flex gap-1">
-              {zonas.map(z => {
-                const active = z === segmentos[d]
-                const isEq = z === ZONA_EQUILIBRIO
-                return (
-                  <span
-                    key={z}
-                    className="flex-1 h-2.5 rounded-sm"
-                    style={{
-                      background: active
-                        ? '#c2866b'
-                        : isEq
-                          ? '#27272720'
-                          : '#27272710',
-                    }}
-                  />
-                )
-              })}
-            </div>
-          </div>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label={t('firma_title')}>
+        {Array.from({ length: NUM_ZONAS }, (_, i) => i + 1).map(z => (
+          <g key={z}>
+            <line x1="46" y1={y(z)} x2="288" y2={y(z)}
+              stroke="#272727" strokeOpacity={z === ZONA_EQUILIBRIO ? 0.28 : 0.1}
+              strokeWidth={z === ZONA_EQUILIBRIO ? 1.2 : 0.7}
+              strokeDasharray={z === ZONA_EQUILIBRIO ? '4 3' : undefined} />
+            <text x="35" y={y(z) + 3} textAnchor="end" fontSize="8" className="fill-[#272727]" opacity="0.45">{z}</text>
+          </g>
         ))}
-      </div>
+        <text x="15" y={plotTop + 3} fontSize="7" className="fill-[#272727]" opacity="0.4">{t('firma_alta')}</text>
+        <text x="15" y={plotBottom} fontSize="7" className="fill-[#272727]" opacity="0.4">{t('firma_baja')}</text>
+        <text x="286" y={y(ZONA_EQUILIBRIO) - 5} textAnchor="end" fontSize="7" className="fill-[#272727]" opacity="0.45">{t('linea_equilibrio')}</text>
+        {DIMS.map((d, i) => {
+          const value = segmentos[d]
+          const top = y(value)
+          const active = d === dominante
+          return (
+            <g key={d}>
+              <rect x={positions[i] - barWidth / 2} y={top} width={barWidth} height={plotBottom - top}
+                rx="5" fill={active ? '#c2866b' : '#7a8b6f'} fillOpacity={active ? 0.95 : 0.72} />
+              <text x={positions[i]} y={top - 7} textAnchor="middle" fontSize="11" fontWeight="600" className="fill-[#272727]">{value}</text>
+              <text x={positions[i]} y="192" textAnchor="middle" fontSize="17" fontWeight="600" className="fill-[#272727]">{d}</text>
+              <text x={positions[i]} y="207" textAnchor="middle" fontSize="7.5" className="fill-[#272727]" opacity="0.6">{t('dim_' + d)}</text>
+            </g>
+          )
+        })}
+      </svg>
     </div>
   )
 }
