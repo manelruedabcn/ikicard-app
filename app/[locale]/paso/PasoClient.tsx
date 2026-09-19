@@ -788,11 +788,6 @@ function BrechasBlock({
   inf: InformePaso
   t: (k: string, v?: Record<string, string | number>) => string
 }) {
-  const dirLabel: Record<'exige_de_mas' | 'esconde' | 'alineado', string> = {
-    exige_de_mas: t('dir_exige'),
-    esconde: t('dir_esconde'),
-    alineado: t('dir_alineado'),
-  }
   return (
     <div className="mt-8 mb-6 rounded-xl border border-[#272727]/10 bg-[#272727]/[0.025] px-5 py-5 paso-avoid-break">
       <p className="text-xs tracking-widest uppercase text-[#272727]/40 mb-4">
@@ -804,6 +799,13 @@ function BrechasBlock({
       <div className="flex flex-col gap-3">
         {inf.brechas.map((b, index) => {
           const abs = Math.abs(b.valor)
+          const grado = t(abs >= 7 ? 'brecha_grado_alto' : abs >= 3 ? 'brecha_grado_medio' : 'brecha_grado_bajo')
+          const rasgo = t('brecha_rasgo_' + b.dimension)
+          const explicacion = b.direccion === 'exige_de_mas'
+            ? t('brecha_mascara', { rasgo, grado })
+            : b.direccion === 'esconde'
+              ? t('brecha_naturaleza', { rasgo, grado })
+              : t('brecha_alineada', { rasgo })
           const color =
             b.direccion === 'exige_de_mas'
               ? '#c2866b'
@@ -832,8 +834,8 @@ function BrechasBlock({
                   </span>
                 )}
               </div>
-              <span className="text-xs leading-relaxed text-[#272727]/50 pl-7">
-                {dirLabel[b.direccion]}
+              <span className="text-xs leading-relaxed text-[#272727]/55 pl-7">
+                {explicacion}
               </span>
             </div>
           )

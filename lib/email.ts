@@ -199,8 +199,8 @@ export async function sendResultEmail(to: string, locale: string, codigo: string
     en: { frecuente: 'A frequent way of walking', habitual: 'A usual way of walking', poco: 'A less frequent way of walking' },
   }
   const labels = l === 'es'
-    ? { reading: 'Tu lectura personal', gap: 'Dónde hay más distancia entre lo que muestras y lo que necesitas', gapIntro: 'Ordenado de mayor a menor distancia. Los puntos no miden capacidad ni calidad: indican cuánto cambia tu respuesta exterior respecto a lo que te sale natural por dentro.', gapRepeat: 'Varias formas pueden compartir la misma frase: su distancia va en la misma dirección.', shown: 'Cómo te muestras', inside: 'Cómo caminas por dentro', motivation: 'Lo que te mueve', pressure: 'Bajo presión', fear: 'Lo que temes', effective: 'Serías más eficaz si…', book: 'Un libro para seguir caminando', cta: 'VOLVER A MI FORMA', note: 'Este correo contiene la lectura calculada con tus respuestas.' }
-    : { reading: 'Your personal reading', gap: 'Where there is more distance between what you show and what you need', gapIntro: 'Ordered from the greatest distance to the smallest. Points do not measure ability or quality: they show how much your outward response differs from what comes naturally inside.', gapRepeat: 'Several ways may share the same sentence: their distance moves in the same direction.', shown: 'How you show up', inside: 'How you walk inside', motivation: 'What moves you', pressure: 'Under pressure', fear: 'What you fear', effective: 'You would be more effective if…', book: 'A book to keep walking', cta: 'RETURN TO MY SHAPE', note: 'This email contains the reading calculated from your answers.' }
+    ? { reading: 'Tu lectura personal', gap: 'La distancia entre tu máscara y tu naturaleza', gapIntro: 'Cada fila compara cómo te muestras para adaptarte con cómo eres cuando no necesitas representar ningún papel. Los puntos miden separación, no capacidad: cuantos más puntos, mayor es el esfuerzo de adaptación.', gapRepeat: 'Una distancia pequeña habla de coherencia entre dentro y fuera. Una distancia grande señala una forma que tu máscara amplifica o contiene.', shown: 'Cómo te muestras', inside: 'Cómo caminas por dentro', motivation: 'Lo que te mueve', pressure: 'Bajo presión', fear: 'Lo que temes', effective: 'Serías más eficaz si…', book: 'Un libro para seguir caminando', cta: 'VOLVER A MI FORMA', note: 'Este correo contiene la lectura calculada con tus respuestas.' }
+    : { reading: 'Your personal reading', gap: 'The distance between your mask and your nature', gapIntro: 'Each row compares how you show up in order to adapt with who you are when you do not need to play a role. Points measure separation, not ability: the more points, the greater the effort of adaptation.', gapRepeat: 'A small distance suggests coherence between inside and outside. A large distance points to a way your mask amplifies or holds back.', shown: 'How you show up', inside: 'How you walk inside', motivation: 'What moves you', pressure: 'Under pressure', fear: 'What you fear', effective: 'You would be more effective if…', book: 'A book to keep walking', cta: 'RETURN TO MY SHAPE', note: 'This email contains the reading calculated from your answers.' }
 
   const graphRows = DIMS.map(d => {
     const maskWidth = Math.max(4, Math.min(100, ((inf.mascara[d] + 28) / 56) * 100))
@@ -217,10 +217,27 @@ export async function sendResultEmail(to: string, locale: string, codigo: string
   }).join('')
 
   const gapRows = inf.brechas.map((b, index) => {
+    const abs = Math.abs(b.valor)
+    const traits: Record<Lang, Record<Dim, string>> = {
+      es: { P: 'la decisión y el impulso para avanzar', A: 'la conexión y la cercanía con los demás', S: 'la calma y la constancia', O: 'la observación y el análisis' },
+      en: { P: 'decision and the drive to move forward', A: 'connection and closeness with others', S: 'calm and steadiness', O: 'observation and analysis' },
+    }
+    const degree = l === 'es'
+      ? (abs >= 7 ? 'mucho más' : abs >= 3 ? 'algo más' : 'ligeramente más')
+      : (abs >= 7 ? 'much more' : abs >= 3 ? 'somewhat more' : 'slightly more')
+    const trait = traits[l][b.dimension]
     const direction = l === 'es'
-      ? (b.direccion === 'exige_de_mas' ? 'te exiges más de lo que necesitas' : b.direccion === 'esconde' ? 'guardas más de lo que muestras' : 'vas alineado')
-      : (b.direccion === 'exige_de_mas' ? 'you demand more than you need' : b.direccion === 'esconde' ? 'you hold more than you show' : 'you are aligned')
-    return `<li style="margin:0 0 9px;"><strong>${index + 1}. ${eje[l][b.dimension]}</strong>: ${escapeHtml(direction)}${b.valor ? ` (${Math.abs(b.valor)} ${l === 'es' ? 'puntos de distancia' : 'points of distance'})` : ''}</li>`
+      ? (b.direccion === 'exige_de_mas'
+          ? `Tu máscara amplifica ${trait}: por fuera expresa ${degree} de lo que te nace naturalmente.`
+          : b.direccion === 'esconde'
+            ? `Tu máscara contiene ${trait}: por dentro hay ${degree} de lo que dejas ver.`
+            : `Tu máscara y tu naturaleza muestran un nivel muy parecido de ${trait}.`)
+      : (b.direccion === 'exige_de_mas'
+          ? `Your mask amplifies ${trait}: outwardly it appears ${degree} than comes naturally to you.`
+          : b.direccion === 'esconde'
+            ? `Your nature carries ${degree} ${trait} than your mask allows others to see.`
+            : `Your mask and your nature show a very similar level of ${trait}.`)
+    return `<li style="margin:0 0 9px;"><strong>${index + 1}. ${eje[l][b.dimension]}</strong>: ${escapeHtml(direction)}${b.valor ? ` (${abs} ${l === 'es' ? 'puntos de separación' : 'points of separation'})` : ''}</li>`
   }).join('')
 
   const patternFields = patron ? [
