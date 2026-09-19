@@ -788,8 +788,11 @@ function BrechasBlock({
       <p className="text-xs tracking-widest uppercase text-[#272727]/40 mb-4">
         {t('separas_title')}
       </p>
+      <p className="text-sm leading-relaxed text-[#272727]/70 mb-5">
+        {t('separas_intro')}
+      </p>
       <div className="flex flex-col gap-3">
-        {inf.brechas.map(b => {
+        {inf.brechas.map((b, index) => {
           const abs = Math.abs(b.valor)
           const color =
             b.direccion === 'exige_de_mas'
@@ -801,6 +804,9 @@ function BrechasBlock({
             <div key={b.dimension} className="flex flex-col gap-0.5">
               <div className="flex items-baseline justify-between gap-3">
                 <div className="flex items-baseline gap-2 min-w-0">
+                  <span className="text-[10px] tabular-nums text-[#272727]/35 w-3 shrink-0">
+                    {index + 1}
+                  </span>
                   <span
                     className="inline-block h-2 w-2 rounded-full shrink-0 translate-y-[-1px]"
                     style={{ background: color }}
@@ -816,13 +822,16 @@ function BrechasBlock({
                   </span>
                 )}
               </div>
-              <span className="text-xs leading-relaxed text-[#272727]/50 pl-4">
+              <span className="text-xs leading-relaxed text-[#272727]/50 pl-7">
                 {dirLabel[b.direccion]}
               </span>
             </div>
           )
         })}
       </div>
+      <p className="text-xs leading-relaxed text-[#272727]/45 mt-5 pt-4 border-t border-[#272727]/10">
+        {t('separas_repeat')}
+      </p>
     </div>
   )
 }

@@ -199,8 +199,8 @@ export async function sendResultEmail(to: string, locale: string, codigo: string
     en: { frecuente: 'A frequent way of walking', habitual: 'A usual way of walking', poco: 'A less frequent way of walking' },
   }
   const labels = l === 'es'
-    ? { reading: 'Tu lectura personal', gap: 'Dónde te separas de ti', shown: 'Cómo te muestras', inside: 'Cómo caminas por dentro', motivation: 'Lo que te mueve', pressure: 'Bajo presión', fear: 'Lo que temes', effective: 'Serías más eficaz si…', book: 'Un libro para seguir caminando', cta: 'VOLVER A MI FORMA', note: 'Este correo contiene la lectura calculada con tus respuestas.' }
-    : { reading: 'Your personal reading', gap: 'Where you separate from yourself', shown: 'How you show up', inside: 'How you walk inside', motivation: 'What moves you', pressure: 'Under pressure', fear: 'What you fear', effective: 'You would be more effective if…', book: 'A book to keep walking', cta: 'RETURN TO MY SHAPE', note: 'This email contains the reading calculated from your answers.' }
+    ? { reading: 'Tu lectura personal', gap: 'Dónde hay más distancia entre lo que muestras y lo que necesitas', gapIntro: 'Ordenado de mayor a menor distancia. Los puntos no miden capacidad ni calidad: indican cuánto cambia tu respuesta exterior respecto a lo que te sale natural por dentro.', gapRepeat: 'Varias formas pueden compartir la misma frase: su distancia va en la misma dirección.', shown: 'Cómo te muestras', inside: 'Cómo caminas por dentro', motivation: 'Lo que te mueve', pressure: 'Bajo presión', fear: 'Lo que temes', effective: 'Serías más eficaz si…', book: 'Un libro para seguir caminando', cta: 'VOLVER A MI FORMA', note: 'Este correo contiene la lectura calculada con tus respuestas.' }
+    : { reading: 'Your personal reading', gap: 'Where there is more distance between what you show and what you need', gapIntro: 'Ordered from the greatest distance to the smallest. Points do not measure ability or quality: they show how much your outward response differs from what comes naturally inside.', gapRepeat: 'Several ways may share the same sentence: their distance moves in the same direction.', shown: 'How you show up', inside: 'How you walk inside', motivation: 'What moves you', pressure: 'Under pressure', fear: 'What you fear', effective: 'You would be more effective if…', book: 'A book to keep walking', cta: 'RETURN TO MY SHAPE', note: 'This email contains the reading calculated from your answers.' }
 
   const graphRows = DIMS.map(d => {
     const maskWidth = Math.max(4, Math.min(100, ((inf.mascara[d] + 28) / 56) * 100))
@@ -216,11 +216,11 @@ export async function sendResultEmail(to: string, locale: string, codigo: string
     </tr>`
   }).join('')
 
-  const gapRows = inf.brechas.map(b => {
+  const gapRows = inf.brechas.map((b, index) => {
     const direction = l === 'es'
       ? (b.direccion === 'exige_de_mas' ? 'te exiges más de lo que necesitas' : b.direccion === 'esconde' ? 'guardas más de lo que muestras' : 'vas alineado')
       : (b.direccion === 'exige_de_mas' ? 'you demand more than you need' : b.direccion === 'esconde' ? 'you hold more than you show' : 'you are aligned')
-    return `<li style="margin:0 0 9px;"><strong>${eje[l][b.dimension]}</strong>: ${escapeHtml(direction)}${b.valor ? ` (${Math.abs(b.valor)})` : ''}</li>`
+    return `<li style="margin:0 0 9px;"><strong>${index + 1}. ${eje[l][b.dimension]}</strong>: ${escapeHtml(direction)}${b.valor ? ` (${Math.abs(b.valor)} ${l === 'es' ? 'puntos de distancia' : 'points of distance'})` : ''}</li>`
   }).join('')
 
   const patternFields = patron ? [
@@ -276,7 +276,7 @@ export async function sendResultEmail(to: string, locale: string, codigo: string
         ${narrativa.sintesis ? `<p style="font-size:14px;line-height:1.7;color:#272727;">${escapeHtml(narrativa.sintesis)}</p>` : ''}
         ${narrativa.invitacion ? `<p style="font-family:Georgia,serif;font-size:20px;color:#c2866b;">${escapeHtml(narrativa.invitacion)}</p>` : ''}
       </div>
-      <div style="background:#f5f1eb;padding:18px 20px;margin:24px 0;"><p style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 12px;">${labels.gap}</p><ul style="font-size:13px;line-height:1.55;color:#5c554f;margin:0;padding-left:18px;">${gapRows}</ul></div>
+      <div style="background:#f5f1eb;padding:18px 20px;margin:24px 0;"><p style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 8px;">${labels.gap}</p><p style="font-size:13px;line-height:1.55;color:#5c554f;margin:0 0 14px;">${escapeHtml(labels.gapIntro)}</p><ol style="font-size:13px;line-height:1.55;color:#5c554f;margin:0;padding-left:18px;list-style:none;">${gapRows}</ol><p style="font-size:12px;line-height:1.5;color:#8b8179;border-top:1px solid #ded8d1;margin:14px 0 0;padding-top:12px;">${escapeHtml(labels.gapRepeat)}</p></div>
       <div style="background:#faf7f2;padding:18px 20px;margin:24px 0;"><p style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 12px;">${l === 'es' ? 'Qué mide PASO' : 'What PASO measures'}</p>${pasoMeaning.map(([name, text]) => `<p style="font-size:13px;line-height:1.55;margin:0 0 10px;color:#5c554f;"><strong>${escapeHtml(name)}</strong><br>${escapeHtml(text)}</p>`).join('')}</div>
       ${patternFields}
       <div style="background:#f5f1eb;padding:18px 20px;margin:24px 0;"><p style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 12px;">${l === 'es' ? 'Las 15 formas de caminar' : 'The 15 ways of walking'}</p><ul style="font-size:13px;line-height:1.45;margin:0;padding-left:18px;">${mapHtml}</ul></div>
