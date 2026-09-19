@@ -231,16 +231,16 @@ export async function sendResultEmail(to: string, locale: string, codigo: string
   ].map(([label, text]) => `<div style="margin:0 0 18px;"><p style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#c2866b;margin:0 0 5px;">${escapeHtml(label)}</p><p style="font-size:14px;line-height:1.65;margin:0;color:#403b37;">${escapeHtml(text)}</p></div>`).join('') : ''
   const pasoMeaning = l === 'es'
     ? [
-        ['Pisar firme', 'Decidir, avanzar y afrontar lo difícil.'],
-        ['Acompañar', 'Conectar, expresarte y caminar con la gente.'],
-        ['Sostener', 'Mantener el paso, la calma y la constancia.'],
-        ['Observar', 'Mirar, analizar y cuidar el detalle.'],
+        ['Pisar firme', 'La energía para decidir, tomar posición y avanzar. En equilibrio aporta determinación y valentía; cuando domina puede convertirse en presión, impaciencia o necesidad de control.'],
+        ['Acompañar', 'La energía para conectar, expresarte y crear pertenencia. En equilibrio aporta cercanía, entusiasmo y capacidad de unir; cuando domina puedes buscar aprobación o adaptarte demasiado.'],
+        ['Sostener', 'La energía para conservar la calma, cuidar el ritmo y mantener los compromisos. En equilibrio aporta estabilidad, paciencia y confianza; cuando domina puede costarte cambiar, poner límites o afrontar un conflicto.'],
+        ['Observar', 'La energía para leer el terreno, comprender los matices y buscar claridad. En equilibrio aporta criterio, precisión y profundidad; cuando domina puedes sobreanalizar, dudar o esperar demasiado antes de actuar.'],
       ]
     : [
-        ['Press on', 'Decide, move forward and face what is difficult.'],
-        ['Accompany', 'Connect, express yourself and walk with people.'],
-        ['Sustain', 'Hold your pace, calm and steadiness.'],
-        ['Observe', 'Look, analyse and care for detail.'],
+        ['Press on', 'The energy to decide, take a stand and move forward. In balance it brings determination and courage; when it dominates it can become pressure, impatience or a need for control.'],
+        ['Accompany', 'The energy to connect, express yourself and create belonging. In balance it brings warmth, enthusiasm and unity; when it dominates you may seek approval or adapt too much.'],
+        ['Sustain', 'The energy to remain calm, protect your pace and keep commitments. In balance it brings stability, patience and trust; when it dominates change, boundaries or conflict may become difficult.'],
+        ['Observe', 'The energy to read the terrain, understand nuance and seek clarity. In balance it brings judgement, precision and depth; when it dominates you may overanalyse, doubt or wait too long before acting.'],
       ]
   const mapHtml = getPasoPatterns(l).map(p => `<li style="margin:0 0 5px;${p.codigo === codigo ? 'font-weight:bold;color:#272727;' : 'color:#77706a;'}">${p.codigo === codigo ? '● ' : ''}${escapeHtml(p.nombre)}</li>`).join('')
 

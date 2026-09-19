@@ -912,15 +912,23 @@ function QueEsPasoBlock({
         {t('que_es_title')}
       </p>
       <p className="text-sm leading-relaxed text-[#272727]/70 mb-5">{t('que_es_intro')}</p>
-      <div className="grid grid-cols-2 gap-x-5 gap-y-4">
+      <div className="flex flex-col gap-5">
         {DIMS.map(d => (
-          <div key={d} className="flex flex-col gap-0.5">
+          <div key={d} className="flex flex-col gap-1 pb-5 last:pb-0 border-b last:border-b-0 border-[#272727]/10">
             <EjeLabel
               label={t('dim_' + d)}
-              className="font-[family-name:var(--font-cormorant)] text-lg text-[#272727]"
+              className="font-[family-name:var(--font-cormorant)] text-xl text-[#272727]"
             />
             <span className="text-sm leading-relaxed text-[#272727]/70">
               {t('que_es_' + d)}
+            </span>
+            <span className="text-sm leading-relaxed text-[#272727]/70 mt-1">
+              <strong className="text-[#7a8b6f] font-medium">{t('que_es_equilibrio')}:</strong>{' '}
+              {t('que_es_' + d + '_equilibrio')}
+            </span>
+            <span className="text-sm leading-relaxed text-[#272727]/70">
+              <strong className="text-[#c2866b] font-medium">{t('que_es_domina')}:</strong>{' '}
+              {t('que_es_' + d + '_domina')}
             </span>
           </div>
         ))}
