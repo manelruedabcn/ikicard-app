@@ -912,24 +912,26 @@ function QueEsPasoBlock({
         {t('que_es_title')}
       </p>
       <p className="text-sm leading-relaxed text-[#272727]/70 mb-5">{t('que_es_intro')}</p>
-      <div className="flex flex-col gap-5">
+      <div className="grid grid-cols-2 gap-3">
         {DIMS.map(d => (
-          <div key={d} className="flex flex-col gap-1 pb-5 last:pb-0 border-b last:border-b-0 border-[#272727]/10">
+          <div key={d} className="flex flex-col rounded-lg bg-[#FDFBF7]/80 border border-[#272727]/[0.07] px-4 py-4 min-h-[218px]">
             <EjeLabel
               label={t('dim_' + d)}
               className="font-[family-name:var(--font-cormorant)] text-xl text-[#272727]"
             />
-            <span className="text-sm leading-relaxed text-[#272727]/70">
+            <span className="text-[13px] leading-relaxed text-[#272727]/65 mt-1 mb-3">
               {t('que_es_' + d)}
             </span>
-            <span className="text-sm leading-relaxed text-[#272727]/70 mt-1">
-              <strong className="text-[#7a8b6f] font-medium">{t('que_es_equilibrio')}:</strong>{' '}
-              {t('que_es_' + d + '_equilibrio')}
-            </span>
-            <span className="text-sm leading-relaxed text-[#272727]/70">
-              <strong className="text-[#c2866b] font-medium">{t('que_es_domina')}:</strong>{' '}
-              {t('que_es_' + d + '_domina')}
-            </span>
+            <div className="mt-auto flex flex-col gap-2.5">
+              <div>
+                <strong className="block text-[10px] tracking-wide uppercase text-[#7a8b6f] font-medium mb-0.5">{t('que_es_equilibrio')}</strong>
+                <span className="block text-xs leading-relaxed text-[#272727]/65">{t('que_es_' + d + '_equilibrio')}</span>
+              </div>
+              <div>
+                <strong className="block text-[10px] tracking-wide uppercase text-[#c2866b] font-medium mb-0.5">{t('que_es_domina')}</strong>
+                <span className="block text-xs leading-relaxed text-[#272727]/65">{t('que_es_' + d + '_domina')}</span>
+              </div>
+            </div>
           </div>
         ))}
       </div>
