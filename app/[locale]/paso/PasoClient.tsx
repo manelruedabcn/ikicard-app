@@ -912,9 +912,9 @@ function QueEsPasoBlock({
         {t('que_es_title')}
       </p>
       <p className="text-sm leading-relaxed text-[#272727]/70 mb-5">{t('que_es_intro')}</p>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 min-[390px]:grid-cols-2 auto-rows-fr gap-3">
         {DIMS.map(d => (
-          <div key={d} className="flex flex-col rounded-lg bg-[#FDFBF7]/80 border border-[#272727]/[0.07] px-4 py-4 min-h-[218px]">
+          <div key={d} className="flex h-full flex-col rounded-lg bg-[#FDFBF7]/80 border border-[#272727]/[0.07] px-4 py-4 min-h-[218px] break-words">
             <EjeLabel
               label={t('dim_' + d)}
               className="font-[family-name:var(--font-cormorant)] text-xl text-[#272727]"
