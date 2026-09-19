@@ -452,24 +452,27 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
           </div>
         )}
 
-        {/* Guardar en PDF: en móvil abre el diálogo nativo para guardarlo en
-            Archivos o compartirlo. Sin cuenta: se lleva el resultado tal cual. */}
-        <div className="mt-4 text-center print:hidden paso-no-export">
-          <button
-            onClick={compartir}
-            disabled={generandoPdf}
-            className="w-full py-3 bg-[#c2866b] text-[#FDFBF7] text-xs tracking-widest hover:bg-[#272727] transition-colors"
-          >
-            {generandoPdf ? t('pdf_generating') : t('share_button')}
-          </button>
+        {/* Dos caminos sin fricción: recibir el informe solicitado por email o
+            descargarlo directamente, sin registro ni cesión obligatoria de datos. */}
+        <div className="mt-8 text-center print:hidden paso-no-export">
+          <LeadCapture codigo={codigo} locale={locale} informe={inf} />
           <button
             onClick={guardarPdf}
             disabled={generandoPdf}
             className="w-full py-3 mt-3 border border-[#272727] text-[#272727] text-xs tracking-widest hover:bg-[#272727] hover:text-[#FDFBF7] transition-colors disabled:opacity-40"
           >
-            {generandoPdf ? t('pdf_generating') : t('pdf_button')}
+            {generandoPdf ? t('pdf_generating') : (locale === 'en' ? 'DOWNLOAD THE PDF NOW' : 'DESCARGAR EL PDF AHORA')}
           </button>
-          <p className="text-xs text-[#272727]/40 mt-2">{t('pdf_hint')}</p>
+          <button
+            onClick={compartir}
+            disabled={generandoPdf}
+            className="mt-3 text-xs text-[#272727]/50 underline underline-offset-4 hover:text-[#c2866b] disabled:opacity-40"
+          >
+            {generandoPdf ? t('pdf_generating') : t('share_button')}
+          </button>
+          <p className="text-xs text-[#272727]/40 mt-3">
+            {locale === 'en' ? 'Downloading does not require an email or an account.' : 'La descarga no requiere email ni crear una cuenta.'}
+          </p>
         </div>
 
         {/* Pie de marca: solo aparece en el PDF/impresión, para que quien lo
@@ -500,9 +503,6 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
             saved && <p className="text-xs text-[#272727]/50">{t('saved')}</p>
           ) : (
             <div className="space-y-5">
-              {/* Captura de email (lead magnet): promesa abierta de recibir las
-                  herramientas de IKIGAIER. Single opt-in con checkbox explícito. */}
-              <LeadCapture codigo={codigo} locale={locale} informe={inf} />
               <div className="rounded-xl bg-[#272727]/[0.03] px-5 py-5">
                 <p className="text-sm text-[#272727]/70 mb-4">{t('cta_account')}</p>
                 <Link
@@ -578,21 +578,21 @@ function LeadCapture({ codigo, locale, informe }: { codigo: string; locale: stri
 
   const copy = es
     ? {
-        title: '¿Te envío tu resultado por correo?',
-        body: 'Te envío el informe personal completo que estás viendo, con tu lectura, tus brechas y tu firma.',
+        title: 'Llévate tu lectura completa',
+        body: 'Tu nombre PASO explica cómo caminas. El informe completo revela desde dónde lo haces: qué parte te nace, qué parte has aprendido a mostrar y dónde puede estar apareciendo el esfuerzo.',
         placeholder: 'tu@correo.com',
         consent: 'Quiero recibir más información del universo IKIGAIER (nuevas herramientas). Puedo darme de baja cuando quiera.',
-        button: 'Enviarme mi resultado',
+        button: 'ENVIARME EL INFORME POR EMAIL',
         sending: 'Enviando…',
         done: 'Hecho. Revisa tu correo: te he enviado tu informe personal completo.',
         error: 'No se pudo enviar. Inténtalo de nuevo.',
       }
     : {
-        title: 'Shall I email you your result?',
-        body: "You'll receive the complete personal report you're viewing, including your reading, gaps and signature.",
+        title: 'Take your complete reading with you',
+        body: 'Your PASO name explains how you walk. The complete report reveals where that walk comes from: what is natural, what you have learned to show and where effort may be appearing.',
         placeholder: 'you@email.com',
         consent: 'I want to receive more from the IKIGAIER universe (new tools). I can unsubscribe anytime.',
-        button: 'Email me my result',
+        button: 'EMAIL ME THE COMPLETE REPORT',
         sending: 'Sending…',
         done: 'Done. Check your inbox: your complete personal report is on its way.',
         error: 'Could not send. Please try again.',
