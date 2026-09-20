@@ -347,6 +347,7 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
             print-color-adjust: exact;
           }
           .paso-print-only { display: block; }
+          .paso-screen-only { display: none !important; }
           /* La lectura del patrón empieza en página nueva y no se parte. */
           .paso-break-before { break-before: page; }
           .paso-avoid-break { break-inside: avoid; }
@@ -376,7 +377,16 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
         {/* El retrato nace de la firma PASO global. No es la máscara: resume el
             arquetipo que dibuja la combinación de intensidades de los cuatro ejes. */}
         {patron?.retrato && (
-          <div className="mt-8 mb-10 px-1">
+          <>
+          <div className="paso-screen-only mt-8 mb-8 px-1">
+            <p className="text-xs tracking-widest uppercase text-[#c2866b] mb-2 text-center">
+              {t('retrato_eyebrow')}
+            </p>
+            <p className="text-[15px] leading-relaxed text-[#272727]/80 text-center">
+              {resumirTexto(patron.retrato, 2)}
+            </p>
+          </div>
+          <div className="paso-print-only mt-8 mb-10 px-1">
             <p className="text-xs tracking-widest uppercase text-[#c2866b] mb-2 text-center">
               {t('retrato_eyebrow')}
             </p>
@@ -384,16 +394,36 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
               {patron.retrato}
             </p>
           </div>
+          </>
         )}
 
-        {/* La persona debe conocer los cuatro ejes antes de leer la curva. */}
-        <QueEsPasoBlock t={t} />
+        {/* La explicación pedagógica completa pertenece al informe descargable. */}
+        <div className="paso-print-only"><QueEsPasoBlock t={t} /></div>
 
         {/* Primero, la firma global: es la que determina el tipo de Caminante. */}
         <FirmaBlock segmentos={segmentos} t={t} />
 
         {/* Después, la lectura amplia del arquetipo que esa firma origina. */}
         {patron && (
+          <>
+          <div className="paso-screen-only mt-8 grid grid-cols-1 gap-3">
+            <ResumenClave
+              label={locale === 'en' ? 'YOUR STRENGTH' : 'TU FORTALEZA'}
+              text={resumirTexto(patron.motivacion, 1)}
+              color="#7a8b6f"
+            />
+            <ResumenClave
+              label={locale === 'en' ? 'YOUR RISK' : 'TU RIESGO'}
+              text={resumirTexto(patron.bajo_presion, 1)}
+              color="#c2866b"
+            />
+            <ResumenClave
+              label={locale === 'en' ? 'YOUR LEARNING' : 'TU APRENDIZAJE'}
+              text={resumirTexto(patron.seria_mas_eficaz_si, 1)}
+              color="#c5a15b"
+            />
+          </div>
+          <div className="paso-print-only">
           <div className="flex flex-col gap-6 mt-10 paso-avoid-break">
             {/* FOMO M2: teaser seco que anticipa «Lo que temes» sin resolverlo */}
             <p className="font-[family-name:var(--font-cormorant)] text-xl leading-snug text-[#272727] text-center px-4 mb-2">
@@ -404,25 +434,30 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
             <Field label={t('teme')} text={patron.teme} />
             <Field label={t('eficaz')} text={patron.seria_mas_eficaz_si} />
           </div>
+          </div>
+          </>
         )}
 
         {/* A continuación se abre una segunda lectura, distinta de la firma:
             cómo se compara la máscara aprendida con la naturaleza interior. */}
         <div className="paso-break-before">
           <HorizonGraph inf={inf} labels={DIMS.map(d => t('dim_' + d))} t={t} />
-          <NarrativaBlock inf={inf} locale={locale} />
-          <BrechasBlock inf={inf} t={t} />
+          <div className="paso-screen-only"><ResumenMascara inf={inf} locale={locale} /></div>
+          <div className="paso-print-only">
+            <NarrativaBlock inf={inf} locale={locale} />
+            <BrechasBlock inf={inf} t={t} />
+          </div>
         </div>
 
         {/* Mapa de las 15 formas de caminar: sitúa tu tipo entre todos.
             Refuerza que no es una etiqueta, sino una de muchas formas. */}
-        <MapaCaminantes codigoActual={codigo} t={t} locale={locale} />
+        <div className="paso-print-only"><MapaCaminantes codigoActual={codigo} t={t} locale={locale} /></div>
 
         {/* Libro recomendado. Si hay enlace de compra, el título es clicable
             (abre Amazon en pestaña nueva) y se muestra un CTA. El enlace <a>
             sigue siendo clicable si el resultado se guarda como PDF. */}
         {patron && (
-          <div className="mt-6 rounded-xl border border-[#c2866b]/30 bg-[#c2866b]/5 px-5 py-5 text-center">
+          <div className="paso-print-only mt-6 rounded-xl border border-[#c2866b]/30 bg-[#c2866b]/5 px-5 py-5 text-center">
             <p className="text-xs tracking-widest uppercase text-[#c2866b] mb-2">{t('book')}</p>
             {LIBRO_LINKS[patron.libro_recomendado] ? (
               <a
@@ -532,6 +567,39 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
 }
 
 // ---------- Subcomponentes ----------
+
+function resumirTexto(texto: string, frases = 1) {
+  const partes = texto.match(/[^.!?]+[.!?]+|[^.!?]+$/g) ?? [texto]
+  return partes.slice(0, frases).join(' ').trim()
+}
+
+function ResumenClave({ label, text, color }: { label: string; text: string; color: string }) {
+  return (
+    <div className="rounded-xl border border-[#272727]/10 bg-[#272727]/[0.025] px-4 py-4">
+      <p className="text-xs tracking-widest uppercase mb-1.5" style={{ color }}>{label}</p>
+      <p className="text-sm leading-relaxed text-[#272727]/75">{text}</p>
+    </div>
+  )
+}
+
+function ResumenMascara({ inf, locale }: { inf: InformePaso; locale: string }) {
+  const n = generarNarrativa(inf, locale)
+  return (
+    <div className="mt-6 rounded-xl border border-[#c2866b]/25 bg-[#c2866b]/[0.045] px-5 py-5">
+      <p className="text-xs tracking-widest uppercase text-[#c2866b] mb-2">
+        {locale === 'en' ? 'THE MAIN CLUE' : 'LA CLAVE PRINCIPAL'}
+      </p>
+      <p className="text-sm leading-relaxed text-[#272727]/80">
+        {n.sintesis || n.intro}
+      </p>
+      {n.invitacion && (
+        <p className="font-[family-name:var(--font-cormorant)] text-xl text-[#c2866b] mt-3">
+          {n.invitacion}
+        </p>
+      )}
+    </div>
+  )
+}
 
 function ChoiceBtn({
   active,

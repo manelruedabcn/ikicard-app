@@ -7,6 +7,7 @@ const C = { paper: '#F8F4EE', ink: '#272421', terra: '#C2866B', sage: '#7A8B6F',
 
 function prepararClon(doc: Document) {
   doc.querySelectorAll<HTMLElement>('.paso-print-only').forEach(el => { el.style.display = 'block' })
+  doc.querySelectorAll<HTMLElement>('.paso-screen-only').forEach(el => { el.style.display = 'none' })
   doc.querySelectorAll<HTMLElement>('.paso-no-export').forEach(el => { el.style.display = 'none' })
 }
 
