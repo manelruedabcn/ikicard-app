@@ -356,7 +356,7 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
           <p className="text-xs tracking-[0.4em] uppercase text-[#c2866b] mb-2">
             {t('your_pattern')}
           </p>
-          <h1 className="font-[family-name:var(--font-cormorant)] text-4xl text-[#272727]">
+          <h1 className="paso-report-title font-[family-name:var(--font-cormorant)] text-4xl text-[#272727]">
             {patron?.nombre}
           </h1>
           <p className="text-xs leading-relaxed text-[#272727]/45 mt-2 px-4">{t('pattern_framing')}</p>
@@ -379,7 +379,7 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
             <p className="text-xs tracking-widest uppercase text-[#c2866b] mb-2 text-center">
               {t('retrato_eyebrow')}
             </p>
-            <p className="text-[15px] leading-relaxed text-[#272727]/80 text-center">
+            <p className="paso-report-portrait text-[15px] leading-relaxed text-[#272727]/80 text-center">
               {resumirTexto(patron.retrato, 2)}
             </p>
           </div>
@@ -387,7 +387,7 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
             <p className="text-xs tracking-widest uppercase text-[#c2866b] mb-2 text-center">
               {t('retrato_eyebrow')}
             </p>
-            <p className="text-[15px] leading-relaxed text-[#272727]/80 text-center">
+            <p className="paso-report-portrait text-[15px] leading-relaxed text-[#272727]/80 text-center">
               {patron.retrato}
             </p>
           </div>
@@ -748,7 +748,7 @@ function TitularesBlock({ inf, dominante, locale }: { inf: InformePaso; dominant
   const teaser = generarTeaserGancho(inf, locale)
   return (
     <div className="text-center mb-8">
-      <p className="font-[family-name:var(--font-cormorant)] text-2xl leading-snug text-[#272727] px-2">
+      <p className="paso-report-lead font-[family-name:var(--font-cormorant)] text-2xl leading-snug text-[#272727] px-2">
         {principal}
       </p>
       {resto.length > 0 && (

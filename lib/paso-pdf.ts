@@ -17,6 +17,9 @@ function prepararClon(doc: Document) {
     el.style.marginLeft = 'auto'
     el.style.marginRight = 'auto'
   })
+  doc.querySelectorAll<HTMLElement>('.paso-report-title').forEach(el => { el.style.fontSize = '30px' })
+  doc.querySelectorAll<HTMLElement>('.paso-report-lead').forEach(el => { el.style.fontSize = '20px' })
+  doc.querySelectorAll<HTMLElement>('.paso-report-portrait').forEach(el => { el.style.fontSize = '14px' })
   doc.querySelectorAll<HTMLElement>('.paso-print-only').forEach(el => { el.style.display = 'block' })
   doc.querySelectorAll<HTMLElement>('.paso-screen-only').forEach(el => { el.style.display = 'none' })
   doc.querySelectorAll<HTMLElement>('.paso-no-export').forEach(el => { el.style.display = 'none' })
