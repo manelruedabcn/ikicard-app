@@ -29,7 +29,6 @@ import {
   ZONA_EQUILIBRIO,
   PASO_PENDING_KEY,
   calcularSegmentos,
-  firmaTexto,
   resolverCodigoPorSegmentos,
 } from '@/lib/paso-segments'
 import { generarNarrativa } from '@/lib/paso-narrativa'
@@ -326,7 +325,6 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
   // Asignación por SEGMENTOS (norming DISC adaptado): tu firma exacta
   // (1 de 2.401) y, de ahí, tu Caminante.
   const segmentos = calcularSegmentos(inf.scores)
-  const firma = firmaTexto(segmentos)
   const codigo = resolverCodigoPorSegmentos(segmentos)
   const patron = getLocalizedPatron(codigo, locale)
   // Eje dominante POR SEGMENTOS (zona más alta, empate → orden P-A-S-O): la misma
@@ -363,7 +361,6 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
           </h1>
           <p className="text-xs leading-relaxed text-[#272727]/45 mt-2 px-4">{t('pattern_framing')}</p>
           <p className="text-sm text-[#272727]/55 mt-2">{t('rareza_' + getRareza(codigo))}</p>
-          <p className="text-xs tracking-[0.3em] text-[#272727]/40 mt-2">{firma}</p>
           {/* FOMO M3: anzuelo de rareza que tira hasta el mapa de los 15 (al final) */}
           <p className="text-[13px] italic text-[#c2866b]/80 mt-3">
             {teaserRareza(getRareza(codigo), locale)}

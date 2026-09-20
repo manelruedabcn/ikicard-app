@@ -1,6 +1,6 @@
 import { Resend } from 'resend'
 import { DIMS, getPasoPatterns, getLocalizedPatron, type Dim, type InformePaso } from '@/lib/paso-content'
-import { calcularSegmentos, firmaTexto } from '@/lib/paso-segments'
+import { calcularSegmentos } from '@/lib/paso-segments'
 import { generarNarrativa } from '@/lib/paso-narrativa'
 import { generarTitulares } from '@/lib/paso-titulares'
 import { getRareza } from '@/lib/paso-rareza'
@@ -184,7 +184,6 @@ export async function sendResultEmail(to: string, locale: string, codigo: string
   const nombre = patron?.nombre ?? ''
   const url = `${APP_URL}/${l}/paso/forma/${encodeURIComponent(codigo)}`
   const segmentos = calcularSegmentos(inf.scores)
-  const firma = firmaTexto(segmentos)
   const dominante = DIMS.reduce((a, b) => (segmentos[a] >= segmentos[b] ? a : b))
   const titulares = generarTitulares(inf, dominante, l)
   const narrativa = generarNarrativa(inf, l)
@@ -295,7 +294,6 @@ export async function sendResultEmail(to: string, locale: string, codigo: string
       <p style="font-size:15px;line-height:1.7;color:rgba(39,39,39,0.8);text-align:center;">${c.intro}</p>
       <p style="font-family:Georgia,serif;font-size:30px;text-align:center;color:#272727;margin:12px 0 4px;">${escapeHtml(nombre)}</p>
       <p style="font-size:12px;text-align:center;color:#8b8179;margin:5px 0;">${escapeHtml(rarezaTexto[l][rareza])}</p>
-      <p style="font-size:12px;letter-spacing:.22em;text-align:center;color:#a59b92;margin:8px 0 26px;">${escapeHtml(firma)}</p>
       ${titulares.map((text, i) => `<p style="${i === 0 ? 'font-family:Georgia,serif;font-size:24px;color:#272727;' : 'font-size:14px;color:#766e68;'}line-height:1.5;text-align:center;margin:${i === 0 ? '0 0 10px' : '3px 0'};">${escapeHtml(text)}</p>`).join('')}
       ${patron?.retrato ? `<p style="font-size:15px;line-height:1.7;color:#5c554f;text-align:center;margin:28px 0;">${escapeHtml(patron.retrato)}</p>` : ''}
       <div style="background:#faf7f2;padding:18px 20px;margin:24px 0;"><p style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 12px;">${l === 'es' ? 'Qué mide PASO' : 'What PASO measures'}</p>${pasoMeaning.map(([name, text]) => `<p style="font-size:13px;line-height:1.55;margin:0 0 10px;color:#5c554f;"><strong>${escapeHtml(name)}</strong><br>${escapeHtml(text)}</p>`).join('')}</div>
