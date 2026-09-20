@@ -4,8 +4,19 @@
 
 type PasoPdfMeta = { pattern?: string; rarity?: string }
 const C = { paper: '#F8F4EE', ink: '#272421', terra: '#C2866B', sage: '#7A8B6F', gold: '#C5A15B' }
+// El informe se lee en móvil dentro de una columna estrecha. Si capturamos esa
+// misma columna y la estiramos hasta A4, la tipografía queda desproporcionada.
+// Para exportar componemos una versión editorial más ancha: 15 px en pantalla
+// se convierten aproximadamente en 11 pt sobre el papel.
+const PDF_RENDER_WIDTH = 680
 
 function prepararClon(doc: Document) {
+  doc.querySelectorAll<HTMLElement>('.paso-print-root').forEach(el => {
+    el.style.width = `${PDF_RENDER_WIDTH}px`
+    el.style.maxWidth = 'none'
+    el.style.marginLeft = 'auto'
+    el.style.marginRight = 'auto'
+  })
   doc.querySelectorAll<HTMLElement>('.paso-print-only').forEach(el => { el.style.display = 'block' })
   doc.querySelectorAll<HTMLElement>('.paso-screen-only').forEach(el => { el.style.display = 'none' })
   doc.querySelectorAll<HTMLElement>('.paso-no-export').forEach(el => { el.style.display = 'none' })
@@ -85,7 +96,14 @@ async function entregar(pdf: import('jspdf').jsPDF, fileName: string, mode: 'dow
 export async function generarPasoPdf(el: HTMLElement, fileName = 'PASO.pdf', mode: 'download' | 'share' = 'download', locale = 'es', meta: PasoPdfMeta = {}) {
   const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([import('html2canvas'), import('jspdf')])
   await document.fonts?.ready
-  const canvas = await html2canvas(el, { scale: 2.25, backgroundColor: '#FDFBF7', useCORS: true, windowWidth: el.scrollWidth, onclone: prepararClon })
+  const canvas = await html2canvas(el, {
+    scale: 2.25,
+    backgroundColor: '#FDFBF7',
+    useCORS: true,
+    width: PDF_RENDER_WIDTH,
+    windowWidth: PDF_RENDER_WIDTH + 80,
+    onclone: prepararClon,
+  })
   const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true })
   portada(pdf, locale, meta)
   const pageW = pdf.internal.pageSize.getWidth(), pageH = pdf.internal.pageSize.getHeight()
