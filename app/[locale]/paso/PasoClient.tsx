@@ -197,10 +197,10 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
             <p className="text-xs tracking-widest uppercase text-[#c2866b] mb-1">{t('example_eyebrow')}</p>
             <p className="text-sm leading-relaxed text-[#272727]/70 mb-4">{t('example_intro')}</p>
             <div className="flex items-center justify-end gap-2 mb-2 pr-1">
-              <span className="w-14 text-center text-[10px] tracking-widest uppercase text-[#c2866b]">
+              <span className="w-14 text-center text-xs tracking-widest uppercase text-[#c2866b]">
                 {t('mas')}
               </span>
-              <span className="w-14 text-center text-[10px] tracking-widest uppercase text-[#272727]/40">
+              <span className="w-14 text-center text-xs tracking-widest uppercase text-[#272727]/40">
                 {t('menos')}
               </span>
             </div>
@@ -260,10 +260,10 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
 
           {/* Cabecera de columnas */}
           <div className="flex items-center justify-end gap-2 mb-2 pr-1">
-            <span className="w-14 text-center text-[10px] tracking-widest uppercase text-[#c2866b]">
+            <span className="w-14 text-center text-xs tracking-widest uppercase text-[#c2866b]">
               {t('mas')}
             </span>
-            <span className="w-14 text-center text-[10px] tracking-widest uppercase text-[#272727]/40">
+            <span className="w-14 text-center text-xs tracking-widest uppercase text-[#272727]/40">
               {t('menos')}
             </span>
           </div>
@@ -811,7 +811,7 @@ function BrechasBlock({
             <div key={b.dimension} className="flex flex-col gap-0.5">
               <div className="flex items-baseline justify-between gap-3">
                 <div className="flex items-baseline gap-2 min-w-0">
-                  <span className="text-[10px] tabular-nums text-[#272727]/35 w-3 shrink-0">
+                  <span className="text-xs tabular-nums text-[#272727]/35 w-3 shrink-0">
                     {index + 1}
                   </span>
                   <span
@@ -852,12 +852,12 @@ function FirmaBlock({
   segmentos: Record<Dim, number>
   t: (k: string, v?: Record<string, string | number>) => string
 }) {
-  const W = 320
-  const H = 225
-  const plotTop = 22
-  const plotBottom = 172
-  const barWidth = 38
-  const positions = [72, 132, 192, 252]
+  const W = 430
+  const H = 270
+  const plotTop = 28
+  const plotBottom = 205
+  const barWidth = 48
+  const positions = [110, 195, 280, 365]
   const y = (z: number) => plotBottom - (z / NUM_ZONAS) * (plotBottom - plotTop)
   const dominante = DIMS.reduce((a, b) => (segmentos[a] >= segmentos[b] ? a : b))
   return (
@@ -869,16 +869,16 @@ function FirmaBlock({
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label={t('firma_title')}>
         {Array.from({ length: NUM_ZONAS }, (_, i) => i + 1).map(z => (
           <g key={z}>
-            <line x1="46" y1={y(z)} x2="288" y2={y(z)}
+            <line x1="70" y1={y(z)} x2="405" y2={y(z)}
               stroke="#272727" strokeOpacity={z === ZONA_EQUILIBRIO ? 0.28 : 0.1}
               strokeWidth={z === ZONA_EQUILIBRIO ? 1.2 : 0.7}
               strokeDasharray={z === ZONA_EQUILIBRIO ? '4 3' : undefined} />
-            <text x="35" y={y(z) + 3} textAnchor="end" fontSize="8" className="fill-[#272727]" opacity="0.45">{z}</text>
+            <text x="57" y={y(z) + 4} textAnchor="end" fontSize="12" className="fill-[#272727]" opacity="0.45">{z}</text>
           </g>
         ))}
-        <text x="15" y={plotTop + 3} fontSize="7" className="fill-[#272727]" opacity="0.4">{t('firma_alta')}</text>
-        <text x="15" y={plotBottom} fontSize="7" className="fill-[#272727]" opacity="0.4">{t('firma_baja')}</text>
-        <text x="286" y={y(ZONA_EQUILIBRIO) - 5} textAnchor="end" fontSize="7" className="fill-[#272727]" opacity="0.45">{t('linea_equilibrio')}</text>
+        <text x="8" y={plotTop + 4} fontSize="12" className="fill-[#272727]" opacity="0.4">{t('firma_alta')}</text>
+        <text x="8" y={plotBottom} fontSize="12" className="fill-[#272727]" opacity="0.4">{t('firma_baja')}</text>
+        <text x="402" y={y(ZONA_EQUILIBRIO) - 7} textAnchor="end" fontSize="12" className="fill-[#272727]" opacity="0.45">{t('linea_equilibrio')}</text>
         {DIMS.map((d, i) => {
           const value = segmentos[d]
           const top = y(value)
@@ -887,9 +887,9 @@ function FirmaBlock({
             <g key={d}>
               <rect x={positions[i] - barWidth / 2} y={top} width={barWidth} height={plotBottom - top}
                 rx="5" fill={active ? '#c2866b' : '#7a8b6f'} fillOpacity={active ? 0.95 : 0.72} />
-              <text x={positions[i]} y={top - 7} textAnchor="middle" fontSize="11" fontWeight="600" className="fill-[#272727]">{value}</text>
-              <text x={positions[i]} y="192" textAnchor="middle" fontSize="17" fontWeight="600" className="fill-[#272727]">{d}</text>
-              <text x={positions[i]} y="207" textAnchor="middle" fontSize="7.5" className="fill-[#272727]" opacity="0.6">{t('dim_' + d)}</text>
+              <text x={positions[i]} y={top - 8} textAnchor="middle" fontSize="12" fontWeight="600" className="fill-[#272727]">{value}</text>
+              <text x={positions[i]} y="229" textAnchor="middle" fontSize="18" fontWeight="600" className="fill-[#272727]">{d}</text>
+              <text x={positions[i]} y="250" textAnchor="middle" fontSize="12" className="fill-[#272727]" opacity="0.6">{t('dim_' + d)}</text>
             </g>
           )
         })}
@@ -924,11 +924,11 @@ function QueEsPasoBlock({
             </span>
             <div className="mt-auto flex flex-col gap-2.5">
               <div>
-                <strong className="block text-[10px] tracking-wide uppercase text-[#7a8b6f] font-medium mb-0.5">{t('que_es_equilibrio')}</strong>
+                <strong className="block text-xs tracking-wide uppercase text-[#7a8b6f] font-medium mb-0.5">{t('que_es_equilibrio')}</strong>
                 <span className="block text-xs leading-relaxed text-[#272727]/65">{t('que_es_' + d + '_equilibrio')}</span>
               </div>
               <div>
-                <strong className="block text-[10px] tracking-wide uppercase text-[#c2866b] font-medium mb-0.5">{t('que_es_domina')}</strong>
+                <strong className="block text-xs tracking-wide uppercase text-[#c2866b] font-medium mb-0.5">{t('que_es_domina')}</strong>
                 <span className="block text-xs leading-relaxed text-[#272727]/65">{t('que_es_' + d + '_domina')}</span>
               </div>
             </div>
@@ -1024,7 +1024,7 @@ function HorizonGraph({
           strokeWidth={1}
           strokeDasharray="3 3"
         />
-        <text x={padX} y={y(ZONA_EQUILIBRIO) - 4} fontSize={8} className="fill-[#272727]" opacity={0.35}>
+        <text x={padX} y={y(ZONA_EQUILIBRIO) - 5} fontSize={12} className="fill-[#272727]" opacity={0.35}>
           {t('linea_equilibrio')}
         </text>
         {/* Máscara: curva que muestras (terracota) */}
@@ -1043,7 +1043,7 @@ function HorizonGraph({
               y={H - 8}
               textAnchor="middle"
               className="fill-[#272727]"
-              fontSize={11}
+              fontSize={12}
             >
               {labels[i]}
             </text>

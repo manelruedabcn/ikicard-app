@@ -19,7 +19,7 @@ function shell(inner: string): string {
       <p style="letter-spacing:0.3em;font-size:13px;color:#272727;text-align:center;margin:0 0 28px;">IKIGAIER</p>
       ${inner}
       <hr style="border:none;border-top:1px solid rgba(39,39,39,0.12);margin:32px 0 16px;" />
-      <p style="font-size:11px;color:rgba(39,39,39,0.4);text-align:center;line-height:1.6;margin:0;">
+      <p style="font-size:12px;color:rgba(39,39,39,0.4);text-align:center;line-height:1.6;margin:0;">
         app.ikigaier.com
       </p>
     </div>
@@ -57,7 +57,7 @@ const enrollmentCopy: Record<Lang, { subject: string; html: (unsubUrl: string) =
         Te enviaré un recordatorio suave cada mañana para que no pierdas el día.
       </p>
       ${button(APP_URL, 'ABRIR MI VIAJE')}
-      <p style="font-size:11px;color:rgba(39,39,39,0.4);text-align:center;margin-top:24px;">
+      <p style="font-size:12px;color:rgba(39,39,39,0.4);text-align:center;margin-top:24px;">
         Si no quieres recibir recordatorios, <a href="${unsubUrl}" style="color:rgba(39,39,39,0.5);">desactívalos aquí</a>.
       </p>
     `),
@@ -79,7 +79,7 @@ const enrollmentCopy: Record<Lang, { subject: string; html: (unsubUrl: string) =
         I'll send you a gentle reminder each morning so you don't lose the day.
       </p>
       ${button(APP_URL, 'OPEN MY JOURNEY')}
-      <p style="font-size:11px;color:rgba(39,39,39,0.4);text-align:center;margin-top:24px;">
+      <p style="font-size:12px;color:rgba(39,39,39,0.4);text-align:center;margin-top:24px;">
         If you'd rather not get reminders, <a href="${unsubUrl}" style="color:rgba(39,39,39,0.5);">turn them off here</a>.
       </p>
     `),
@@ -96,7 +96,7 @@ const reminderCopy: Record<Lang, { subject: (day: number) => string; html: (day:
         Hoy te esperan tres cartas. Tómate un momento, léelas con calma y quédate con una palabra de cada una.
       </p>
       ${button(APP_URL, 'ENTRAR AL VIAJE')}
-      <p style="font-size:11px;color:rgba(39,39,39,0.4);text-align:center;margin-top:24px;">
+      <p style="font-size:12px;color:rgba(39,39,39,0.4);text-align:center;margin-top:24px;">
         <a href="${unsubUrl}" style="color:rgba(39,39,39,0.5);">Desactivar recordatorios</a>
       </p>
     `),
@@ -109,7 +109,7 @@ const reminderCopy: Record<Lang, { subject: (day: number) => string; html: (day:
         Three cards await you today. Take a moment, read them calmly and keep one word from each.
       </p>
       ${button(APP_URL, 'ENTER THE JOURNEY')}
-      <p style="font-size:11px;color:rgba(39,39,39,0.4);text-align:center;margin-top:24px;">
+      <p style="font-size:12px;color:rgba(39,39,39,0.4);text-align:center;margin-top:24px;">
         <a href="${unsubUrl}" style="color:rgba(39,39,39,0.5);">Turn off reminders</a>
       </p>
     `),
@@ -132,7 +132,7 @@ const leadWelcomeCopy: Record<Lang, { subject: string; html: (unsubUrl: string) 
         IKIGAIER es un universo de herramientas para conocerte mejor, y las voy abriendo poco a poco. Te avisaré cuando llegue la siguiente —sin ruido, sin prisa.
       </p>
       ${button(APP_URL, 'VOLVER A IKIGAIER')}
-      <p style="font-size:11px;color:rgba(39,39,39,0.4);text-align:center;margin-top:24px;">
+      <p style="font-size:12px;color:rgba(39,39,39,0.4);text-align:center;margin-top:24px;">
         Si prefieres no recibir nada, <a href="${unsubUrl}" style="color:rgba(39,39,39,0.5);">date de baja aquí</a>.
       </p>
     `),
@@ -148,7 +148,7 @@ const leadWelcomeCopy: Record<Lang, { subject: string; html: (unsubUrl: string) 
         IKIGAIER is a universe of tools to know yourself better, and I open them little by little. I'll let you know when the next one arrives —no noise, no rush.
       </p>
       ${button(APP_URL, 'BACK TO IKIGAIER')}
-      <p style="font-size:11px;color:rgba(39,39,39,0.4);text-align:center;margin-top:24px;">
+      <p style="font-size:12px;color:rgba(39,39,39,0.4);text-align:center;margin-top:24px;">
         If you'd rather not hear from me, <a href="${unsubUrl}" style="color:rgba(39,39,39,0.5);">unsubscribe here</a>.
       </p>
     `),
@@ -208,9 +208,9 @@ export async function sendResultEmail(to: string, locale: string, codigo: string
     return `<tr>
       <td style="padding:10px 8px 10px 0;width:105px;font-size:13px;color:#272727;">${eje[l][d]}</td>
       <td style="padding:7px 0;">
-        <div style="font-size:10px;color:#8b8179;margin-bottom:3px;">${labels.shown}: ${inf.mascara[d]}</div>
+        <div style="font-size:12px;color:#8b8179;margin-bottom:3px;">${labels.shown}: ${inf.mascara[d]}</div>
         <div style="height:7px;background:#eee9e3;"><div style="height:7px;width:${maskWidth}%;background:#c2866b;"></div></div>
-        <div style="font-size:10px;color:#8b8179;margin:5px 0 3px;">${labels.inside}: ${inf.natural[d]}</div>
+        <div style="font-size:12px;color:#8b8179;margin:5px 0 3px;">${labels.inside}: ${inf.natural[d]}</div>
         <div style="height:7px;background:#eee9e3;"><div style="height:7px;width:${naturalWidth}%;background:#7a8b6f;"></div></div>
       </td>
     </tr>`
@@ -258,7 +258,7 @@ export async function sendResultEmail(to: string, locale: string, codigo: string
     [labels.pressure, patron.bajo_presion],
     [labels.fear, patron.teme],
     [labels.effective, patron.seria_mas_eficaz_si],
-  ].map(([label, text]) => `<div style="margin:0 0 18px;"><p style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#c2866b;margin:0 0 5px;">${escapeHtml(label)}</p><p style="font-size:14px;line-height:1.65;margin:0;color:#403b37;">${escapeHtml(text)}</p></div>`).join('') : ''
+  ].map(([label, text]) => `<div style="margin:0 0 18px;"><p style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#c2866b;margin:0 0 5px;">${escapeHtml(label)}</p><p style="font-size:14px;line-height:1.65;margin:0;color:#403b37;">${escapeHtml(text)}</p></div>`).join('') : ''
   const pasoMeaning = l === 'es'
     ? [
         ['Pisar firme', 'La energía para decidir, tomar posición y avanzar. En equilibrio aporta determinación y valentía; cuando domina puede convertirse en presión, impaciencia o necesidad de control.'],
@@ -295,17 +295,17 @@ export async function sendResultEmail(to: string, locale: string, codigo: string
       <p style="font-size:15px;line-height:1.7;color:rgba(39,39,39,0.8);text-align:center;">${c.intro}</p>
       <p style="font-family:Georgia,serif;font-size:30px;text-align:center;color:#272727;margin:12px 0 4px;">${escapeHtml(nombre)}</p>
       <p style="font-size:12px;text-align:center;color:#8b8179;margin:5px 0;">${escapeHtml(rarezaTexto[l][rareza])}</p>
-      <p style="font-size:11px;letter-spacing:.22em;text-align:center;color:#a59b92;margin:8px 0 26px;">${escapeHtml(firma)}</p>
+      <p style="font-size:12px;letter-spacing:.22em;text-align:center;color:#a59b92;margin:8px 0 26px;">${escapeHtml(firma)}</p>
       ${titulares.map((text, i) => `<p style="${i === 0 ? 'font-family:Georgia,serif;font-size:24px;color:#272727;' : 'font-size:14px;color:#766e68;'}line-height:1.5;text-align:center;margin:${i === 0 ? '0 0 10px' : '3px 0'};">${escapeHtml(text)}</p>`).join('')}
       ${patron?.retrato ? `<p style="font-size:15px;line-height:1.7;color:#5c554f;text-align:center;margin:28px 0;">${escapeHtml(patron.retrato)}</p>` : ''}
-      <div style="background:#faf7f2;padding:18px 20px;margin:24px 0;"><p style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 12px;">${l === 'es' ? 'Qué mide PASO' : 'What PASO measures'}</p>${pasoMeaning.map(([name, text]) => `<p style="font-size:13px;line-height:1.55;margin:0 0 10px;color:#5c554f;"><strong>${escapeHtml(name)}</strong><br>${escapeHtml(text)}</p>`).join('')}</div>
+      <div style="background:#faf7f2;padding:18px 20px;margin:24px 0;"><p style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 12px;">${l === 'es' ? 'Qué mide PASO' : 'What PASO measures'}</p>${pasoMeaning.map(([name, text]) => `<p style="font-size:13px;line-height:1.55;margin:0 0 10px;color:#5c554f;"><strong>${escapeHtml(name)}</strong><br>${escapeHtml(text)}</p>`).join('')}</div>
       <div style="background:#f5f1eb;padding:18px 20px;margin:24px 0;">
-        <p style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 8px;">${l === 'es' ? 'Tu firma PASO' : 'Your PASO signature'}</p>
+        <p style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 8px;">${l === 'es' ? 'Tu firma PASO' : 'Your PASO signature'}</p>
         <p style="font-size:13px;line-height:1.55;color:#5c554f;margin:0 0 12px;">${l === 'es' ? 'Esta combinación origina el nombre de tu Caminante. Cada barra sitúa una dimensión entre la zona 1 (presencia muy baja) y la zona 7 (presencia muy alta).' : 'This combination gives your Walker its name. Each bar places one dimension between zone 1 (very low presence) and zone 7 (very high presence).'}</p>
         <table role="presentation" style="width:100%;border-collapse:collapse;">${signatureRows}</table>
       </div>
       ${patternFields}
-      <p style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#c2866b;margin:30px 0 8px;">${labels.reading}</p>
+      <p style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#c2866b;margin:30px 0 8px;">${labels.reading}</p>
       <table role="presentation" style="width:100%;border-collapse:collapse;background:#faf7f2;padding:12px;">${graphRows}</table>
       <div style="margin:28px 0;">
         <p style="font-size:14px;line-height:1.7;color:#5c554f;">${escapeHtml(narrativa.intro)}</p>
@@ -313,9 +313,9 @@ export async function sendResultEmail(to: string, locale: string, codigo: string
         ${narrativa.sintesis ? `<p style="font-size:14px;line-height:1.7;color:#272727;">${escapeHtml(narrativa.sintesis)}</p>` : ''}
         ${narrativa.invitacion ? `<p style="font-family:Georgia,serif;font-size:20px;color:#c2866b;">${escapeHtml(narrativa.invitacion)}</p>` : ''}
       </div>
-      <div style="background:#f5f1eb;padding:18px 20px;margin:24px 0;"><p style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 8px;">${labels.gap}</p><p style="font-size:13px;line-height:1.55;color:#5c554f;margin:0 0 14px;">${escapeHtml(labels.gapIntro)}</p><ol style="font-size:13px;line-height:1.55;color:#5c554f;margin:0;padding-left:18px;list-style:none;">${gapRows}</ol><p style="font-size:12px;line-height:1.5;color:#8b8179;border-top:1px solid #ded8d1;margin:14px 0 0;padding-top:12px;">${escapeHtml(labels.gapRepeat)}</p></div>
-      <div style="background:#f5f1eb;padding:18px 20px;margin:24px 0;"><p style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 12px;">${l === 'es' ? 'Las 15 formas de caminar' : 'The 15 ways of walking'}</p><ul style="font-size:13px;line-height:1.45;margin:0;padding-left:18px;">${mapHtml}</ul></div>
-      ${patron?.libro_recomendado ? `<div style="border:1px solid #e1c7ba;background:#fbf4f0;padding:18px;text-align:center;margin:28px 0;"><p style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#c2866b;margin:0 0 8px;">${labels.book}</p><p style="font-family:Georgia,serif;font-size:21px;margin:0;">${escapeHtml(patron.libro_recomendado)}</p></div>` : ''}
+      <div style="background:#f5f1eb;padding:18px 20px;margin:24px 0;"><p style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 8px;">${labels.gap}</p><p style="font-size:13px;line-height:1.55;color:#5c554f;margin:0 0 14px;">${escapeHtml(labels.gapIntro)}</p><ol style="font-size:13px;line-height:1.55;color:#5c554f;margin:0;padding-left:18px;list-style:none;">${gapRows}</ol><p style="font-size:12px;line-height:1.5;color:#8b8179;border-top:1px solid #ded8d1;margin:14px 0 0;padding-top:12px;">${escapeHtml(labels.gapRepeat)}</p></div>
+      <div style="background:#f5f1eb;padding:18px 20px;margin:24px 0;"><p style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 12px;">${l === 'es' ? 'Las 15 formas de caminar' : 'The 15 ways of walking'}</p><ul style="font-size:13px;line-height:1.45;margin:0;padding-left:18px;">${mapHtml}</ul></div>
+      ${patron?.libro_recomendado ? `<div style="border:1px solid #e1c7ba;background:#fbf4f0;padding:18px;text-align:center;margin:28px 0;"><p style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#c2866b;margin:0 0 8px;">${labels.book}</p><p style="font-family:Georgia,serif;font-size:21px;margin:0;">${escapeHtml(patron.libro_recomendado)}</p></div>` : ''}
       ${button(url, labels.cta)}
       <p style="font-size:12px;color:rgba(39,39,39,0.5);text-align:center;margin-top:8px;">${labels.note}</p>
     `),
