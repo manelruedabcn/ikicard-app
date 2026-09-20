@@ -8,14 +8,25 @@ const C = { paper: '#F8F4EE', ink: '#272421', terra: '#C2866B', sage: '#7A8B6F',
 // misma columna y la estiramos hasta A4, la tipografía queda desproporcionada.
 // Para exportar componemos una versión editorial más ancha: 15 px en pantalla
 // se convierten aproximadamente en 11 pt sobre el papel.
-const PDF_RENDER_WIDTH = 680
+const PDF_RENDER_WIDTH = 640
 
 function prepararClon(doc: Document) {
   doc.querySelectorAll<HTMLElement>('.paso-print-root').forEach(el => {
     el.style.width = `${PDF_RENDER_WIDTH}px`
     el.style.maxWidth = 'none'
+    el.style.boxSizing = 'border-box'
+    el.style.padding = '8px 30px 34px'
     el.style.marginLeft = 'auto'
     el.style.marginRight = 'auto'
+  })
+  // En papel los módulos necesitan más aire que en una pantalla estrecha.
+  doc.querySelectorAll<HTMLElement>('.paso-print-root .rounded-xl').forEach(el => {
+    el.style.paddingLeft = '26px'
+    el.style.paddingRight = '26px'
+  })
+  doc.querySelectorAll<HTMLElement>('.paso-print-root .rounded-lg').forEach(el => {
+    el.style.paddingLeft = '20px'
+    el.style.paddingRight = '20px'
   })
   doc.querySelectorAll<HTMLElement>('.paso-report-title').forEach(el => { el.style.fontSize = '30px' })
   doc.querySelectorAll<HTMLElement>('.paso-report-lead').forEach(el => { el.style.fontSize = '20px' })
