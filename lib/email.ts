@@ -216,6 +216,19 @@ export async function sendResultEmail(to: string, locale: string, codigo: string
     </tr>`
   }).join('')
 
+  const signatureRows = DIMS.map(d => {
+    const zone = segmentos[d]
+    const width = Math.max(8, (zone / 7) * 100)
+    const active = d === dominante
+    return `<tr>
+      <td style="padding:10px 10px 10px 0;width:105px;font-size:13px;color:#272727;">${eje[l][d]}</td>
+      <td style="padding:10px 0;">
+        <div style="height:14px;background:#e8e2dc;border-radius:7px;overflow:hidden;"><div style="height:14px;width:${width}%;background:${active ? '#c2866b' : '#7a8b6f'};border-radius:7px;"></div></div>
+      </td>
+      <td style="padding:10px 0 10px 12px;width:52px;font-size:13px;font-weight:bold;color:#5c554f;text-align:right;">${zone}/7</td>
+    </tr>`
+  }).join('')
+
   const gapRows = inf.brechas.map((b, index) => {
     const abs = Math.abs(b.valor)
     const traits: Record<Lang, Record<Dim, string>> = {
@@ -285,6 +298,13 @@ export async function sendResultEmail(to: string, locale: string, codigo: string
       <p style="font-size:11px;letter-spacing:.22em;text-align:center;color:#a59b92;margin:8px 0 26px;">${escapeHtml(firma)}</p>
       ${titulares.map((text, i) => `<p style="${i === 0 ? 'font-family:Georgia,serif;font-size:24px;color:#272727;' : 'font-size:14px;color:#766e68;'}line-height:1.5;text-align:center;margin:${i === 0 ? '0 0 10px' : '3px 0'};">${escapeHtml(text)}</p>`).join('')}
       ${patron?.retrato ? `<p style="font-size:15px;line-height:1.7;color:#5c554f;text-align:center;margin:28px 0;">${escapeHtml(patron.retrato)}</p>` : ''}
+      <div style="background:#faf7f2;padding:18px 20px;margin:24px 0;"><p style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 12px;">${l === 'es' ? 'Qué mide PASO' : 'What PASO measures'}</p>${pasoMeaning.map(([name, text]) => `<p style="font-size:13px;line-height:1.55;margin:0 0 10px;color:#5c554f;"><strong>${escapeHtml(name)}</strong><br>${escapeHtml(text)}</p>`).join('')}</div>
+      <div style="background:#f5f1eb;padding:18px 20px;margin:24px 0;">
+        <p style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 8px;">${l === 'es' ? 'Tu firma PASO' : 'Your PASO signature'}</p>
+        <p style="font-size:13px;line-height:1.55;color:#5c554f;margin:0 0 12px;">${l === 'es' ? 'Esta combinación origina el nombre de tu Caminante. Cada barra sitúa una dimensión entre la zona 1 (presencia muy baja) y la zona 7 (presencia muy alta).' : 'This combination gives your Walker its name. Each bar places one dimension between zone 1 (very low presence) and zone 7 (very high presence).'}</p>
+        <table role="presentation" style="width:100%;border-collapse:collapse;">${signatureRows}</table>
+      </div>
+      ${patternFields}
       <p style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#c2866b;margin:30px 0 8px;">${labels.reading}</p>
       <table role="presentation" style="width:100%;border-collapse:collapse;background:#faf7f2;padding:12px;">${graphRows}</table>
       <div style="margin:28px 0;">
@@ -294,8 +314,6 @@ export async function sendResultEmail(to: string, locale: string, codigo: string
         ${narrativa.invitacion ? `<p style="font-family:Georgia,serif;font-size:20px;color:#c2866b;">${escapeHtml(narrativa.invitacion)}</p>` : ''}
       </div>
       <div style="background:#f5f1eb;padding:18px 20px;margin:24px 0;"><p style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 8px;">${labels.gap}</p><p style="font-size:13px;line-height:1.55;color:#5c554f;margin:0 0 14px;">${escapeHtml(labels.gapIntro)}</p><ol style="font-size:13px;line-height:1.55;color:#5c554f;margin:0;padding-left:18px;list-style:none;">${gapRows}</ol><p style="font-size:12px;line-height:1.5;color:#8b8179;border-top:1px solid #ded8d1;margin:14px 0 0;padding-top:12px;">${escapeHtml(labels.gapRepeat)}</p></div>
-      <div style="background:#faf7f2;padding:18px 20px;margin:24px 0;"><p style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 12px;">${l === 'es' ? 'Qué mide PASO' : 'What PASO measures'}</p>${pasoMeaning.map(([name, text]) => `<p style="font-size:13px;line-height:1.55;margin:0 0 10px;color:#5c554f;"><strong>${escapeHtml(name)}</strong><br>${escapeHtml(text)}</p>`).join('')}</div>
-      ${patternFields}
       <div style="background:#f5f1eb;padding:18px 20px;margin:24px 0;"><p style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 12px;">${l === 'es' ? 'Las 15 formas de caminar' : 'The 15 ways of walking'}</p><ul style="font-size:13px;line-height:1.45;margin:0;padding-left:18px;">${mapHtml}</ul></div>
       ${patron?.libro_recomendado ? `<div style="border:1px solid #e1c7ba;background:#fbf4f0;padding:18px;text-align:center;margin:28px 0;"><p style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#c2866b;margin:0 0 8px;">${labels.book}</p><p style="font-family:Georgia,serif;font-size:21px;margin:0;">${escapeHtml(patron.libro_recomendado)}</p></div>` : ''}
       ${button(url, labels.cta)}

@@ -260,11 +260,11 @@ export const PASO_PATRONES: Patron[] = [
   {
     "codigo": "AAAA",
     "nombre": "Caminante en Compañía",
-    "retrato": "Caminas hacia la gente. Los pasos te saben distintos cuando hay alguien al lado con quien compartirlos, y tu energía crece con la del grupo. Tu don es unir a la gente; tu aprendizaje, descubrir que los tramos en soledad también son tuyos y también te sostienen.",
-    "motivacion": "Que el camino se comparta. Un logro sin nadie que lo celebre casi no cuenta como logro.",
-    "bajo_presion": "Dispersas energía en conversación y validación, y a veces confundes hablar del problema con resolverlo.",
-    "teme": "El camino silencioso, sin testigos ni reconocimiento.",
-    "seria_mas_eficaz_si": "Te entrenaras en sostener tramos en soledad, sin que eso signifique perder el rumbo.",
+    "retrato": "Caminas hacia la gente. Tu energía se activa en el encuentro: piensas mejor al conversar, das sentido a lo vivido cuando puedes compartirlo y detectas con facilidad qué necesita un grupo para sentirse unido. Sueles crear cercanía, abrir puertas y hacer que otros se sientan incluidos. No buscas compañía solo para no estar a solas; la relación es una de tus principales formas de comprender el mundo y de avanzar por él. Tu don es conectar personas, contagiar entusiasmo y convertir un recorrido individual en una experiencia compartida. El riesgo aparece cuando la mirada ajena pesa tanto que adaptas tu paso, callas lo que necesitas o confundes pertenecer con agradar. Tu aprendizaje no consiste en alejarte de los demás, sino en comprobar que también puedes escucharte, decidir y sostenerte cuando nadie valida el camino.",
+    "motivacion": "Te mueve sentir que el camino tiene destinatario y compañía. Necesitas intercambio, respuesta y la sensación de que lo que haces acerca a las personas. Celebrar juntos, conversar y crear pertenencia alimenta tu energía. Cuando esa conexión es auténtica, haces que los grupos avancen con más confianza y humanidad.",
+    "bajo_presion": "Buscas más conversación, presencia o aprobación para recuperar seguridad. Puedes dispersarte atendiendo a todos, aceptar compromisos para no decepcionar o hablar mucho de lo que ocurre sin llegar a decidir. Si temes perder el vínculo, corres el riesgo de ajustar demasiado tu conducta a lo que esperan los demás.",
+    "teme": "Quedarte fuera, no ser tenido en cuenta o recorrer un tramo importante sin testigos, respuesta ni reconocimiento. En el fondo, puede inquietarte que elegirte a ti mismo ponga en peligro la pertenencia.",
+    "seria_mas_eficaz_si": "Diferenciaras conexión de aprobación. Seguir cerca de la gente sin abandonar tu propio criterio; preguntar qué quieres antes de adaptarte; y entrenarte en completar algunos tramos en soledad, no como aislamiento, sino como una forma de volver a ti.",
     "libro_recomendado": "Camina sin separarte de ti"
   },
   {

@@ -53,11 +53,11 @@ export const PASO_PATTERNS_EN: Patron[] = [
   },
   {
     codigo: 'AAAA', nombre: 'Companion Walker',
-    retrato: 'You walk towards people. Each step feels different when someone is beside you, and your energy grows with the group. Your gift is bringing people together; your learning is discovering that solitary stretches also belong to you and can sustain you.',
-    motivacion: 'For the journey to be shared. An achievement with nobody to celebrate it with barely feels like an achievement.',
-    bajo_presion: 'You scatter energy through conversation and validation, sometimes mistaking talking about the problem for solving it.',
-    teme: 'The silent road, without witnesses or recognition.',
-    seria_mas_eficaz_si: 'You practised sustaining stretches on your own without interpreting solitude as losing direction.',
+    retrato: 'You walk towards people. Your energy comes alive through encounter: you think more clearly in conversation, make sense of experience by sharing it and readily notice what a group needs in order to feel united. You tend to create warmth, open doors and help others feel included. You do not seek company simply to avoid being alone; relationships are one of your main ways of understanding the world and moving through it. Your gift is connecting people, spreading enthusiasm and turning an individual journey into a shared experience. The risk appears when other people’s gaze carries so much weight that you alter your pace, silence your needs or confuse belonging with pleasing. Your learning is not to move away from others, but to discover that you can also listen to yourself, decide and sustain your path when nobody is validating it.',
+    motivacion: 'You are moved by the feeling that the journey has both a recipient and companions. You need exchange, response and the sense that what you do brings people closer. Shared celebration, conversation and belonging feed your energy. When that connection is genuine, you help groups move with greater confidence and humanity.',
+    bajo_presion: 'You seek more conversation, presence or approval to recover a sense of safety. You may scatter your energy by attending to everyone, accept commitments to avoid disappointing people, or talk at length about what is happening without reaching a decision. If you fear losing the bond, you may adapt your behaviour too much to what others expect.',
+    teme: 'Being left out, not being considered, or walking an important stretch without witnesses, response or recognition. Underneath, you may fear that choosing yourself will endanger your belonging.',
+    seria_mas_eficaz_si: 'You distinguished connection from approval: staying close to people without abandoning your own judgement, asking what you want before adapting, and practising the completion of some stretches alone—not as isolation, but as a way of returning to yourself.',
     libro_recomendado: 'Camina sin separarte de ti',
   },
   {

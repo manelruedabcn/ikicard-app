@@ -373,10 +373,8 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
             Da el golpe visual y empuja a leer el desarrollo de abajo. */}
         <TitularesBlock inf={inf} dominante={dominante} locale={locale} />
 
-        {/* El retrato del Caminante es el yo ADAPTADO (la máscara): describe
-            cómo te MUESTRAS, no quién eres. Se enmarca como tal para que las
-            frases (a veces absolutas) se lean como apariencia, no como veredicto;
-            la brecha con el yo natural la desarrolla NarrativaBlock justo debajo. */}
+        {/* El retrato nace de la firma PASO global. No es la máscara: resume el
+            arquetipo que dibuja la combinación de intensidades de los cuatro ejes. */}
         {patron?.retrato && (
           <div className="mt-8 mb-10 px-1">
             <p className="text-xs tracking-widest uppercase text-[#c2866b] mb-2 text-center">
@@ -391,23 +389,12 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
         {/* La persona debe conocer los cuatro ejes antes de leer la curva. */}
         <QueEsPasoBlock t={t} />
 
-        {/* Gráfico horizonte: lo más visual del informe */}
-        <HorizonGraph inf={inf} labels={DIMS.map(d => t('dim_' + d))} t={t} />
-
-        {/* DESARROLLO (abajo): la lectura completa para quien quiere profundizar. */}
-
-        {/* La lectura máscara vs real: el corazón del test (protagonista) */}
-        <NarrativaBlock inf={inf} locale={locale} />
-
-        {/* Dónde te separas de ti (brechas máscara vs natural) */}
-        <BrechasBlock inf={inf} t={t} />
-
-        {/* Tu firma: la asignación precisa por zonas (1 de 2.401) */}
+        {/* Primero, la firma global: es la que determina el tipo de Caminante. */}
         <FirmaBlock segmentos={segmentos} t={t} />
 
-        {/* Lectura del patrón */}
+        {/* Después, la lectura amplia del arquetipo que esa firma origina. */}
         {patron && (
-          <div className="flex flex-col gap-6 mt-10 paso-break-before paso-avoid-break">
+          <div className="flex flex-col gap-6 mt-10 paso-avoid-break">
             {/* FOMO M2: teaser seco que anticipa «Lo que temes» sin resolverlo */}
             <p className="font-[family-name:var(--font-cormorant)] text-xl leading-snug text-[#272727] text-center px-4 mb-2">
               {teaserTemido(locale)}
@@ -418,6 +405,14 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
             <Field label={t('eficaz')} text={patron.seria_mas_eficaz_si} />
           </div>
         )}
+
+        {/* A continuación se abre una segunda lectura, distinta de la firma:
+            cómo se compara la máscara aprendida con la naturaleza interior. */}
+        <div className="paso-break-before">
+          <HorizonGraph inf={inf} labels={DIMS.map(d => t('dim_' + d))} t={t} />
+          <NarrativaBlock inf={inf} locale={locale} />
+          <BrechasBlock inf={inf} t={t} />
+        </div>
 
         {/* Mapa de las 15 formas de caminar: sitúa tu tipo entre todos.
             Refuerza que no es una etiqueta, sino una de muchas formas. */}
