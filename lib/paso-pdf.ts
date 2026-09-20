@@ -2,7 +2,7 @@
 // independientes buscando espacios visuales vacíos: nunca se desplaza una sola
 // imagen entre páginas, que era lo que cortaba titulares y párrafos.
 
-type PasoPdfMeta = { pattern?: string; signature?: string; rarity?: string }
+type PasoPdfMeta = { pattern?: string; rarity?: string }
 const C = { paper: '#F8F4EE', ink: '#272421', terra: '#C2866B', sage: '#7A8B6F', gold: '#C5A15B' }
 
 function prepararClon(doc: Document) {
@@ -20,19 +20,18 @@ function portada(pdf: import('jspdf').jsPDF, locale: string, meta: PasoPdfMeta) 
   pdf.setTextColor(248, 244, 238); pdf.setFont('times', 'normal'); pdf.setFontSize(32)
   pdf.text('ikigai', 22, 33); const bw = pdf.getTextWidth('ikigai')
   pdf.setTextColor(194, 134, 107); pdf.text('ER', 22 + bw, 33)
-  pdf.setTextColor(197, 161, 91); pdf.setFont('helvetica', 'normal'); pdf.setFontSize(9); pdf.setCharSpace(2.2)
+  pdf.setTextColor(197, 161, 91); pdf.setFont('helvetica', 'normal'); pdf.setFontSize(12); pdf.setCharSpace(2.2)
   pdf.text(locale === 'en' ? 'YOUR WAY OF WALKING' : 'TU FORMA DE CAMINAR', w / 2, 58, { align: 'center' }); pdf.setCharSpace(0)
   pdf.setTextColor(248, 244, 238); pdf.setFont('times', 'normal'); pdf.setFontSize(27)
   pdf.text(pdf.splitTextToSize(meta.pattern || (locale === 'en' ? 'Your PASO report' : 'Tu informe PASO'), 158), w / 2, 75, { align: 'center' })
   pdf.setTextColor(39, 36, 33); pdf.setFont('times', 'italic'); pdf.setFontSize(17)
   const promise = locale === 'en' ? 'Not a label. A mirror of how you walk today.' : 'No es una etiqueta. Es un espejo de cómo caminas hoy.'
   pdf.text(pdf.splitTextToSize(promise, 145), w / 2, 140, { align: 'center' })
-  if (meta.rarity) { pdf.setFont('helvetica', 'normal'); pdf.setFontSize(10); pdf.setTextColor(104, 96, 89); pdf.text(meta.rarity, w / 2, 166, { align: 'center' }) }
-  if (meta.signature) { pdf.setFontSize(9); pdf.setCharSpace(1.5); pdf.setTextColor(194, 134, 107); pdf.text(meta.signature, w / 2, 181, { align: 'center' }); pdf.setCharSpace(0) }
+  if (meta.rarity) { pdf.setFont('helvetica', 'normal'); pdf.setFontSize(12); pdf.setTextColor(104, 96, 89); pdf.text(meta.rarity, w / 2, 166, { align: 'center' }) }
   pdf.setDrawColor(194, 134, 107); pdf.setLineWidth(0.5); pdf.line(76, 205, 134, 205)
-  pdf.setFont('helvetica', 'normal'); pdf.setFontSize(9); pdf.setTextColor(104, 96, 89)
+  pdf.setFont('helvetica', 'normal'); pdf.setFontSize(12); pdf.setTextColor(104, 96, 89)
   pdf.text(locale === 'en' ? 'A personal reading from your answers' : 'Una lectura personal nacida de tus respuestas', w / 2, 219, { align: 'center' })
-  pdf.setFontSize(10); pdf.setTextColor(39, 36, 33); pdf.text('www.ikigaier.com', w / 2, 271, { align: 'center' })
+  pdf.setFontSize(12); pdf.setTextColor(39, 36, 33); pdf.text('www.ikigaier.com', w / 2, 271, { align: 'center' })
 }
 
 function tinta(data: Uint8ClampedArray, width: number, y: number) {
@@ -66,7 +65,7 @@ function marco(pdf: import('jspdf').jsPDF, page: number, locale: string) {
   pdf.setFillColor(C.paper); pdf.rect(0, 0, w, h, 'F')
   pdf.setFont('times', 'normal'); pdf.setFontSize(13); pdf.setTextColor(39, 36, 33); pdf.text('ikigai', 16, 13)
   const bw = pdf.getTextWidth('ikigai'); pdf.setTextColor(194, 134, 107); pdf.text('ER', 16 + bw, 13)
-  pdf.setFont('helvetica', 'normal'); pdf.setFontSize(7); pdf.setTextColor(130, 121, 113)
+  pdf.setFont('helvetica', 'normal'); pdf.setFontSize(12); pdf.setTextColor(130, 121, 113)
   pdf.text(locale === 'en' ? 'PERSONAL PASO REPORT' : 'INFORME PERSONAL PASO', w - 16, 13, { align: 'right' })
   pdf.setDrawColor(222, 214, 205); pdf.setLineWidth(0.25); pdf.line(16, 18, w - 16, 18)
   pdf.text(`www.ikigaier.com   ·   ${page}`, w / 2, h - 8, { align: 'center' })
