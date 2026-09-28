@@ -10,24 +10,19 @@ import { type Dim, type InformePaso } from './paso-content'
 
 type Locale = 'es' | 'en'
 
-const NOMBRE_EJE: Record<Locale, Record<Dim, string>> = {
-  es: { P: 'Pisar firme', A: 'Acompañar', S: 'Sostener', O: 'Observar' },
-  en: { P: 'Press on', A: 'Accompany', S: 'Sustain', O: 'Observe' },
-}
-
 // Titular del eje dominante: "tu fuerza es…". Sale del score más alto.
 const DOMINANTE: Record<Locale, Record<Dim, string>> = {
   es: {
-    P: 'Tu fuerza es decidir y avanzar.',
-    A: 'Tu fuerza es caminar acompañado.',
-    S: 'Tu fuerza es sostener el paso.',
-    O: 'Tu fuerza es mirar antes de pisar.',
+    P: 'Tiendes a decidir y poner las cosas en marcha.',
+    A: 'Tiendes a implicar a los demás en lo que ocurre.',
+    S: 'Tiendes a dar continuidad y mantener el ritmo.',
+    O: 'Tiendes a observar y comprender antes de actuar.',
   },
   en: {
-    P: 'Your strength is deciding and moving.',
-    A: 'Your strength is walking alongside others.',
-    S: 'Your strength is holding your pace.',
-    O: 'Your strength is looking before you step.',
+    P: 'You tend to decide and set things in motion.',
+    A: 'You tend to involve others in what is happening.',
+    S: 'You tend to provide continuity and maintain the pace.',
+    O: 'You tend to observe and understand before acting.',
   },
 }
 
@@ -73,9 +68,19 @@ const BRECHA: Record<Locale, Record<Dim, { exige: string; esconde: string }>> = 
   },
 }
 
-const FOCO: Record<Locale, (dim: string) => string> = {
-  es: dim => `Y donde más te separas de ti es en «${dim}».`,
-  en: dim => `And where you separate from yourself most is “${dim}”.`,
+const FOCO: Record<Locale, Record<Dim, string>> = {
+  es: {
+    P: 'La mayor distancia aparece entre cómo decides por dentro y la firmeza que muestras al avanzar.',
+    A: 'La mayor distancia aparece entre cuánto te importan los demás y cuánto lo dejas ver.',
+    S: 'La mayor distancia aparece entre el ritmo que te nace y el que sostienes por fuera.',
+    O: 'La mayor distancia aparece entre cuánto analizas por dentro y cuánto control muestras por fuera.',
+  },
+  en: {
+    P: 'The greatest distance appears between how you decide inside and the firmness you show as you move forward.',
+    A: 'The greatest distance appears between how much others matter to you and how much you let it show.',
+    S: 'The greatest distance appears between the pace that comes naturally and the one you maintain outwardly.',
+    O: 'The greatest distance appears between how much you analyse inside and how much control you show outwardly.',
+  },
 }
 
 const ALINEADO: Record<Locale, string> = {
@@ -108,7 +113,7 @@ export function generarTitulares(inf: InformePaso, dominante: Dim, locale: strin
   const top = separaciones[0]
   const dir = top.direccion === 'exige_de_mas' ? 'exige' : 'esconde'
   const tBrecha = BRECHA[L][top.dimension][dir]
-  const tFoco = FOCO[L](NOMBRE_EJE[L][top.dimension])
+  const tFoco = FOCO[L][top.dimension]
 
   return [tBrecha, tDominante, tFoco]
 }

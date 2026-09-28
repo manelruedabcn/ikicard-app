@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Isotipo circular IKIGAIER">
+  <title>IKIGAIER — isotipo círculo y A ascendente</title>
+  <!-- Geometría de la lámina aprobada: arco abierto y A sin travesaño,
+       con las patas prolongadas por debajo de los extremos del círculo. -->
+  <path id="circulo-abierto" d="M112 357 A190 190 0 1 1 400 357"
+        fill="none" stroke="#272625" stroke-width="24" stroke-linecap="butt"/>
+  <path id="a-ascendente" d="M256 137 L365 404 L320 404 L256 238 L192 404 L147 404 Z"
+        fill="#BC8266"/>
+</svg>

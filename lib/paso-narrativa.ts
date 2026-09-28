@@ -41,25 +41,25 @@ const FRASE: Record<Locale, Record<Dim, { exige: string; esconde: string }>> = {
   es: {
     P: {
       exige:
-        'Por fuera te muestras firme y frontal, siempre empujando hacia delante. Pero por dentro tu instinto no pide tanta marcha: te exiges avanzar y resolver más de lo que de verdad necesitas.',
+        'Por fuera te muestras firme y frontal, siempre empujando hacia delante. Pero por dentro no te nace ir con tanta marcha: te exiges avanzar y resolver más de lo que realmente necesitas.',
       esconde:
         'Por fuera apenas empujas, dejas que las cosas lleguen a su ritmo. Pero por dentro llevas más determinación de la que enseñas: guardas una fuerza para decidir que casi no sacas a la luz.',
     },
     A: {
       exige:
-        'Por fuera te muestras sociable y afable, muy pendiente de los demás. Pero por dentro no lo necesitas tanto: te exiges estar disponible y agradar más de lo que te nace.',
+        'Por fuera te muestras sociable y afable, muy pendiente de los demás. Pero por dentro no te nace estar tan disponible: te esfuerzas por agradar más de lo que realmente necesitas.',
       esconde:
         'Por fuera pareces ir a lo tuyo, sin depender de nadie. Pero por dentro la gente te importa mucho más de lo que dejas ver: guardas una necesidad de compañía que no muestras.',
     },
     S: {
       exige:
-        'Por fuera te muestras constante y en calma, con el ritmo siempre bajo control. Pero por dentro no lo estás tanto: te exiges aguantar y sostener más de lo que tu instinto pediría.',
+        'Por fuera te muestras constante y en calma, con el ritmo siempre bajo control. Pero por dentro no siempre estás así: te exiges aguantar y sostener más de lo que te nace.',
       esconde:
         'Por fuera muestras poca paciencia y vas cambiando el paso. Pero por dentro sostienes mucho más de lo que enseñas: guardas una constancia que no dejas ver.',
     },
     O: {
       exige:
-        'Por fuera te muestras detallista y prudente, mirando bien antes de dar cada paso. Pero por dentro no lo necesitas tanto: te exiges controlar y calcular más de lo que te sale natural.',
+        'Por fuera te muestras detallista y prudente, mirando bien antes de dar cada paso. Pero por dentro no necesitas tanto control: revisas y calculas más de lo que te nace.',
       esconde:
         'Por fuera pareces lanzarte sin darle muchas vueltas. Pero por dentro observas y calculas mucho más de lo que enseñas: guardas una cautela que no muestras.',
     },
@@ -98,21 +98,21 @@ const TEXTO: Record<
 > = {
   es: {
     intro:
-      'Esto no es una etiqueta. Es la distancia entre cómo te muestras por fuera y cómo caminas por dentro.',
+      'Al comparar ambas líneas aparece dónde tu forma visible de actuar coincide con tu tendencia espontánea y dónde necesita adaptación. Esta es la lectura que dibujan tus respuestas.',
     sintesis: dim =>
-      `Donde más te separas de ti es en «${dim}». Ahí es donde caminar te cuesta más — no por debilidad, sino porque llevas un traje que no acaba de ser tu piel.`,
-    invitacion: 'Caminar sin separarte de ti empieza justo por mirar ahí.',
+      `La mayor distancia aparece en «${dim}». No significa que estés fingiendo: ahí puede haber una adaptación que te ayuda, o un esfuerzo que empieza a pesarte.`,
+    invitacion: 'La pregunta no es qué parte es la correcta, sino si esa distancia te ayuda o te pesa.',
     alineadoIntro:
-      'Hoy caminas bastante cerca de ti: lo que muestras por fuera y lo que llevas por dentro van casi de la mano. No es poca cosa — es un buen lugar desde el que seguir caminando.',
+      'En tus respuestas, la forma que haces visible y tu tendencia espontánea van bastante de la mano. Te adaptas, como todo el mundo, pero sin alejarte demasiado de lo que te sale de manera natural.',
   },
   en: {
     intro:
-      "This isn't a label. It's the distance between how you show up on the outside and how you walk on the inside.",
+      'Comparing the two lines shows where your visible way of acting matches your spontaneous tendency and where it requires adaptation. This is the reading drawn by your answers.',
     sintesis: dim =>
-      `Where you separate from yourself the most is in “${dim}”. That's where walking costs you more — not out of weakness, but because you're wearing a suit that isn't quite your own skin.`,
-    invitacion: 'Walking without separating from yourself starts right there.',
+      `The largest distance appears in “${dim}”. It does not mean you are pretending: it may be an adaptation that helps you, or an effort that is beginning to weigh on you.`,
+    invitacion: 'The question is not which part is right, but whether that distance helps you or weighs on you.',
     alineadoIntro:
-      'Right now you walk quite close to yourself: what you show on the outside and what you carry inside go almost hand in hand. That\'s no small thing — it\'s a good place to keep walking from.',
+      'In your answers, the style you make visible and your spontaneous tendency largely go hand in hand. You adapt, as everyone does, without moving too far from what comes naturally.',
   },
 }
 

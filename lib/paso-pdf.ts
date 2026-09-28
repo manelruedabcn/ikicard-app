@@ -1,137 +1,218 @@
-// Exportación editorial del informe PASO. El informe se divide en láminas
-// independientes buscando espacios visuales vacíos: nunca se desplaza una sola
-// imagen entre páginas, que era lo que cortaba titulares y párrafos.
+// Generación del PDF del resultado PASO en el propio navegador.
+//
+// window.print() no sirve en móvil: en Safari es confuso y en los navegadores
+// dentro de apps (Instagram, etc.) no hace nada. Aquí capturamos el informe a
+// imagen y lo montamos en un PDF A4 real. El botón de descarga debe descargar
+// el archivo; compartir ya tiene su propia acción separada en la interfaz.
+//
+// Las librerías se importan de forma diferida (solo en el clic) para no cargar
+// nada en el render inicial ni romper el SSR.
 
-type PasoPdfMeta = { pattern?: string; rarity?: string }
-const C = { paper: '#F8F4EE', ink: '#272421', terra: '#C2866B', sage: '#7A8B6F', gold: '#C5A15B' }
-// El informe se lee en móvil dentro de una columna estrecha. Si capturamos esa
-// misma columna y la estiramos hasta A4, la tipografía queda desproporcionada.
-// Para exportar componemos una versión editorial más ancha: 15 px en pantalla
-// se convierten aproximadamente en 11 pt sobre el papel.
-const PDF_RENDER_WIDTH = 640
-
-function prepararClon(doc: Document) {
-  doc.querySelectorAll<HTMLElement>('.paso-print-root').forEach(el => {
-    el.style.width = `${PDF_RENDER_WIDTH}px`
-    el.style.maxWidth = 'none'
-    el.style.boxSizing = 'border-box'
-    el.style.padding = '8px 30px 34px'
-    el.style.marginLeft = 'auto'
-    el.style.marginRight = 'auto'
+// Prepara el clon del informe para el PDF: enseña el pie con QR (que en pantalla
+// está oculto) y esconde lo interactivo (botones y CTA), que no pinta en papel.
+function prepararClon(root: HTMLElement) {
+  root.querySelectorAll<HTMLElement>('.paso-print-only').forEach(el => {
+    el.style.display = 'block'
   })
-  // En papel los módulos necesitan más aire que en una pantalla estrecha.
-  doc.querySelectorAll<HTMLElement>('.paso-print-root .rounded-xl').forEach(el => {
-    el.style.paddingLeft = '26px'
-    el.style.paddingRight = '26px'
+  root.querySelectorAll<HTMLElement>('.paso-no-export').forEach(el => {
+    el.style.display = 'none'
   })
-  doc.querySelectorAll<HTMLElement>('.paso-print-root .rounded-lg').forEach(el => {
-    el.style.paddingLeft = '20px'
-    el.style.paddingRight = '20px'
-  })
-  doc.querySelectorAll<HTMLElement>('.paso-report-title').forEach(el => { el.style.fontSize = '30px' })
-  doc.querySelectorAll<HTMLElement>('.paso-report-lead').forEach(el => { el.style.fontSize = '20px' })
-  doc.querySelectorAll<HTMLElement>('.paso-report-portrait').forEach(el => { el.style.fontSize = '14px' })
-  doc.querySelectorAll<HTMLElement>('.paso-print-only').forEach(el => { el.style.display = 'block' })
-  doc.querySelectorAll<HTMLElement>('.paso-screen-only').forEach(el => { el.style.display = 'none' })
-  doc.querySelectorAll<HTMLElement>('.paso-no-export').forEach(el => { el.style.display = 'none' })
 }
 
-function portada(pdf: import('jspdf').jsPDF, locale: string, meta: PasoPdfMeta) {
-  const w = pdf.internal.pageSize.getWidth(), h = pdf.internal.pageSize.getHeight()
-  pdf.setFillColor(C.paper); pdf.rect(0, 0, w, h, 'F')
-  pdf.setFillColor(C.ink); pdf.rect(0, 0, w, 105, 'F')
-  pdf.setFillColor(C.sage); pdf.circle(14, 10, 37, 'F')
-  pdf.setFillColor(C.terra); pdf.circle(w + 4, h - 8, 45, 'F')
-  pdf.setTextColor(248, 244, 238); pdf.setFont('times', 'normal'); pdf.setFontSize(32)
-  pdf.text('ikigai', 22, 33); const bw = pdf.getTextWidth('ikigai')
-  pdf.setTextColor(194, 134, 107); pdf.text('ER', 22 + bw, 33)
-  pdf.setTextColor(197, 161, 91); pdf.setFont('helvetica', 'normal'); pdf.setFontSize(12); pdf.setCharSpace(2.2)
-  pdf.text(locale === 'en' ? 'YOUR WAY OF WALKING' : 'TU FORMA DE CAMINAR', w / 2, 58, { align: 'center' }); pdf.setCharSpace(0)
-  pdf.setTextColor(248, 244, 238); pdf.setFont('times', 'normal'); pdf.setFontSize(27)
-  pdf.text(pdf.splitTextToSize(meta.pattern || (locale === 'en' ? 'Your PASO report' : 'Tu informe PASO'), 158), w / 2, 75, { align: 'center' })
-  pdf.setTextColor(39, 36, 33); pdf.setFont('times', 'italic'); pdf.setFontSize(17)
-  const promise = locale === 'en' ? 'Not a label. A mirror of how you walk today.' : 'No es una etiqueta. Es un espejo de cómo caminas hoy.'
-  pdf.text(pdf.splitTextToSize(promise, 145), w / 2, 140, { align: 'center' })
-  if (meta.rarity) { pdf.setFont('helvetica', 'normal'); pdf.setFontSize(12); pdf.setTextColor(104, 96, 89); pdf.text(meta.rarity, w / 2, 166, { align: 'center' }) }
-  pdf.setDrawColor(194, 134, 107); pdf.setLineWidth(0.5); pdf.line(76, 205, 134, 205)
-  pdf.setFont('helvetica', 'normal'); pdf.setFontSize(12); pdf.setTextColor(104, 96, 89)
-  pdf.text(locale === 'en' ? 'A personal reading from your answers' : 'Una lectura personal nacida de tus respuestas', w / 2, 219, { align: 'center' })
-  pdf.setFontSize(12); pdf.setTextColor(39, 36, 33); pdf.text('www.ikigaier.com', w / 2, 271, { align: 'center' })
-}
+function nuevaPagina(pdf: import('jspdf').jsPDF, numero: number) {
+  if (numero > 1) pdf.addPage()
 
-function tinta(data: Uint8ClampedArray, width: number, y: number) {
-  let n = 0
-  for (let x = 0; x < width; x += 5) {
-    const i = (y * width + x) * 4
-    if (Math.abs(data[i] - 253) + Math.abs(data[i + 1] - 251) + Math.abs(data[i + 2] - 247) > 42) n++
+  // Un folio editorial discreto: orienta sin competir con el contenido.
+  if (numero > 1) {
+    const pageW = pdf.internal.pageSize.getWidth()
+    const pageH = pdf.internal.pageSize.getHeight()
+    pdf.setFont('helvetica', 'normal')
+    pdf.setFontSize(7)
+    pdf.setTextColor(194, 134, 107)
+    pdf.text('P  ·  A  ·  S  ·  O', 14, 9)
+    pdf.setTextColor(135, 132, 127)
+    pdf.text(String(numero).padStart(2, '0'), pageW - 14, pageH - 8, { align: 'right' })
   }
-  return n
 }
 
-function corteSeguro(canvas: HTMLCanvasElement, from: number, ideal: number) {
-  if (ideal >= canvas.height) return canvas.height
-  const ctx = canvas.getContext('2d', { willReadFrequently: true }); if (!ctx) return ideal
-  const span = ideal - from
-  const min = Math.max(from + 260, ideal - Math.round(span * 0.22))
-  const max = Math.min(canvas.height, ideal + Math.round(span * 0.08))
-  const data = ctx.getImageData(0, min, canvas.width, Math.max(1, max - min)).data
-  let best = ideal, bestScore = Infinity
-  for (let y = min + 12; y < max - 12; y += 3) {
-    let score = 0
-    for (let d = -10; d <= 10; d += 5) score += tinta(data, canvas.width, y - min + d)
-    score += (max - y) * 0.002
-    if (score < bestScore) { bestScore = score; best = y }
+export async function generarPasoPdf(
+  el: HTMLElement,
+  fileName = 'PASO.pdf',
+) {
+  const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+    import('html2canvas'),
+    import('jspdf'),
+  ])
+
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+  const pageW = pdf.internal.pageSize.getWidth()
+  const pageH = pdf.internal.pageSize.getHeight()
+  const marginX = 14
+  const topY = 14
+  const bottomY = 14
+  const contentW = pageW - marginX * 2
+  const contentH = pageH - topY - bottomY
+  const gap = 5
+
+  // El PDF tiene su propia maqueta. Clonamos el informe a un ancho editorial
+  // estable (activa las rejillas de dos columnas) y capturamos bloques
+  // semánticos completos. Así nunca cortamos un título, una tarjeta o un
+  // párrafo por la mitad.
+  const holder = document.createElement('div')
+  holder.style.position = 'fixed'
+  holder.style.left = '-10000px'
+  holder.style.top = '0'
+  holder.style.width = '760px'
+  holder.style.background = '#FDFBF7'
+  holder.style.zIndex = '-1'
+
+  // Escala tipográfica propia del papel. No ampliamos toda la interfaz: solo
+  // elevamos los niveles de lectura de las secciones interiores para mantener
+  // la portada y las proporciones gráficas intactas.
+  const pdfStyles = document.createElement('style')
+  pdfStyles.textContent = `
+    .paso-pdf-mode section [class~="text-sm"],
+    .paso-pdf-mode section [class~="text-[15px]"] {
+      font-size: 17px !important;
+      line-height: 1.5 !important;
+    }
+    .paso-pdf-mode section [class~="text-xs"] {
+      font-size: 14px !important;
+      line-height: 1.45 !important;
+    }
+    .paso-pdf-mode section [class~="text-[10px]"],
+    .paso-pdf-mode section [class~="text-[11px]"] {
+      font-size: 14px !important;
+      line-height: 1.35 !important;
+    }
+    .paso-pdf-mode section [class~="text-3xl"] {
+      font-size: 39px !important;
+      line-height: 1.08 !important;
+    }
+    .paso-pdf-mode section [class~="text-2xl"] {
+      font-size: 30px !important;
+      line-height: 1.15 !important;
+    }
+    .paso-pdf-mode section [class~="text-xl"] {
+      font-size: 24px !important;
+      line-height: 1.2 !important;
+    }
+    .paso-pdf-mode > header > div:last-child {
+      min-height: 720px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+    }
+    .paso-pdf-mode section > [data-pdf-block][data-pdf-break="before"] > div:first-child > span:first-child {
+      font-size: 18px !important;
+      line-height: 1 !important;
+      letter-spacing: 0.22em !important;
+    }
+    .paso-pdf-mode .pdf-definition-grid > div {
+      padding-top: 20px !important;
+      padding-bottom: 20px !important;
+    }
+    .paso-pdf-mode .pdf-definition-block > div:first-child p {
+      margin-top: 6px !important;
+    }
+    .paso-pdf-mode .pdf-definition-grid {
+      margin-top: 16px !important;
+    }
+    .paso-pdf-mode .pdf-distance-explainer > div {
+      padding-top: 34px !important;
+      padding-bottom: 34px !important;
+    }
+    .paso-pdf-mode .pdf-distance-summary {
+      padding-top: 38px !important;
+      padding-bottom: 34px !important;
+    }
+  `
+  holder.appendChild(pdfStyles)
+
+  const clone = el.cloneNode(true) as HTMLElement
+  clone.style.width = '760px'
+  clone.style.maxWidth = 'none'
+  clone.classList.add('paso-pdf-mode')
+  prepararClon(clone)
+  holder.appendChild(clone)
+  document.body.appendChild(holder)
+
+  let page = 1
+  let y = topY
+  nuevaPagina(pdf, page)
+
+  try {
+    const blocks = Array.from(clone.querySelectorAll<HTMLElement>('[data-pdf-block]'))
+
+    for (let i = 0; i < blocks.length; i++) {
+      const block = blocks[i]
+      const forcePage = block.dataset.pdfBreak === 'before'
+      const canvas = await html2canvas(block, {
+        scale: 2,
+        backgroundColor: '#FDFBF7',
+        useCORS: true,
+        logging: false,
+        windowWidth: 760,
+        // Algunas fuentes editoriales descienden unos píxeles fuera de la caja
+        // calculada por el navegador. Este colchón evita cortar descendentes,
+        // la última línea de un párrafo o las etiquetas bajo un gráfico.
+        height: Math.ceil(block.scrollHeight) + 24,
+      })
+
+      const isCover = i === 0
+      const blockW = isCover ? pageW - 10 : contentW
+      let drawW = blockW
+      let drawH = (canvas.height * drawW) / canvas.width
+      const maxH = isCover ? pageH - 10 : contentH
+      if (drawH > maxH) {
+        const ratio = maxH / drawH
+        drawH *= ratio
+        drawW *= ratio
+      }
+
+      // Un encabezado marcado keep-next nunca queda huérfano al pie del folio.
+      let reserve = 0
+      if (block.dataset.pdfKeepNext === 'true' && blocks[i + 1]) {
+        const nextRect = blocks[i + 1].getBoundingClientRect()
+        reserve = Math.min(48, (nextRect.height * contentW) / Math.max(nextRect.width, 1))
+      }
+
+      // Si la página solo contiene una breve conclusión, permitimos que la
+      // sección siguiente arranque debajo: evita crear un folio casi vacío.
+      // En cualquier otra situación, el inicio de sección abre página nueva.
+      // La portada ocupa casi todo el A4 y se centra con su propio margen de
+      // 5 mm. No debe evaluarse con el límite inferior de las páginas
+      // interiores: hacerlo añadía una primera hoja en blanco.
+      if (!isCover && ((forcePage && y > topY + 60) || y + drawH + reserve > pageH - bottomY)) {
+        page += 1
+        nuevaPagina(pdf, page)
+        y = topY
+      }
+
+      const x = isCover ? 5 + (blockW - drawW) / 2 : marginX + (contentW - drawW) / 2
+      const drawY = isCover ? 5 + (maxH - drawH) / 2 : y
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.94), 'JPEG', x, drawY, drawW, drawH)
+      y += drawH + gap
+    }
+  } finally {
+    holder.remove()
   }
-  return best
-}
 
-function marco(pdf: import('jspdf').jsPDF, page: number, locale: string) {
-  const w = pdf.internal.pageSize.getWidth(), h = pdf.internal.pageSize.getHeight()
-  pdf.setFillColor(C.paper); pdf.rect(0, 0, w, h, 'F')
-  pdf.setFont('times', 'normal'); pdf.setFontSize(13); pdf.setTextColor(39, 36, 33); pdf.text('ikigai', 16, 13)
-  const bw = pdf.getTextWidth('ikigai'); pdf.setTextColor(194, 134, 107); pdf.text('ER', 16 + bw, 13)
-  pdf.setFont('helvetica', 'normal'); pdf.setFontSize(12); pdf.setTextColor(130, 121, 113)
-  pdf.text(locale === 'en' ? 'PERSONAL PASO REPORT' : 'INFORME PERSONAL PASO', w - 16, 13, { align: 'right' })
-  pdf.setDrawColor(222, 214, 205); pdf.setLineWidth(0.25); pdf.line(16, 18, w - 16, 18)
-  pdf.text(`www.ikigaier.com   ·   ${page}`, w / 2, h - 8, { align: 'center' })
-}
+  const blob = pdf.output('blob')
+  // Descarga directa. Revocamos la URL después de que el navegador haya tenido
+  // tiempo de iniciar la transferencia (hacerlo en el mismo instante falla en
+  // algunos navegadores móviles).
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = fileName
+  a.style.display = 'none'
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
 
-async function entregar(pdf: import('jspdf').jsPDF, fileName: string, mode: 'download' | 'share', locale: string) {
-  const blob = pdf.output('blob'), file = new File([blob], fileName, { type: 'application/pdf' })
-  const nav = navigator as Navigator & { canShare?: (data?: ShareData) => boolean }
-  if (mode === 'share' && nav.share && nav.canShare?.({ files: [file] })) {
-    try { await nav.share({ title: locale === 'en' ? 'My PASO Report · IKIGAIER' : 'Mi informe PASO · IKIGAIER', text: locale === 'en' ? 'This is my personal PASO report.' : 'Este es mi informe personal PASO.', files: [file] }); return }
-    catch (e) { if ((e as Error).name === 'AbortError') return }
-  }
-  const url = URL.createObjectURL(blob), a = document.createElement('a')
-  a.href = url; a.download = fileName; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000)
-}
-
-export async function generarPasoPdf(el: HTMLElement, fileName = 'PASO.pdf', mode: 'download' | 'share' = 'download', locale = 'es', meta: PasoPdfMeta = {}) {
-  const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([import('html2canvas'), import('jspdf')])
-  await document.fonts?.ready
-  const canvas = await html2canvas(el, {
-    scale: 2.25,
-    backgroundColor: '#FDFBF7',
-    useCORS: true,
-    width: PDF_RENDER_WIDTH,
-    windowWidth: PDF_RENDER_WIDTH + 80,
-    onclone: prepararClon,
-  })
-  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true })
-  portada(pdf, locale, meta)
-  const pageW = pdf.internal.pageSize.getWidth(), pageH = pdf.internal.pageSize.getHeight()
-  const marginX = 17, top = 23, bottom = 16, imageW = pageW - marginX * 2, imageH = pageH - top - bottom
-  const idealSlice = Math.floor(imageH * canvas.width / imageW)
-  let from = 0, page = 1
-  while (from < canvas.height) {
-    const to = corteSeguro(canvas, from, Math.min(canvas.height, from + idealSlice)), sliceH = Math.max(1, to - from)
-    const slice = document.createElement('canvas'); slice.width = canvas.width; slice.height = sliceH
-    const ctx = slice.getContext('2d'); if (!ctx) throw new Error('PDF canvas unavailable')
-    ctx.fillStyle = '#FDFBF7'; ctx.fillRect(0, 0, slice.width, slice.height); ctx.drawImage(canvas, 0, from, canvas.width, sliceH, 0, 0, canvas.width, sliceH)
-    pdf.addPage(); marco(pdf, page, locale)
-    pdf.addImage(slice.toDataURL('image/jpeg', 0.94), 'JPEG', marginX, top, imageW, sliceH * imageW / canvas.width, undefined, 'FAST')
-    from = to; page++
-  }
-  await entregar(pdf, fileName, mode, locale)
+  // El componente conserva esta URL para mostrar un enlace explícito. Es el
+  // fallback fiable en navegadores integrados que bloquean la descarga
+  // programática al finalizar un proceso asíncrono.
+  return url
 }

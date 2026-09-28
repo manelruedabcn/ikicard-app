@@ -1,28 +1,23 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { trackEvent } from '@/lib/analytics'
 import { generarPasoPdf } from '@/lib/paso-pdf'
 import {
+  PASO_GRUPOS,
   DIMS,
   TOTAL_GRUPOS,
   calcularInformePaso,
-  getPasoGroups,
-  getPasoPatterns,
-  getLocalizedPatron,
+  getPatron,
   type Dim,
   type Answer,
   type InformePaso,
 } from '@/lib/paso-content'
-import { getRareza } from '@/lib/paso-rareza'
 import {
   generarTitulares,
-  generarTeaserGancho,
-  teaserTemido,
-  teaserRareza,
 } from '@/lib/paso-titulares'
 import {
   NUM_ZONAS,
@@ -32,8 +27,10 @@ import {
   resolverCodigoPorSegmentos,
 } from '@/lib/paso-segments'
 import { generarNarrativa } from '@/lib/paso-narrativa'
+import { PASO_GRUPOS_EN } from '@/lib/paso-questions-en'
 
 type Stage = 'intro' | 'test' | 'result'
+const PASO_PROGRESS_KEY = 'paso_test_progress_v2'
 
 // Enlaces de compra por libro recomendado. Clave = título exacto en los patrones.
 // Los libros sin entrada (p. ej. el perfil Equilibrio) no muestran enlace.
@@ -60,7 +57,7 @@ interface Props {
 export default function PasoClient({ locale, userId, volver = null }: Props) {
   const t = useTranslations('paso')
   const tn = useTranslations('nav')
-  const pasoGroups = getPasoGroups(locale)
+  const grupos = locale === 'en' ? PASO_GRUPOS_EN : PASO_GRUPOS
 
   const [stage, setStage] = useState<Stage>('intro')
   const [step, setStep] = useState(0) // grupo actual (0-27)
@@ -68,11 +65,37 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
   const [informe, setInforme] = useState<InformePaso | null>(null)
   const [saved, setSaved] = useState(false)
   const [generandoPdf, setGenerandoPdf] = useState(false)
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
   const informeRef = useRef<HTMLDivElement>(null)
+  const progressReady = useRef(false)
 
   // Ejemplo interactivo de la intro (práctica del gesto MÁS/MENOS, no puntúa).
   const ejemplo = locale === 'en' ? EJEMPLO_EN : EJEMPLO_ES
   const [ej, setEj] = useState<{ mas?: number; menos?: number }>({})
+
+  // Un test de 28 decisiones no debería perderse por recargar la página.
+  // Se guarda solo en este navegador y se elimina al terminar.
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(`${PASO_PROGRESS_KEY}:${locale}`)
+      if (raw) {
+        const data = JSON.parse(raw) as { step?: number; answers?: Record<number, { mas?: Dim; menos?: Dim }> }
+        if (data.answers && Object.keys(data.answers).length > 0) {
+          setAnswers(data.answers)
+          setStep(Math.max(0, Math.min(TOTAL_GRUPOS - 1, data.step ?? 0)))
+          setStage('test')
+        }
+      }
+    } catch {}
+    progressReady.current = true
+  }, [locale])
+
+  useEffect(() => {
+    if (!progressReady.current || stage !== 'test') return
+    try {
+      sessionStorage.setItem(`${PASO_PROGRESS_KEY}:${locale}`, JSON.stringify({ step, answers }))
+    } catch {}
+  }, [answers, locale, stage, step])
 
   function pickEj(kind: 'mas' | 'menos', idx: number) {
     setEj(prev => {
@@ -84,42 +107,43 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
     })
   }
 
-  async function compartir() {
-    if (!informeRef.current || generandoPdf) return
-    setGenerandoPdf(true)
-    trackEvent('share', { tool: 'paso', content: 'personal_pdf' })
+  async function compartir(nombrePatron: string, codigoPatron: string) {
+    trackEvent('share', { tool: 'paso' })
+    const url = `${window.location.origin}/${locale}/paso/forma/${encodeURIComponent(codigoPatron)}`
+    const data = {
+      title: t('share_title'),
+      text: `${t('share_text', { patron: nombrePatron })} ${url}`,
+      url,
+    }
     try {
-      await generarPasoPdf(informeRef.current, locale === 'en' ? 'My PASO Report - IKIGAIER.pdf' : 'Mi informe PASO - IKIGAIER.pdf', 'share', locale, pdfMeta())
+      if (navigator.share) {
+        await navigator.share(data)
+      } else {
+        await navigator.clipboard.writeText(data.text)
+        alert(t('share_copied'))
+      }
     } catch {
-      // Último recurso: descarga el PDF; nunca sustituimos el informe por un enlace genérico.
-      await generarPasoPdf(informeRef.current, locale === 'en' ? 'My PASO Report - IKIGAIER.pdf' : 'Mi informe PASO - IKIGAIER.pdf', 'download', locale, pdfMeta())
-    } finally {
-      setGenerandoPdf(false)
+      // La persona cerró el diálogo de compartir: no hacemos nada.
     }
   }
 
   async function guardarPdf() {
     if (!informeRef.current || generandoPdf) return
     setGenerandoPdf(true)
+    setPdfUrl(prev => {
+      if (prev) URL.revokeObjectURL(prev)
+      return null
+    })
     trackEvent('pdf_download', { tool: 'paso' })
     try {
-      await generarPasoPdf(informeRef.current, locale === 'en' ? 'My PASO Report - IKIGAIER.pdf' : 'Mi informe PASO - IKIGAIER.pdf', 'download', locale, pdfMeta())
+      const url = await generarPasoPdf(informeRef.current, 'PASO.pdf')
+      setPdfUrl(url)
     } catch {
-      // Último recurso si la generación falla (navegador muy antiguo):
-      // el diálogo de impresión del sistema.
-      window.print()
+      alert(locale === 'en'
+        ? 'The PDF could not be created. Please try again.'
+        : 'No se ha podido crear el PDF. Inténtalo de nuevo.')
     } finally {
       setGenerandoPdf(false)
-    }
-  }
-
-  function pdfMeta() {
-    if (!informe) return {}
-    const zonas = calcularSegmentos(informe.scores)
-    const codigo = resolverCodigoPorSegmentos(zonas)
-    return {
-      pattern: getLocalizedPatron(codigo, locale)?.nombre,
-      rarity: t('rareza_' + getRareza(codigo)),
     }
   }
 
@@ -130,12 +154,18 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
       const other = kind === 'mas' ? 'menos' : 'mas'
       if (cur[other] === dim) cur[other] = undefined
       cur[kind] = cur[kind] === dim ? undefined : dim
-      return { ...prev, [grupo]: cur }
+      const next = { ...prev, [grupo]: cur }
+      // Persistimos dentro del propio gesto para cubrir incluso una recarga
+      // inmediata, antes de que se ejecute el efecto de React.
+      try {
+        sessionStorage.setItem(`${PASO_PROGRESS_KEY}:${locale}`, JSON.stringify({ step, answers: next }))
+      } catch {}
+      return next
     })
   }
 
   async function finish() {
-    const list: Answer[] = pasoGroups.map(g => ({
+    const list: Answer[] = grupos.map(g => ({
       grupo: g.grupo,
       mas: answers[g.grupo]!.mas!,
       menos: answers[g.grupo]!.menos!,
@@ -144,9 +174,11 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
     setInforme(inf)
     setStage('result')
     window.scrollTo({ top: 0 })
+    try {
+      sessionStorage.removeItem(`${PASO_PROGRESS_KEY}:${locale}`)
+    } catch {}
 
-    // El código se asigna por SEGMENTOS (norming), no por la dominancia cruda:
-    // es la asignación precisa (1 de 2.401 firmas).
+    // El código se asigna por SEGMENTOS (norming), no por la dominancia cruda.
     const codigo = resolverCodigoPorSegmentos(calcularSegmentos(inf.scores))
     trackEvent('test_completed', { tool: 'paso', pattern: codigo })
 
@@ -181,25 +213,58 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
 
   // ---------- INTRO ----------
   if (stage === 'intro') {
+    const ejemploCompleto = ej.mas !== undefined && ej.menos !== undefined
+    const ejemploPaso = ej.mas === undefined
+      ? t('example_step_more')
+      : ej.menos === undefined
+        ? t('example_step_less')
+        : t('example_done')
+
     return (
       <Shell locale={locale} tn={tn} userId={userId}>
-        <div className="w-full max-w-md text-center mt-10">
-          <p className="text-2xl font-medium tracking-[0.4em] uppercase text-[#c2866b] mb-4">P · A · S · O</p>
-          <h1 className="font-[family-name:var(--font-cormorant)] text-4xl text-[#272727] mb-6">
+        <div className="w-full max-w-md text-center mt-4 sm:mt-8">
+          <img
+            src="/brand/ikigaier-isotipo.png"
+            alt=""
+            aria-hidden="true"
+            className="mx-auto mb-4 h-12 w-12"
+          />
+          <p className="text-sm font-medium tracking-[0.45em] uppercase text-[#c2866b] mb-4">P · A · S · O</p>
+          <h1 className="font-[family-name:var(--font-cormorant)] text-4xl sm:text-5xl leading-[1.05] text-[#272727] mb-4">
             {t('intro_title')}
           </h1>
-          <p className="text-sm leading-relaxed text-[#272727]/70 mb-4">{t('intro_desc')}</p>
-          <p className="text-sm leading-relaxed text-[#272727]/70 mb-6">{t('intro_how')}</p>
+          <p className="text-base leading-relaxed text-[#272727]/70 max-w-sm mx-auto">
+            {t('intro_desc')}
+          </p>
+
+          <div className="grid grid-cols-2 gap-2 mt-7 mb-7 text-left">
+            {DIMS.map(dim => (
+              <div key={dim} className="rounded-xl bg-[#272727]/[0.035] px-4 py-3">
+                <p className="font-[family-name:var(--font-cormorant)] text-lg text-[#272727]">
+                  <EjeLabel label={t('dim_' + dim)} />
+                </p>
+                <p className="text-xs leading-relaxed text-[#272727]/55 mt-0.5">
+                  {t('intro_dim_' + dim)}
+                </p>
+              </div>
+            ))}
+          </div>
 
           {/* Ejemplo interactivo: practica el gesto MÁS/MENOS con algo fácil */}
-          <div className="rounded-2xl border border-[#272727]/10 bg-[#272727]/[0.02] p-5 mb-8">
-            <p className="text-xs tracking-widest uppercase text-[#c2866b] mb-1">{t('example_eyebrow')}</p>
-            <p className="text-sm leading-relaxed text-[#272727]/70 mb-4">{t('example_intro')}</p>
+          <div className="rounded-2xl border border-[#c2866b]/25 bg-white/55 p-5 mb-5 shadow-[0_18px_50px_rgba(39,39,39,0.05)]">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#c2866b] text-[11px] text-white">1</span>
+              <p className="text-xs tracking-widest uppercase text-[#c2866b]">{t('example_eyebrow')}</p>
+            </div>
+            <p className="font-[family-name:var(--font-cormorant)] text-xl text-[#272727] mb-1">
+              {t('example_title')}
+            </p>
+            <p className="text-sm leading-relaxed text-[#272727]/60 mb-4">{t('example_intro')}</p>
             <div className="flex items-center justify-end gap-2 mb-2 pr-1">
-              <span className="w-14 text-center text-xs tracking-widest uppercase text-[#c2866b]">
+              <span className="w-14 text-center text-[10px] tracking-widest uppercase text-[#c2866b]">
                 {t('mas')}
               </span>
-              <span className="w-14 text-center text-xs tracking-widest uppercase text-[#272727]/40">
+              <span className="w-14 text-center text-[10px] tracking-widest uppercase text-[#272727]/40">
                 {t('menos')}
               </span>
             </div>
@@ -210,23 +275,25 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
                   className="flex items-center gap-2 rounded-xl border border-[#272727]/10 bg-[#FDFBF7] px-4 py-2.5"
                 >
                   <span className="flex-1 text-left text-[15px] text-[#272727]">{it}</span>
-                  <ChoiceBtn active={ej.mas === i} variant="mas" onClick={() => pickEj('mas', i)} />
-                  <ChoiceBtn active={ej.menos === i} variant="menos" onClick={() => pickEj('menos', i)} />
+                  <ChoiceBtn active={ej.mas === i} variant="mas" label={`${t('mas')}: ${it}`} shortLabel={t('mas')} onClick={() => pickEj('mas', i)} />
+                  <ChoiceBtn active={ej.menos === i} variant="menos" label={`${t('menos')}: ${it}`} shortLabel={t('menos')} onClick={() => pickEj('menos', i)} />
                 </div>
               ))}
             </div>
-            {ej.mas !== undefined && ej.menos !== undefined && (
-              <p className="text-sm text-[#c2866b] mt-4">{t('example_done')}</p>
-            )}
+            <p aria-live="polite" className={`text-sm mt-4 ${ejemploCompleto ? 'text-[#7a8b6f]' : 'text-[#c2866b]'}`}>
+              {ejemploPaso}
+            </p>
           </div>
 
+          <p className="text-xs text-[#272727]/45 mb-4">{t('intro_time')}</p>
           <button
             onClick={() => setStage('test')}
-            className="w-full py-4 bg-[#272727] text-[#FDFBF7] text-xs tracking-widest hover:bg-[#c2866b] transition-colors"
+            disabled={!ejemploCompleto}
+            className="w-full rounded-xl py-4 bg-[#272727] text-[#FDFBF7] text-xs tracking-widest hover:bg-[#c2866b] transition-colors disabled:cursor-not-allowed disabled:opacity-25"
           >
             {t('intro_start')}
           </button>
-          <p className="text-xs text-[#272727]/40 mt-4">{t('intro_time')}</p>
+          <p className="text-xs leading-relaxed text-[#272727]/40 mt-3 px-4">{t('intro_reassurance')}</p>
         </div>
       </Shell>
     )
@@ -234,10 +301,17 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
 
   // ---------- TEST ----------
   if (stage === 'test') {
-    const g = pasoGroups[step]
+    const g = grupos[step]
     const cur = answers[g.grupo] || {}
     const complete = !!cur.mas && !!cur.menos
     const isLast = step === TOTAL_GRUPOS - 1
+    const instruction = !cur.mas && !cur.menos
+      ? t('test_step_more')
+      : !cur.mas
+        ? t('test_step_more_missing')
+        : !cur.menos
+          ? t('test_step_less')
+          : t('test_step_done')
 
     return (
       <Shell locale={locale} tn={tn} userId={userId}>
@@ -255,14 +329,16 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
             </div>
           </div>
 
-          <p className="text-center text-sm text-[#272727]/60 mb-6">{t('test_prompt')}</p>
+          <div className="mb-6 rounded-xl bg-[#272727]/[0.035] px-4 py-3 text-center" aria-live="polite">
+            <p className={`text-sm ${complete ? 'text-[#7a8b6f]' : 'text-[#272727]/70'}`}>{instruction}</p>
+          </div>
 
           {/* Cabecera de columnas */}
           <div className="flex items-center justify-end gap-2 mb-2 pr-1">
-            <span className="w-14 text-center text-xs tracking-widest uppercase text-[#c2866b]">
+            <span className="w-14 text-center text-[10px] tracking-widest uppercase text-[#c2866b]">
               {t('mas')}
             </span>
-            <span className="w-14 text-center text-xs tracking-widest uppercase text-[#272727]/40">
+            <span className="w-14 text-center text-[10px] tracking-widest uppercase text-[#272727]/40">
               {t('menos')}
             </span>
           </div>
@@ -271,13 +347,19 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
             {DIMS.map(dim => (
               <div
                 key={dim}
-                className="flex items-center gap-2 rounded-xl border border-[#272727]/10 px-4 py-3"
+                className={`flex items-center gap-2 rounded-xl border px-4 py-3 transition-all ${
+                  cur.mas === dim
+                    ? 'border-[#c2866b]/60 bg-[#c2866b]/[0.07] shadow-[0_6px_24px_rgba(194,134,107,0.08)]'
+                    : cur.menos === dim
+                      ? 'border-[#272727]/25 bg-[#272727]/[0.035]'
+                      : 'border-[#272727]/10 bg-white/30'
+                }`}
               >
                 <span className="flex-1 font-[family-name:var(--font-cormorant)] text-xl text-[#272727]">
                   {g[dim]}
                 </span>
-                <ChoiceBtn active={cur.mas === dim} variant="mas" onClick={() => pick(g.grupo, 'mas', dim)} />
-                <ChoiceBtn active={cur.menos === dim} variant="menos" onClick={() => pick(g.grupo, 'menos', dim)} />
+                <ChoiceBtn active={cur.mas === dim} variant="mas" label={`${t('mas')}: ${g[dim]}`} shortLabel={t('mas')} onClick={() => pick(g.grupo, 'mas', dim)} />
+                <ChoiceBtn active={cur.menos === dim} variant="menos" label={`${t('menos')}: ${g[dim]}`} shortLabel={t('menos')} onClick={() => pick(g.grupo, 'menos', dim)} />
               </div>
             ))}
           </div>
@@ -298,7 +380,7 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
               <button
                 onClick={finish}
                 disabled={!complete}
-                className="px-6 py-3 bg-[#c2866b] text-[#FDFBF7] text-xs tracking-widest hover:bg-[#272727] transition-colors disabled:opacity-30"
+                className="rounded-xl px-6 py-3 bg-[#c2866b] text-[#FDFBF7] text-xs tracking-widest hover:bg-[#272727] transition-colors disabled:opacity-30"
               >
                 {t('see_result')}
               </button>
@@ -309,7 +391,7 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
                   window.scrollTo({ top: 0 })
                 }}
                 disabled={!complete}
-                className="px-6 py-3 bg-[#272727] text-[#FDFBF7] text-xs tracking-widest hover:bg-[#c2866b] transition-colors disabled:opacity-30"
+                className="rounded-xl px-6 py-3 bg-[#272727] text-[#FDFBF7] text-xs tracking-widest hover:bg-[#c2866b] transition-colors disabled:opacity-30"
               >
                 {t('next')} →
               </button>
@@ -322,11 +404,11 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
 
   // ---------- RESULT ----------
   const inf = informe!
-  // Asignación por SEGMENTOS (norming DISC adaptado): tu firma exacta
-  // (1 de 2.401) y, de ahí, tu Caminante.
+  // Asignación por SEGMENTOS (norming DISC adaptado): la clasificación visual
+  // de P·A·S·O y, a partir de ella, el Caminante.
   const segmentos = calcularSegmentos(inf.scores)
   const codigo = resolverCodigoPorSegmentos(segmentos)
-  const patron = getLocalizedPatron(codigo, locale)
+  const patron = getPatron(codigo)
   // Eje dominante POR SEGMENTOS (zona más alta, empate → orden P-A-S-O): la misma
   // fuente que da el nombre del Caminante, para que el titular no lo contradiga.
   const dominante = DIMS.reduce((a, b) => (segmentos[a] >= segmentos[b] ? a : b))
@@ -345,116 +427,106 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
             print-color-adjust: exact;
           }
           .paso-print-only { display: block; }
-          .paso-screen-only { display: none !important; }
           /* La lectura del patrón empieza en página nueva y no se parte. */
           .paso-break-before { break-before: page; }
           .paso-avoid-break { break-inside: avoid; }
         }
       `}</style>
-      <div ref={informeRef} className="w-full max-w-md paso-print-root">
-        <div className="text-center mb-8">
-          <p className="text-xs tracking-[0.4em] uppercase text-[#c2866b] mb-2">
-            {t('your_pattern')}
-          </p>
-          <h1 className="paso-report-title font-[family-name:var(--font-cormorant)] text-4xl text-[#272727]">
-            {patron?.nombre}
-          </h1>
-          <p className="text-xs leading-relaxed text-[#272727]/45 mt-2 px-4">{t('pattern_framing')}</p>
-          <p className="text-sm text-[#272727]/55 mt-2">{t('rareza_' + getRareza(codigo))}</p>
-          {/* FOMO M3: anzuelo de rareza que tira hasta el mapa de los 15 (al final) */}
-          <p className="text-[13px] italic text-[#c2866b]/80 mt-3">
-            {teaserRareza(getRareza(codigo), locale)}
-          </p>
-        </div>
-
-        {/* GANCHO (parte superior): titular dinámico + retrato + gráfica.
-            Da el golpe visual y empuja a leer el desarrollo de abajo. */}
-        <TitularesBlock inf={inf} dominante={dominante} locale={locale} />
-
-        {/* El retrato nace de la firma PASO global. No es la máscara: resume el
-            arquetipo que dibuja la combinación de intensidades de los cuatro ejes. */}
-        {patron?.retrato && (
-          <>
-          <div className="paso-screen-only mt-8 mb-8 px-1">
-            <p className="text-xs tracking-widest uppercase text-[#c2866b] mb-2 text-center">
-              {t('retrato_eyebrow')}
+      <div ref={informeRef} className="w-full max-w-xl paso-print-root">
+        {/* Portada inspirada en el informe editorial original: identidad fuerte
+            arriba y lectura personal, más íntima, sobre papel claro. */}
+        <header data-pdf-block data-pdf-break="before" className="relative overflow-hidden rounded-[2rem] bg-[#F8F4ED] text-center shadow-[0_28px_90px_rgba(39,36,32,0.14)] paso-avoid-break">
+          <div className="relative isolate overflow-hidden bg-[#242320] px-6 pb-16 pt-12 sm:px-10 sm:pb-20 sm:pt-14">
+            <div className="absolute -left-16 -top-20 -z-10 h-52 w-52 rounded-full bg-[#84937A] sm:-left-20 sm:-top-24 sm:h-64 sm:w-64" />
+            <div className="absolute -bottom-28 -right-20 -z-10 h-48 w-48 rounded-full bg-[#C7896D]/90 sm:h-56 sm:w-56" />
+            <div className="absolute left-8 top-8 sm:left-11 sm:top-10">
+              <img
+                src="/brand/ikigaier-isotipo-crema.png"
+                alt="IKIGAIER"
+                className="block h-12 w-12 object-contain opacity-90 sm:h-14 sm:w-14"
+              />
+            </div>
+            <p className="mb-7 mt-12 text-[11px] uppercase tracking-[0.38em] text-[#D2A857] sm:mt-14">
+              {t('your_pattern')}
             </p>
-            <p className="paso-report-portrait text-[15px] leading-relaxed text-[#272727]/80 text-center">
-              {resumirTexto(patron.retrato, 2)}
-            </p>
+            <h1 className="mx-auto max-w-lg font-[family-name:var(--font-cormorant)] text-4xl leading-[1.05] text-[#F8F4ED] sm:text-6xl">
+              {patron?.nombre}
+            </h1>
           </div>
-          <div className="paso-print-only mt-8 mb-10 px-1">
-            <p className="text-xs tracking-widest uppercase text-[#c2866b] mb-2 text-center">
-              {t('retrato_eyebrow')}
-            </p>
-            <p className="paso-report-portrait text-[15px] leading-relaxed text-[#272727]/80 text-center">
-              {patron.retrato}
-            </p>
-          </div>
-          </>
-        )}
 
-        {/* La explicación pedagógica completa pertenece al informe descargable. */}
-        <div className="paso-print-only"><QueEsPasoBlock t={t} /></div>
-
-        {/* Primero, la firma global: es la que determina el tipo de Caminante. */}
-        <FirmaBlock segmentos={segmentos} t={t} />
-
-        {/* Después, la lectura amplia del arquetipo que esa firma origina. */}
-        {patron && (
-          <>
-          <div className="paso-screen-only mt-8 grid grid-cols-1 gap-3">
-            <ResumenClave
-              label={locale === 'en' ? 'YOUR STRENGTH' : 'TU FORTALEZA'}
-              text={resumirTexto(patron.motivacion, 1)}
-              color="#7a8b6f"
-            />
-            <ResumenClave
-              label={locale === 'en' ? 'YOUR RISK' : 'TU RIESGO'}
-              text={resumirTexto(patron.bajo_presion, 1)}
-              color="#c2866b"
-            />
-            <ResumenClave
-              label={locale === 'en' ? 'YOUR LEARNING' : 'TU APRENDIZAJE'}
-              text={resumirTexto(patron.seria_mas_eficaz_si, 1)}
-              color="#c5a15b"
-            />
-          </div>
-          <div className="paso-print-only">
-          <div className="flex flex-col gap-6 mt-10 paso-avoid-break">
-            {/* FOMO M2: teaser seco que anticipa «Lo que temes» sin resolverlo */}
-            <p className="font-[family-name:var(--font-cormorant)] text-xl leading-snug text-[#272727] text-center px-4 mb-2">
-              {teaserTemido(locale)}
+          <div className="relative overflow-hidden px-6 py-11 sm:px-10 sm:py-14">
+            <div className="absolute -bottom-28 -right-24 h-48 w-48 rounded-full bg-[#C7896D] sm:-bottom-36 sm:-right-28 sm:h-60 sm:w-60" />
+            <p className="mx-auto mb-9 max-w-md font-[family-name:var(--font-cormorant)] text-2xl leading-snug text-[#272727] sm:text-3xl">
+              {locale === 'en'
+                ? 'Not a label. A mirror of how you walk today.'
+                : 'No es una etiqueta. Es un espejo de cómo caminas hoy.'}
             </p>
-            <Field label={t('motivacion')} text={patron.motivacion} />
-            <Field label={t('bajo_presion')} text={patron.bajo_presion} />
-            <Field label={t('teme')} text={patron.teme} />
-            <Field label={t('eficaz')} text={patron.seria_mas_eficaz_si} />
+            <div className="relative mx-auto max-w-md">
+              <TitularesBlock inf={inf} dominante={dominante} locale={locale} />
+              {patron?.retrato && (
+                <div className="border-t border-[#C7896D]/35 pt-7">
+                  <p className="mb-3 text-[10px] uppercase tracking-[0.3em] text-[#C7896D]">
+                    {t('retrato_eyebrow')}
+                  </p>
+                  <p className="text-[15px] leading-relaxed text-[#272727]/72">{patron.retrato}</p>
+                </div>
+              )}
+              <div className="mx-auto my-7 h-px w-24 bg-[#C7896D]/70" />
+              <p className="text-xs leading-relaxed text-[#272727]/45">{t('pattern_framing')}</p>
+            </div>
           </div>
-          </div>
-          </>
-        )}
+        </header>
 
-        {/* A continuación se abre una segunda lectura, distinta de la firma:
-            cómo se compara la máscara aprendida con la naturaleza interior. */}
-        <div className="paso-break-before">
-          <HorizonGraph inf={inf} labels={DIMS.map(d => t('dim_' + d))} t={t} />
-          <div className="paso-screen-only"><ResumenMascara inf={inf} locale={locale} /></div>
-          <div className="paso-print-only">
+        {/* El tipo es la síntesis; la clasificación visual aporta el matiz. */}
+        <ReportSection number="01" title={t('result_classification_title')} intro={t('result_classification_intro')}>
+          <FirmaBlock segmentos={segmentos} t={t} embedded />
+        </ReportSection>
+
+        {/* El corazón del informe: diferencia entre lo mostrado y lo espontáneo. */}
+        <ReportSection number="02" title={t('result_distance_title')} intro={t('result_distance_intro')}>
+          <div data-pdf-block className="rounded-2xl bg-[#FDFBF7] px-3 py-5 sm:px-6">
+            <HorizonGraph inf={inf} labels={DIMS.map(d => t('dim_' + d))} t={t} />
+          </div>
+          <div data-pdf-block className="pdf-distance-explainer mt-6 grid gap-px overflow-hidden rounded-2xl border border-[#272727]/10 bg-[#272727]/10 sm:grid-cols-2">
+            <div className="bg-[#FDFBF7] px-5 py-5 sm:px-6">
+              <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-[#c2866b]">
+                {t('distance_mask_title')}
+              </p>
+              <p className="mt-3 text-sm leading-relaxed text-[#272727]/72">
+                {t('distance_mask_text')}
+              </p>
+            </div>
+            <div className="bg-[#FDFBF7] px-5 py-5 sm:px-6">
+              <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-[#c2866b]">
+                {t('distance_reading_title')}
+              </p>
+              <p className="mt-3 text-sm leading-relaxed text-[#272727]/72">
+                {t('distance_reading_text')}
+              </p>
+            </div>
+          </div>
+          <div data-pdf-block className="pdf-distance-summary mt-8 border-t border-[#272727]/10 pt-8 pb-4">
             <NarrativaBlock inf={inf} locale={locale} />
-            <BrechasBlock inf={inf} t={t} />
           </div>
-        </div>
+        </ReportSection>
 
-        {/* Mapa de las 15 formas de caminar: sitúa tu tipo entre todos.
-            Refuerza que no es una etiqueta, sino una de muchas formas. */}
-        <div className="paso-print-only"><MapaCaminantes codigoActual={codigo} t={t} locale={locale} /></div>
+        {/* Desarrollo útil del Caminante, en formato de informe y sin cebos. */}
+        {patron && (
+          <ReportSection number="03" title={t('result_profile_title')} intro={t('result_profile_intro')} pageBreak>
+            <div data-pdf-block className="grid gap-px overflow-hidden rounded-2xl border border-[#272727]/10 bg-[#272727]/10 sm:grid-cols-2 paso-avoid-break">
+              <Field label={t('motivacion')} text={patron.motivacion} card />
+              <Field label={t('bajo_presion')} text={patron.bajo_presion} card />
+              <Field label={t('teme')} text={patron.teme} card />
+              <Field label={t('eficaz')} text={patron.seria_mas_eficaz_si} card />
+            </div>
+          </ReportSection>
+        )}
 
         {/* Libro recomendado. Si hay enlace de compra, el título es clicable
             (abre Amazon en pestaña nueva) y se muestra un CTA. El enlace <a>
             sigue siendo clicable si el resultado se guarda como PDF. */}
         {patron && (
-          <div className="paso-print-only mt-6 rounded-xl border border-[#c2866b]/30 bg-[#c2866b]/5 px-5 py-5 text-center">
+          <div data-pdf-block className="mt-10 rounded-2xl border border-[#c2866b]/25 bg-[#c2866b]/[0.06] px-6 py-6 text-center paso-avoid-break">
             <p className="text-xs tracking-widest uppercase text-[#c2866b] mb-2">{t('book')}</p>
             {LIBRO_LINKS[patron.libro_recomendado] ? (
               <a
@@ -479,33 +551,39 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
           </div>
         )}
 
-        {/* Dos caminos sin fricción: recibir el informe solicitado por email o
-            descargarlo directamente, sin registro ni cesión obligatoria de datos. */}
-        <div className="mt-8 text-center print:hidden paso-no-export">
-          <LeadCapture codigo={codigo} locale={locale} informe={inf} />
+        {/* Descargar PDF: crea el informe y guarda el archivo directamente.
+            Compartir sigue siendo una acción independiente. */}
+        <div className="mt-4 text-center print:hidden paso-no-export">
           <button
-            onClick={guardarPdf}
-            disabled={generandoPdf}
-            className="w-full py-3 mt-3 border border-[#272727] text-[#272727] text-xs tracking-widest hover:bg-[#272727] hover:text-[#FDFBF7] transition-colors disabled:opacity-40"
+            onClick={() => compartir(patron?.nombre ?? '', codigo)}
+            className="w-full py-3 bg-[#c2866b] text-[#FDFBF7] text-xs tracking-widest hover:bg-[#272727] transition-colors"
           >
-            {generandoPdf ? t('pdf_generating') : (locale === 'en' ? 'DOWNLOAD THE PDF NOW' : 'DESCARGAR EL PDF AHORA')}
+            {t('share_button')}
           </button>
-          <button
-            onClick={compartir}
-            disabled={generandoPdf}
-            className="mt-3 text-xs text-[#272727]/50 underline underline-offset-4 hover:text-[#c2866b] disabled:opacity-40"
-          >
-            {generandoPdf ? t('pdf_generating') : t('share_button')}
-          </button>
-          <p className="text-xs text-[#272727]/40 mt-3">
-            {locale === 'en' ? 'Downloading does not require an email or an account.' : 'La descarga no requiere email ni crear una cuenta.'}
-          </p>
+          {pdfUrl ? (
+            <a
+              href={pdfUrl}
+              download="PASO.pdf"
+              className="mt-3 block w-full border border-[#272727] bg-[#272727] px-4 py-3 text-xs uppercase tracking-widest text-[#FDFBF7] transition-colors hover:bg-[#c2866b] hover:border-[#c2866b]"
+            >
+              {locale === 'en' ? 'Save PDF →' : 'Guardar PDF →'}
+            </a>
+          ) : (
+            <button
+              onClick={guardarPdf}
+              disabled={generandoPdf}
+              className="w-full py-3 mt-3 border border-[#272727] text-[#272727] text-xs tracking-widest hover:bg-[#272727] hover:text-[#FDFBF7] transition-colors disabled:opacity-40"
+            >
+              {generandoPdf ? t('pdf_generating') : t('pdf_button')}
+            </button>
+          )}
+          {!pdfUrl && <p className="text-xs text-[#272727]/40 mt-2">{t('pdf_hint')}</p>}
         </div>
 
         {/* Pie de marca: solo aparece en el PDF/impresión, para que quien lo
             reciba compartido sepa dónde hacer su propio test. El QR lleva a
             www.ikigaier.com para maximizar la conversión de quien lo escanea. */}
-        <div className="paso-print-only mt-10 pt-6 border-t border-[#272727]/15">
+        <div data-pdf-block className="paso-print-only mt-10 pt-6 border-t border-[#272727]/15">
           <div className="flex items-center justify-center gap-5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -515,9 +593,13 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
               height={88}
               className="w-[88px] h-[88px] shrink-0"
             />
-            <div className="text-left">
-              <p className="text-xs tracking-[0.4em] uppercase text-[#c2866b] mb-1">P · A · S · O</p>
-              <p className="font-[family-name:var(--font-cormorant)] text-lg leading-snug text-[#272727]">
+            <div className="flex min-w-0 flex-col items-start gap-2 text-left">
+              <img
+                src="/brand/ikigaier-marca-completa.png"
+                alt="IKIGAIER"
+                className="h-auto w-44 max-w-full"
+              />
+              <p className="text-xs leading-snug text-[#272727]/60">
                 {t('pdf_footer')}
               </p>
             </div>
@@ -530,6 +612,9 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
             saved && <p className="text-xs text-[#272727]/50">{t('saved')}</p>
           ) : (
             <div className="space-y-5">
+              {/* Captura de email (lead magnet): promesa abierta de recibir las
+                  herramientas de IKIGAIER. Single opt-in con checkbox explícito. */}
+              <LeadCapture codigo={codigo} locale={locale} informe={inf} />
               <div className="rounded-xl bg-[#272727]/[0.03] px-5 py-5">
                 <p className="text-sm text-[#272727]/70 mb-4">{t('cta_account')}</p>
                 <Link
@@ -544,7 +629,7 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
         </div>
 
         {/* Nota de encuadre: PASO es un espejo, no un diagnóstico */}
-        <p className="mt-10 text-center text-xs leading-relaxed text-[#272727]/40 px-2">
+        <p data-pdf-block className="mt-10 pb-4 text-center text-xs leading-relaxed text-[#272727]/40 px-2">
           {t('nota_espejo')}
         </p>
 
@@ -554,7 +639,7 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
               href={`/${locale}${volver}`}
               className="inline-block rounded-full bg-[#c2866b] px-8 py-3 text-xs tracking-widest uppercase text-[#FDFBF7] hover:opacity-90"
             >
-              {locale === 'en' ? 'Back and continue' : 'Volver y seguir'}
+              Volver y seguir
             </Link>
           </div>
         )}
@@ -565,46 +650,17 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
 
 // ---------- Subcomponentes ----------
 
-function resumirTexto(texto: string, frases = 1) {
-  const partes = texto.match(/[^.!?]+[.!?]+|[^.!?]+$/g) ?? [texto]
-  return partes.slice(0, frases).join(' ').trim()
-}
-
-function ResumenClave({ label, text, color }: { label: string; text: string; color: string }) {
-  return (
-    <div className="rounded-xl border border-[#272727]/10 bg-[#272727]/[0.025] px-4 py-4">
-      <p className="text-xs tracking-widest uppercase mb-1.5" style={{ color }}>{label}</p>
-      <p className="text-sm leading-relaxed text-[#272727]/75">{text}</p>
-    </div>
-  )
-}
-
-function ResumenMascara({ inf, locale }: { inf: InformePaso; locale: string }) {
-  const n = generarNarrativa(inf, locale)
-  return (
-    <div className="mt-6 rounded-xl border border-[#c2866b]/25 bg-[#c2866b]/[0.045] px-5 py-5">
-      <p className="text-xs tracking-widest uppercase text-[#c2866b] mb-2">
-        {locale === 'en' ? 'THE MAIN CLUE' : 'LA CLAVE PRINCIPAL'}
-      </p>
-      <p className="text-sm leading-relaxed text-[#272727]/80">
-        {n.sintesis || n.intro}
-      </p>
-      {n.invitacion && (
-        <p className="font-[family-name:var(--font-cormorant)] text-xl text-[#c2866b] mt-3">
-          {n.invitacion}
-        </p>
-      )}
-    </div>
-  )
-}
-
 function ChoiceBtn({
   active,
   variant,
+  label,
+  shortLabel,
   onClick,
 }: {
   active: boolean
   variant: 'mas' | 'menos'
+  label: string
+  shortLabel: string
   onClick: () => void
 }) {
   const on =
@@ -614,11 +670,13 @@ function ChoiceBtn({
   return (
     <button
       onClick={onClick}
-      className={`h-9 w-14 rounded-lg border text-lg transition-colors ${
+      aria-label={label}
+      aria-pressed={active}
+      className={`h-9 w-14 rounded-lg border text-[10px] font-medium uppercase tracking-wider transition-all ${
         active ? on : 'border-[#272727]/20 text-[#272727]/30 hover:border-[#c2866b]'
       }`}
     >
-      {variant === 'mas' ? '+' : '−'}
+      {shortLabel}
     </button>
   )
 }
@@ -638,23 +696,23 @@ function LeadCapture({ codigo, locale, informe }: { codigo: string; locale: stri
 
   const copy = es
     ? {
-        title: 'Llévate tu lectura completa',
-        body: 'Tu nombre PASO explica cómo caminas. El informe completo revela desde dónde lo haces: qué parte te nace, qué parte has aprendido a mostrar y dónde puede estar apareciendo el esfuerzo.',
+        title: '¿Te envío tu resultado por correo?',
+        body: 'Te llega un enlace a tu forma de caminar para volver a ella cuando quieras.',
         placeholder: 'tu@correo.com',
         consent: 'Quiero recibir más información del universo IKIGAIER (nuevas herramientas). Puedo darme de baja cuando quiera.',
-        button: 'ENVIARME EL INFORME POR EMAIL',
+        button: 'Enviarme mi resultado',
         sending: 'Enviando…',
-        done: 'Hecho. Revisa tu correo: te he enviado tu informe personal completo.',
+        done: 'Hecho. Revisa tu correo: te envío tu forma.',
         error: 'No se pudo enviar. Inténtalo de nuevo.',
       }
     : {
-        title: 'Take your complete reading with you',
-        body: 'Your PASO name explains how you walk. The complete report reveals where that walk comes from: what is natural, what you have learned to show and where effort may be appearing.',
+        title: 'Shall I email you your result?',
+        body: "You'll get a link to your way of walking, to come back to it whenever you like.",
         placeholder: 'you@email.com',
         consent: 'I want to receive more from the IKIGAIER universe (new tools). I can unsubscribe anytime.',
-        button: 'EMAIL ME THE COMPLETE REPORT',
+        button: 'Email me my result',
         sending: 'Sending…',
-        done: 'Done. Check your inbox: your complete personal report is on its way.',
+        done: 'Done. Check your inbox: your shape is on its way.',
         error: 'Could not send. Please try again.',
       }
 
@@ -729,9 +787,44 @@ function LeadCapture({ codigo, locale, informe }: { codigo: string; locale: stri
   )
 }
 
-function Field({ label, text }: { label: string; text: string }) {
+function ReportSection({
+  number,
+  title,
+  intro,
+  pageBreak = false,
+  children,
+}: {
+  number: string
+  title: string
+  intro: string
+  pageBreak?: boolean
+  children: React.ReactNode
+}) {
   return (
-    <div>
+    <section className={`mt-12 ${pageBreak ? 'paso-break-before' : ''}`}>
+      <div
+        data-pdf-block
+        data-pdf-break="before"
+        data-pdf-keep-next="true"
+        className="mb-6 pb-4"
+      >
+        <div className="mb-3 flex items-center gap-3" aria-hidden="true">
+          <span className="text-[10px] font-medium tracking-[0.28em] text-[#c2866b]">{number}</span>
+          <span className="h-px w-10 bg-[#c2866b]/40" />
+        </div>
+        <h2 className="font-[family-name:var(--font-cormorant)] text-3xl leading-none text-[#272727]">
+          {title}
+        </h2>
+        <p className="mt-2 max-w-lg text-sm leading-relaxed text-[#272727]/60">{intro}</p>
+      </div>
+      {children}
+    </section>
+  )
+}
+
+function Field({ label, text, card = false }: { label: string; text: string; card?: boolean }) {
+  return (
+    <div className={card ? 'bg-[#FDFBF7] px-5 py-5 sm:px-6 sm:py-6' : ''}>
       <p className="text-xs tracking-widest uppercase text-[#c2866b] mb-1">{label}</p>
       <p className="text-sm leading-relaxed text-[#272727]/80">{text}</p>
     </div>
@@ -745,10 +838,9 @@ function TitularesBlock({ inf, dominante, locale }: { inf: InformePaso; dominant
   const titulares = generarTitulares(inf, dominante, locale)
   if (titulares.length === 0) return null
   const [principal, ...resto] = titulares
-  const teaser = generarTeaserGancho(inf, locale)
   return (
-    <div className="text-center mb-8">
-      <p className="paso-report-lead font-[family-name:var(--font-cormorant)] text-2xl leading-snug text-[#272727] px-2">
+    <div className="text-center mb-6">
+      <p className="font-[family-name:var(--font-cormorant)] text-2xl leading-snug text-[#272727]">
         {principal}
       </p>
       {resto.length > 0 && (
@@ -760,53 +852,6 @@ function TitularesBlock({ inf, dominante, locale }: { inf: InformePaso; dominant
           ))}
         </div>
       )}
-      {/* FOMO M1: bucle máscara↔real que remite a la lectura de abajo */}
-      <p className="text-sm text-[#c2866b] mt-4 px-4">{teaser}</p>
-    </div>
-  )
-}
-
-// Mapa de las 15 formas de caminar. Lista los 15 tipos agrupados por rareza
-// (frecuente → menos habitual → poco frecuente) y resalta el del usuario. No es
-// un ranking de valor: refuerza que su tipo es una de muchas formas posibles.
-function MapaCaminantes({
-  codigoActual,
-  t,
-  locale,
-}: {
-  codigoActual: string
-  t: (k: string, v?: Record<string, string | number>) => string
-  locale: string
-}) {
-  const orden = { frecuente: 0, habitual: 1, poco: 2 } as const
-  const lista = [...getPasoPatterns(locale)].sort(
-    (a, b) => orden[getRareza(a.codigo)] - orden[getRareza(b.codigo)]
-  )
-  return (
-    <div className="mt-10 rounded-xl bg-[#272727]/[0.03] px-5 py-5 paso-avoid-break">
-      <p className="text-xs tracking-widest uppercase text-[#272727]/40 mb-2">{t('mapa_title')}</p>
-      <p className="text-sm leading-relaxed text-[#272727]/70 mb-4">{t('mapa_intro')}</p>
-      <ul className="flex flex-col gap-1.5">
-        {lista.map(p => {
-          const activo = p.codigo === codigoActual
-          return (
-            <li
-              key={p.codigo}
-              className={`flex items-baseline justify-between text-sm ${
-                activo ? 'text-[#272727] font-medium' : 'text-[#272727]/55'
-              }`}
-            >
-              <span>
-                {activo && <span className="text-[#c2866b] mr-1.5">●</span>}
-                {p.nombre}
-              </span>
-              <span className="text-xs text-[#272727]/35 ml-3 shrink-0">
-                {t('rareza_short_' + getRareza(p.codigo))}
-              </span>
-            </li>
-          )
-        })}
-      </ul>
     </div>
   )
 }
@@ -839,167 +884,174 @@ function NarrativaBlock({ inf, locale }: { inf: InformePaso; locale: string }) {
   )
 }
 
-// "Dónde te separas de ti": el detalle numérico de la distancia máscara/natural,
-// eje por eje, ordenada de mayor a menor brecha. Complementa a NarrativaBlock.
-function BrechasBlock({
-  inf,
+// Clasificación PASO: conserva las siete zonas del cálculo, pero las presenta
+// como una posición visual entre menos presente, equilibrio y más presente.
+// Los números pertenecen al motor, no a la lectura de la persona.
+function FirmaBlock({
+  segmentos,
   t,
+  embedded = false,
 }: {
-  inf: InformePaso
+  segmentos: Record<Dim, number>
   t: (k: string, v?: Record<string, string | number>) => string
+  embedded?: boolean
 }) {
   return (
-    <div className="mt-8 mb-6 rounded-xl border border-[#272727]/10 bg-[#272727]/[0.025] px-5 py-5 paso-avoid-break">
-      <p className="text-xs tracking-widest uppercase text-[#272727]/40 mb-4">
-        {t('separas_title')}
-      </p>
-      <p className="text-sm leading-relaxed text-[#272727]/70 mb-5">
-        {t('separas_intro')}
-      </p>
-      <div className="flex flex-col gap-3">
-        {inf.brechas.map((b, index) => {
-          const abs = Math.abs(b.valor)
-          const grado = t(abs >= 7 ? 'brecha_grado_alto' : abs >= 3 ? 'brecha_grado_medio' : 'brecha_grado_bajo')
-          const rasgo = t('brecha_rasgo_' + b.dimension)
-          const explicacion = b.direccion === 'exige_de_mas'
-            ? t('brecha_mascara', { rasgo, grado })
-            : b.direccion === 'esconde'
-              ? t('brecha_naturaleza', { rasgo, grado })
-              : t('brecha_alineada', { rasgo })
-          const color =
-            b.direccion === 'exige_de_mas'
-              ? '#c2866b'
-              : b.direccion === 'esconde'
-                ? '#7a8b6f'
-                : '#27272733'
-          return (
-            <div key={b.dimension} className="flex flex-col gap-0.5">
-              <div className="flex items-baseline justify-between gap-3">
-                <div className="flex items-baseline gap-2 min-w-0">
-                  <span className="text-xs tabular-nums text-[#272727]/35 w-3 shrink-0">
-                    {index + 1}
-                  </span>
-                  <span
-                    className="inline-block h-2 w-2 rounded-full shrink-0 translate-y-[-1px]"
-                    style={{ background: color }}
-                  />
-                  <EjeLabel
-                    label={t('dim_' + b.dimension)}
-                    className="text-[#272727] font-[family-name:var(--font-cormorant)] text-lg"
-                  />
-                </div>
-                {abs > 0 && (
-                  <span className="text-xs text-[#272727]/40 shrink-0 tabular-nums">
-                    {t('separas_puntos', { n: abs })}
-                  </span>
-                )}
-              </div>
-              <span className="text-xs leading-relaxed text-[#272727]/55 pl-7">
-                {explicacion}
-              </span>
+    <div className={`${embedded ? '' : 'mt-8'} rounded-2xl bg-[#272727]/[0.035] px-5 py-6 sm:px-7`}>
+      {!embedded && (
+        <>
+          <p className="text-xs tracking-widest uppercase text-[#272727]/40 mb-1">
+            {t('firma_title')}
+          </p>
+          <p className="text-sm leading-relaxed text-[#272727]/70 mb-4">{t('firma_desc')}</p>
+        </>
+      )}
+      <div data-pdf-block className="pb-4">
+        <p className="mb-4 text-sm leading-relaxed text-[#272727]/65">
+          {t('classification_acronym_intro')}
+        </p>
+        <div className="mb-7 grid gap-2 sm:grid-cols-2">
+          {DIMS.map(d => (
+            <div key={d} className="flex items-baseline gap-2 rounded-lg bg-white/55 px-3 py-2.5">
+              <EjeLabel
+                label={t('dim_' + d)}
+                className="shrink-0 text-[#272727] font-[family-name:var(--font-cormorant)] text-lg"
+              />
+              <span className="text-xs leading-snug text-[#272727]/50">— {t('intro_dim_' + d)}</span>
             </div>
-          )
-        })}
+          ))}
+        </div>
+        <FirmaBarChart segmentos={segmentos} t={t} />
       </div>
-      <p className="text-xs leading-relaxed text-[#272727]/45 mt-5 pt-4 border-t border-[#272727]/10">
-        {t('separas_repeat')}
-      </p>
+      <div data-pdf-block className="pdf-classification-details">
+        <div className="mt-8 rounded-xl border border-[#c2866b]/20 bg-[#c2866b]/[0.055] px-5 py-5">
+          <p className="text-[10px] font-medium uppercase tracking-[0.28em] text-[#c2866b]">
+            {t('classification_your_reading')}
+          </p>
+          <div className="mt-3 space-y-3">
+            {DIMS.map(d => {
+              const position = segmentos[d]
+              const level = position > ZONA_EQUILIBRIO ? 'high' : position < ZONA_EQUILIBRIO ? 'low' : 'balance'
+              return (
+                <p key={d} className="text-sm leading-relaxed text-[#272727]/78">
+                  {t(`dim_${d}_${level}`)}
+                </p>
+              )
+            })}
+          </div>
+        </div>
+        <div className="mt-8 border-t border-[#272727]/10 pt-7">
+          <div className="pdf-definition-block">
+          <div>
+            <h3 className="font-[family-name:var(--font-cormorant)] text-2xl text-[#272727]">
+              {t('classification_reading_title')}
+            </h3>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#272727]/65">
+              {t('classification_reading_note')}
+            </p>
+          </div>
+          <div className="pdf-definition-grid mt-6 grid gap-px overflow-hidden rounded-xl border border-[#272727]/10 bg-[#272727]/10 sm:grid-cols-2">
+            {DIMS.map(d => (
+              <div key={d} className="bg-[#FDFBF7] px-5 py-5">
+                <EjeLabel
+                  label={t('dim_' + d)}
+                  className="text-[#272727] font-[family-name:var(--font-cormorant)] text-xl"
+                />
+                <p className="mt-2 text-sm leading-relaxed text-[#272727]/75">
+                  {t('dim_' + d + '_desc')}
+                </p>
+                <p className="mt-3 border-l-2 border-[#c2866b]/45 pl-3 text-xs leading-relaxed text-[#272727]/55">
+                  {t('dim_' + d + '_example')}
+                </p>
+              </div>
+            ))}
+          </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
 
-// "Tu firma": la asignación precisa. Cada eje en su zona (1..7), con la zona
-// de equilibrio marcada. Es una de las 2.401 combinaciones posibles.
-function FirmaBlock({
+function FirmaBarChart({
   segmentos,
   t,
 }: {
   segmentos: Record<Dim, number>
   t: (k: string, v?: Record<string, string | number>) => string
 }) {
-  const W = 430
-  const H = 270
-  const plotTop = 28
-  const plotBottom = 205
-  const barWidth = 48
-  const positions = [110, 195, 280, 365]
-  const y = (z: number) => plotBottom - (z / NUM_ZONAS) * (plotBottom - plotTop)
-  const dominante = DIMS.reduce((a, b) => (segmentos[a] >= segmentos[b] ? a : b))
+  const W = 620
+  const H = 350
+  const left = 82
+  const right = 18
+  const top = 30
+  const bottom = 82
+  const chartH = H - top - bottom
+  const baseY = top + chartH
+  const centres = [145, 275, 405, 535]
+  const barW = 72
+  const names = DIMS.map(d => t('dim_' + d))
+  // Los siete niveles tienen altura propia: la zona 1 conserva una barra
+  // corta y la zona 7 alcanza el límite superior, como en el gráfico original.
+  const y = (value: number) => baseY - (value / 7) * chartH
+
   return (
-    <div className="mt-8 rounded-xl bg-[#272727]/[0.03] px-5 py-5 paso-avoid-break">
-      <p className="text-xs tracking-widest uppercase text-[#272727]/40 mb-1">
-        {t('firma_title')}
-      </p>
-      <p className="text-sm leading-relaxed text-[#272727]/70 mb-4">{t('firma_desc')}</p>
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label={t('firma_title')}>
-        {Array.from({ length: NUM_ZONAS }, (_, i) => i + 1).map(z => (
-          <g key={z}>
-            <line x1="70" y1={y(z)} x2="405" y2={y(z)}
-              stroke="#272727" strokeOpacity={z === ZONA_EQUILIBRIO ? 0.28 : 0.1}
-              strokeWidth={z === ZONA_EQUILIBRIO ? 1.2 : 0.7}
-              strokeDasharray={z === ZONA_EQUILIBRIO ? '4 3' : undefined} />
-            <text x="57" y={y(z) + 4} textAnchor="end" fontSize="12" className="fill-[#272727]" opacity="0.45">{z}</text>
+    <div className="overflow-hidden rounded-xl bg-[#f5f3ef] px-1 pb-2 pt-1 sm:px-3">
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        className="block w-full"
+        role="img"
+        aria-label={DIMS.map(d => `${t('dim_' + d)}: ${segmentos[d]}`).join('. ')}
+      >
+        {Array.from({ length: 7 }, (_, i) => i + 1).map(value => (
+          <g key={value}>
+            <line
+              x1={left}
+              x2={W - right}
+              y1={y(value)}
+              y2={y(value)}
+              stroke="#272727"
+              strokeOpacity={value === ZONA_EQUILIBRIO ? 0.26 : 0.09}
+              strokeDasharray={value === ZONA_EQUILIBRIO ? '6 6' : undefined}
+            />
+            <text x={left - 22} y={y(value) + 5} textAnchor="middle" fill="#272727" fillOpacity="0.38" fontSize="15">
+              {value}
+            </text>
           </g>
         ))}
-        <text x="8" y={plotTop + 4} fontSize="12" className="fill-[#272727]" opacity="0.4">{t('firma_alta')}</text>
-        <text x="8" y={plotBottom} fontSize="12" className="fill-[#272727]" opacity="0.4">{t('firma_baja')}</text>
-        <text x="402" y={y(ZONA_EQUILIBRIO) - 7} textAnchor="end" fontSize="12" className="fill-[#272727]" opacity="0.45">{t('linea_equilibrio')}</text>
+
+        <text x="12" y={top + 5} fill="#272727" fillOpacity="0.42" fontSize="15">Alta</text>
+        <text x="12" y={baseY + 1} fill="#272727" fillOpacity="0.42" fontSize="15">Baja</text>
+        <text x={W - right - 2} y={y(ZONA_EQUILIBRIO) - 10} textAnchor="end" fill="#272727" fillOpacity="0.42" fontSize="15">
+          {t('firma_balance')}
+        </text>
+
         {DIMS.map((d, i) => {
           const value = segmentos[d]
-          const top = y(value)
-          const active = d === dominante
+          const barTop = y(value)
           return (
             <g key={d}>
-              <rect x={positions[i] - barWidth / 2} y={top} width={barWidth} height={plotBottom - top}
-                rx="5" fill={active ? '#c2866b' : '#7a8b6f'} fillOpacity={active ? 0.95 : 0.72} />
-              <text x={positions[i]} y={top - 8} textAnchor="middle" fontSize="12" fontWeight="600" className="fill-[#272727]">{value}</text>
-              <text x={positions[i]} y="229" textAnchor="middle" fontSize="18" fontWeight="600" className="fill-[#272727]">{d}</text>
-              <text x={positions[i]} y="250" textAnchor="middle" fontSize="12" className="fill-[#272727]" opacity="0.6">{t('dim_' + d)}</text>
+              <rect
+                x={centres[i] - barW / 2}
+                y={barTop}
+                width={barW}
+                height={baseY - barTop}
+                rx="9"
+                fill={i === 0 ? '#c2866b' : '#9cab92'}
+              />
+              <text x={centres[i]} y={barTop - 12} textAnchor="middle" fill="#272727" fontSize="18" fontWeight="600">
+                {value}
+              </text>
+              <text x={centres[i]} y={baseY + 39} textAnchor="middle" fill="#272727" fontSize="24" fontWeight="600">
+                {d}
+              </text>
+              <text x={centres[i]} y={baseY + 67} textAnchor="middle" fill="#272727" fillOpacity="0.56" fontSize="14">
+                {names[i]}
+              </text>
             </g>
           )
         })}
       </svg>
-    </div>
-  )
-}
-
-// "Qué mide PASO": el marco fijo que aparece en todos los informes. Explica las
-// cuatro formas de caminar (P·A·S·O) para que quien no conozca el modelo entienda
-// qué está mirando, sin jerga y sin jerarquía entre ejes.
-function QueEsPasoBlock({
-  t,
-}: {
-  t: (k: string, v?: Record<string, string | number>) => string
-}) {
-  return (
-    <div className="mt-8 rounded-xl bg-[#272727]/[0.03] px-5 py-5">
-      <p className="text-xs tracking-widest uppercase text-[#272727]/40 mb-2">
-        {t('que_es_title')}
-      </p>
-      <p className="text-sm leading-relaxed text-[#272727]/70 mb-5">{t('que_es_intro')}</p>
-      <div className="grid grid-cols-1 min-[390px]:grid-cols-2 auto-rows-fr gap-3">
-        {DIMS.map(d => (
-          <div key={d} className="flex h-full flex-col rounded-lg bg-[#FDFBF7]/80 border border-[#272727]/[0.07] px-4 py-4 min-h-[218px] break-words">
-            <EjeLabel
-              label={t('dim_' + d)}
-              className="font-[family-name:var(--font-cormorant)] text-xl text-[#272727]"
-            />
-            <span className="text-[13px] leading-relaxed text-[#272727]/65 mt-1 mb-3">
-              {t('que_es_' + d)}
-            </span>
-            <div className="mt-auto flex flex-col gap-2.5">
-              <div>
-                <strong className="block text-xs tracking-wide uppercase text-[#7a8b6f] font-medium mb-0.5">{t('que_es_equilibrio')}</strong>
-                <span className="block text-xs leading-relaxed text-[#272727]/65">{t('que_es_' + d + '_equilibrio')}</span>
-              </div>
-              <div>
-                <strong className="block text-xs tracking-wide uppercase text-[#c2866b] font-medium mb-0.5">{t('que_es_domina')}</strong>
-                <span className="block text-xs leading-relaxed text-[#272727]/65">{t('que_es_' + d + '_domina')}</span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
     </div>
   )
 }
@@ -1089,7 +1141,7 @@ function HorizonGraph({
           strokeWidth={1}
           strokeDasharray="3 3"
         />
-        <text x={padX} y={y(ZONA_EQUILIBRIO) - 5} fontSize={12} className="fill-[#272727]" opacity={0.35}>
+        <text x={padX} y={y(ZONA_EQUILIBRIO) - 4} fontSize={8} className="fill-[#272727]" opacity={0.35}>
           {t('linea_equilibrio')}
         </text>
         {/* Máscara: curva que muestras (terracota) */}
@@ -1108,7 +1160,7 @@ function HorizonGraph({
               y={H - 8}
               textAnchor="middle"
               className="fill-[#272727]"
-              fontSize={12}
+              fontSize={11}
             >
               {labels[i]}
             </text>
@@ -1150,7 +1202,7 @@ function Shell({
           href={`/${locale}/${userId ? 'dashboard' : 'login'}`}
           className="text-xs text-[#272727]/40 hover:text-[#c2866b] transition-colors tracking-wide"
         >
-          ← {userId ? tn('platform') : tn('title')}
+          ← {tn('title')}
         </Link>
       </div>
       {children}

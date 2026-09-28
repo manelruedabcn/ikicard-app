@@ -50,15 +50,15 @@ export interface InformePaso {
 export const PASO_GRUPOS: Grupo[] = [
   {
     "grupo": 1,
-    "P": "Decido y avanzo",
-    "A": "Me acerco a la gente",
-    "S": "Voy sin prisa",
-    "O": "Miro antes de dar el paso"
+    "P": "Tomo decisiones con facilidad",
+    "A": "Conecto fácilmente con la gente",
+    "S": "Me tomo las cosas con calma",
+    "O": "Actúo con precaución"
   },
   {
     "grupo": 2,
     "P": "Sostengo lo que pienso",
-    "A": "Trato con calidez",
+    "A": "Trato a los demás con cercanía",
     "S": "Espero sin impacientarme",
     "O": "Me lo pienso con calma"
   },
@@ -66,22 +66,22 @@ export const PASO_GRUPOS: Grupo[] = [
     "grupo": 3,
     "P": "Voy de frente",
     "A": "Me abro a los demás",
-    "S": "No me caigo del ritmo",
+    "S": "Mantengo un ritmo constante",
     "O": "Cuido el detalle"
   },
   {
     "grupo": 4,
     "P": "Me atrevo con lo difícil",
     "A": "Conecto con facilidad",
-    "S": "Me mantengo estable",
-    "O": "Me fijo en todo"
+    "S": "Mantengo la calma ante los cambios",
+    "O": "Presto atención a los detalles"
   },
   {
     "grupo": 5,
-    "P": "Empujo hasta el final",
-    "A": "Me expreso bien",
-    "S": "Soy fiel a los míos",
-    "O": "Trabajo con rigor"
+    "P": "Llevo las cosas hasta el final",
+    "A": "Expreso abiertamente lo que pienso",
+    "S": "Permanezco al lado de quien cuenta conmigo",
+    "O": "Hago las cosas con rigor"
   },
   {
     "grupo": 6,
@@ -92,157 +92,157 @@ export const PASO_GRUPOS: Grupo[] = [
   },
   {
     "grupo": 7,
-    "P": "Me exijo",
-    "A": "Sé convencer",
-    "S": "No me altero",
+    "P": "Me exijo para alcanzar mis objetivos",
+    "A": "Suelo convencer a los demás",
+    "S": "No me altero fácilmente",
     "O": "Reviso antes de darlo por bueno"
   },
   {
     "grupo": 8,
-    "P": "Me basto y me sobro",
-    "A": "Me entusiasmo",
-    "S": "Voy con discreción",
-    "O": "Me guardo algo"
+    "P": "Me las arreglo por mi cuenta",
+    "A": "Me entusiasmo con facilidad",
+    "S": "Actúo con discreción",
+    "O": "Prefiero observar antes de abrirme"
   },
   {
     "grupo": 9,
-    "P": "Tengo valor",
-    "A": "Digo lo que siento",
-    "S": "Soy leal",
-    "O": "Sigo un método"
+    "P": "Asumo riesgos cuando hace falta",
+    "A": "Expreso lo que siento",
+    "S": "Mantengo mis compromisos con los demás",
+    "O": "Sigo un proceso paso a paso"
   },
   {
     "grupo": 10,
-    "P": "Voy sin dudarlo",
-    "A": "Voy con alegría",
-    "S": "Me quito importancia",
-    "O": "Lo analizo"
+    "P": "Actúo sin darle demasiadas vueltas",
+    "A": "Hago las cosas con alegría",
+    "S": "Me siento bien sin ser protagonista",
+    "O": "Analizo las cosas en profundidad"
   },
   {
     "grupo": 11,
-    "P": "Voy rápido",
-    "A": "Soy sociable",
-    "S": "Soy constante",
-    "O": "Voy con cautela"
+    "P": "Actúo con rapidez",
+    "A": "Me relaciono con facilidad",
+    "S": "Actúo con constancia",
+    "O": "Actúo con cautela"
   },
   {
     "grupo": 12,
     "P": "Insisto hasta lograrlo",
-    "A": "Caigo bien",
-    "S": "Soy amable",
-    "O": "Lo hago con orden"
+    "A": "Creo cercanía con facilidad",
+    "S": "Escucho con paciencia",
+    "O": "Hago las cosas de forma ordenada"
   },
   {
     "grupo": 13,
-    "P": "Le pongo energía",
-    "A": "Tengo chispa",
-    "S": "Se puede confiar en mí",
-    "O": "Sé lo que conviene"
+    "P": "Pongo energía en lo que hago",
+    "A": "Transmito entusiasmo a los demás",
+    "S": "Mantengo mi palabra",
+    "O": "Comparo opciones antes de elegir"
   },
   {
     "grupo": 14,
-    "P": "Apunto alto",
-    "A": "Me sumo a los planes",
-    "S": "Estoy en calma",
-    "O": "Voy a lo exacto"
+    "P": "Me propongo metas ambiciosas",
+    "A": "Me uno con entusiasmo a los planes",
+    "S": "Mantengo un ritmo tranquilo",
+    "O": "Busco precisión en lo que hago"
   },
   {
     "grupo": 15,
-    "P": "Voy con ganas",
-    "A": "Me muestro tal cual",
-    "S": "No presumo",
-    "O": "No lo cuento todo"
+    "P": "Afronto las cosas con decisión",
+    "A": "Me muestro tal como soy",
+    "S": "Evito presumir de lo que hago",
+    "O": "Me reservo parte de lo que pienso"
   },
   {
     "grupo": 16,
-    "P": "Voy por mi cuenta",
-    "A": "Hablo con soltura",
-    "S": "Intento agradar",
-    "O": "Sigo un sistema"
+    "P": "Tomo mis propias decisiones",
+    "A": "Me expreso con soltura",
+    "S": "Busco que los demás estén a gusto",
+    "O": "Sigo un sistema definido"
   },
   {
     "grupo": 17,
-    "P": "Decido rápido",
+    "P": "Tomo decisiones con rapidez",
     "A": "Animo a los demás",
-    "S": "Aguanto con el tiempo",
-    "O": "Lo hago con esmero"
+    "S": "Mantengo el esfuerzo con el tiempo",
+    "O": "Hago las cosas con esmero"
   },
   {
     "grupo": 18,
-    "P": "Soy eficaz",
-    "A": "Resulto agradable",
-    "S": "Me tomo mi tiempo",
-    "O": "Lo reflexiono"
+    "P": "Me centro en conseguir resultados",
+    "A": "Genero un ambiente agradable",
+    "S": "Me doy tiempo para hacer las cosas",
+    "O": "Reflexiono antes de decidir"
   },
   {
     "grupo": 19,
-    "P": "Llevo las riendas",
-    "A": "Contagio lo que siento",
-    "S": "Se sabe qué esperar de mí",
-    "O": "Lo calculo"
+    "P": "Tomo la iniciativa",
+    "A": "Dejo ver lo que siento",
+    "S": "Mantengo una forma estable de actuar",
+    "O": "Calculo antes de actuar"
   },
   {
     "grupo": 20,
-    "P": "Dirijo",
-    "A": "Me llevo bien con todos",
-    "S": "Voy sin pasarme",
-    "O": "No dejo fallos"
+    "P": "Tomo el mando cuando hace falta",
+    "A": "Conecto con personas diferentes",
+    "S": "Busco un punto medio",
+    "O": "Reviso para evitar errores"
   },
   {
     "grupo": 21,
-    "P": "Digo las cosas claras",
-    "A": "Me expreso con calor",
-    "S": "Voy con confianza",
-    "O": "Trato a todos por igual"
+    "P": "Digo las cosas con claridad",
+    "A": "Me expreso con cercanía",
+    "S": "Actúo con confianza",
+    "O": "Aplico el mismo criterio a todos"
   },
   {
     "grupo": 22,
-    "P": "Tomo la iniciativa",
-    "A": "Doy confianza",
-    "S": "Mantengo un ritmo regular",
-    "O": "Soy formal"
+    "P": "Doy el primer paso",
+    "A": "Hago que los demás se sientan en confianza",
+    "S": "Mantengo un ritmo estable",
+    "O": "Respeto los acuerdos y las normas"
   },
   {
     "grupo": 23,
-    "P": "Voy con determinación",
-    "A": "Me gano a la gente",
-    "S": "Me mantengo humilde",
-    "O": "Voy con cuidado"
+    "P": "Actúo con determinación",
+    "A": "Me gano la confianza de la gente",
+    "S": "Actúo con humildad",
+    "O": "Hago las cosas con cuidado"
   },
   {
     "grupo": 24,
-    "P": "No me achico",
-    "A": "Hago buenas migas",
-    "S": "No me acelero",
-    "O": "Me guardo lo mío"
+    "P": "No me dejo intimidar",
+    "A": "Hago buenas migas con facilidad",
+    "S": "Mantengo la calma bajo presión",
+    "O": "Me reservo mis asuntos personales"
   },
   {
     "grupo": 25,
-    "P": "Hablo con franqueza",
-    "A": "Trato con amabilidad",
-    "S": "Echo una mano",
-    "O": "Miro hacia dentro"
+    "P": "Expreso lo que pienso con franqueza",
+    "A": "Trato a los demás con amabilidad",
+    "S": "Ayudo cuando hace falta",
+    "O": "Reflexiono sobre lo que siento"
   },
   {
     "grupo": 26,
-    "P": "No dependo de nadie",
-    "A": "Sé llegar a la gente",
-    "S": "Avanzo con calma",
-    "O": "Lo remato bien"
+    "P": "Resuelvo las cosas con autonomía",
+    "A": "Encuentro la forma de llegar a la gente",
+    "S": "Avanzo sin prisas",
+    "O": "Cuido los detalles hasta el final"
   },
   {
     "grupo": 27,
-    "P": "Voy con fuerza",
-    "A": "Voy de buen humor",
-    "S": "Miro por los demás",
-    "O": "Cuido que esté bien hecho"
+    "P": "Afronto las cosas con energía",
+    "A": "Transmito buen humor",
+    "S": "Estoy pendiente de los demás",
+    "O": "Me aseguro de que las cosas queden bien"
   },
   {
     "grupo": 28,
-    "P": "No abandono",
-    "A": "Inspiro a otros",
-    "S": "Tengo paciencia",
-    "O": "Veo las dos partes"
+    "P": "Sigo adelante aunque haya dificultades",
+    "A": "Inspiro a los demás",
+    "S": "Espero con paciencia",
+    "O": "Considero distintos puntos de vista antes de decidir"
   }
 ]
 
@@ -260,11 +260,11 @@ export const PASO_PATRONES: Patron[] = [
   {
     "codigo": "AAAA",
     "nombre": "Caminante en Compañía",
-    "retrato": "Caminas hacia la gente. Tu energía se activa en el encuentro: piensas mejor al conversar, das sentido a lo vivido cuando puedes compartirlo y detectas con facilidad qué necesita un grupo para sentirse unido. Sueles crear cercanía, abrir puertas y hacer que otros se sientan incluidos. No buscas compañía solo para no estar a solas; la relación es una de tus principales formas de comprender el mundo y de avanzar por él. Tu don es conectar personas, contagiar entusiasmo y convertir un recorrido individual en una experiencia compartida. El riesgo aparece cuando la mirada ajena pesa tanto que adaptas tu paso, callas lo que necesitas o confundes pertenecer con agradar. Tu aprendizaje no consiste en alejarte de los demás, sino en comprobar que también puedes escucharte, decidir y sostenerte cuando nadie valida el camino.",
-    "motivacion": "Te mueve sentir que el camino tiene destinatario y compañía. Necesitas intercambio, respuesta y la sensación de que lo que haces acerca a las personas. Celebrar juntos, conversar y crear pertenencia alimenta tu energía. Cuando esa conexión es auténtica, haces que los grupos avancen con más confianza y humanidad.",
-    "bajo_presion": "Buscas más conversación, presencia o aprobación para recuperar seguridad. Puedes dispersarte atendiendo a todos, aceptar compromisos para no decepcionar o hablar mucho de lo que ocurre sin llegar a decidir. Si temes perder el vínculo, corres el riesgo de ajustar demasiado tu conducta a lo que esperan los demás.",
-    "teme": "Quedarte fuera, no ser tenido en cuenta o recorrer un tramo importante sin testigos, respuesta ni reconocimiento. En el fondo, puede inquietarte que elegirte a ti mismo ponga en peligro la pertenencia.",
-    "seria_mas_eficaz_si": "Diferenciaras conexión de aprobación. Seguir cerca de la gente sin abandonar tu propio criterio; preguntar qué quieres antes de adaptarte; y entrenarte en completar algunos tramos en soledad, no como aislamiento, sino como una forma de volver a ti.",
+    "retrato": "Caminas hacia la gente. Los pasos te saben distintos cuando hay alguien al lado con quien compartirlos, y tu energía crece con la del grupo. Tu don es unir a la gente; tu aprendizaje, descubrir que los tramos en soledad también son tuyos y también te sostienen.",
+    "motivacion": "Que el camino se comparta. Un logro sin nadie que lo celebre casi no cuenta como logro.",
+    "bajo_presion": "Dispersas energía en conversación y validación, y a veces confundes hablar del problema con resolverlo.",
+    "teme": "El camino silencioso, sin testigos ni reconocimiento.",
+    "seria_mas_eficaz_si": "Te entrenaras en sostener tramos en soledad, sin que eso signifique perder el rumbo.",
     "libro_recomendado": "Camina sin separarte de ti"
   },
   {
@@ -510,16 +510,12 @@ export function getPatron(codigo: string): Patron | undefined {
   return PASO_PATRONES.find(p => p.codigo === codigo)
 }
 
-// Localised content getters. Scoring always uses the stable dimension codes,
-// so the chosen language cannot change a result.
 export function getPasoGroups(locale: string): Grupo[] {
-  if (locale !== 'en') return PASO_GRUPOS
-  return PASO_GROUPS_EN
+  return locale === 'en' ? PASO_GROUPS_EN : PASO_GRUPOS
 }
 
 export function getPasoPatterns(locale: string): Patron[] {
-  if (locale !== 'en') return PASO_PATRONES
-  return PASO_PATTERNS_EN
+  return locale === 'en' ? PASO_PATTERNS_EN : PASO_PATRONES
 }
 
 export function getLocalizedPatron(codigo: string, locale: string): Patron | undefined {
