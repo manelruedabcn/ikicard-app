@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { trackEvent } from '@/lib/analytics'
 
-export default function LoginForm({ locale }: { locale: string }) {
+export default function LoginForm({ locale, next = null }: { locale: string; next?: string | null }) {
   const router = useRouter()
   const pathname = usePathname()
   const supabase = createClient()
@@ -42,11 +42,18 @@ export default function LoginForm({ locale }: { locale: string }) {
         setError(error.message)
       } else {
         trackEvent('login', { method: 'email' })
-        router.push(`/${locale}/dashboard`)
+        router.push(next ?? `/${locale}/dashboard`)
         router.refresh()
       }
     } else if (mode === 'register') {
-      const { error } = await supabase.auth.signUp({ email, password })
+      // Con `next` (QR del taller), el enlace de confirmación vuelve a esa ruta.
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        ...(next
+          ? { options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` } }
+          : {}),
+      })
       if (error) {
         setError(error.message)
       } else {
@@ -72,7 +79,7 @@ export default function LoginForm({ locale }: { locale: string }) {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=/${locale}/dashboard`,
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next ?? `/${locale}/dashboard`)}`,
       },
     })
     if (error) setError(error.message)
