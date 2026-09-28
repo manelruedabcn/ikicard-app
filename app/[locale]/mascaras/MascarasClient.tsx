@@ -350,6 +350,8 @@ function Result({
   // Las que hoy aplican: puntúan 3 o más (gobiernan o asoman), ya ordenadas.
   const active = ranked.filter(m => (scores[m.code] ?? 0) >= MASKS_THRESHOLDS.secondary)
   const combination = maskCombinationReading(active.map(m => m.code), locale)
+  // Las que hoy no pesan (1-2): se nombran juntas, sin detalle.
+  const quiet = ranked.filter(m => (scores[m.code] ?? 0) < MASKS_THRESHOLDS.secondary)
 
   return (
     <div>
@@ -369,165 +371,228 @@ function Result({
         }
       `}</style>
 
-      {/* Informe: lo que se captura en el PDF. Lo interactivo (botones,
-          ejercicio) queda fuera o marcado como no exportable. */}
+      {/* Informe: lo que se captura en el PDF. Mismo lenguaje editorial que el
+          informe PASO (portada oscura, secciones numeradas, tarjetas). Lo
+          interactivo queda fuera o marcado como no exportable. */}
       <div ref={informeRef} className="mask-print-root">
-      {/* Dominante */}
-      <div className="text-center mb-10">
-        <p className="text-xs tracking-[0.3em] uppercase text-[#c2866b] mb-3">
-          {en ? 'The mask that governs you most' : 'La máscara que más te gobierna'}
-        </p>
-        <h2 className="font-[family-name:var(--font-cormorant)] text-4xl text-[#272727] mb-5">
-          {mask.name}
-        </h2>
-        <p className="text-sm leading-relaxed text-[#272727]/75">{mask.description}</p>
-      </div>
-
-      {/* El miedo debajo (el freno) */}
-      <div className="rounded-xl border border-[#c2866b]/30 bg-[#c2866b]/5 px-5 py-5 text-center mb-10">
-        <p className="text-xs tracking-widest uppercase text-[#c2866b] mb-2">{en ? 'The fear underneath' : 'El miedo que hay debajo'}</p>
-        <p className="font-[family-name:var(--font-cormorant)] text-2xl text-[#272727]">{mask.fear}</p>
-        <p className="text-xs text-[#272727]/50 mt-3">
-          {en ? 'When you name the fear, the mask loses its grip.' : 'Cuando le pones nombre al miedo, la máscara pierde fuerza.'}
-        </p>
-      </div>
-
-      {/* Las máscaras que hoy aplican (puntúan 3+): cada una descrita con su
-          miedo. Antes solo se describía la dominante. */}
-      {active.length > 1 && (
-        <div className="mb-10">
-          <p className="text-center text-xs tracking-[0.3em] uppercase text-[#c2866b] mb-1">
-            {en ? 'The ones you wear today' : 'Las que hoy llevas puestas'}
-          </p>
-          <p className="text-center text-sm text-[#272727]/55 mb-6">
-            {en
-              ? 'You may recognise yourself in more than one. That’s normal: they aren’t sealed compartments.'
-              : 'Posiblemente te reconozcas en más de una. Es normal: no son compartimentos estancos.'}
-          </p>
-          <div className="flex flex-col gap-5">
-            {active.map(m => {
-              const gobierna = (scores[m.code] ?? 0) >= MASKS_THRESHOLDS.dominant
-              return (
-                <div
-                  key={m.code}
-                  className="rounded-xl border border-[#272727]/12 bg-white/50 px-5 py-4"
-                >
-                  <div className="flex items-baseline justify-between mb-2">
-                    <p className="font-[family-name:var(--font-cormorant)] text-xl text-[#272727]">
-                      {m.name}
-                    </p>
-                    <span className="text-xs text-[#272727]/35 ml-3 shrink-0">
-                      {gobierna ? (en ? 'governs you' : 'te gobierna') : (en ? 'surfacing' : 'asoma')}
-                    </span>
-                  </div>
-                  <p className="text-sm leading-relaxed text-[#272727]/75 mb-2">{m.description}</p>
-                  <p className="text-xs tracking-wide text-[#c2866b]">{en ? 'The fear behind: ' : 'El miedo detrás: '}{m.fear}</p>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Retrato combinado: cómo se turnan tus máscaras para proteger la misma
-          herida. Enriquecimiento sobre "no son compartimentos estancos". */}
-      {combination.length > 0 && (
-        <div className="rounded-xl bg-[#c2866b]/[0.06] px-5 py-5 mb-10">
-          <p className="text-xs tracking-[0.3em] uppercase text-[#c2866b] mb-3">{en ? 'How they combine in you' : 'Cómo se combinan en ti'}</p>
-          <div className="flex flex-col gap-3">
-            {combination.map((linea, i) => (
-              <p key={i} className="text-sm leading-relaxed text-[#272727]/80">
-                {linea}
-              </p>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Mapa de las 7 máscaras: sitúa la tuya entre todas. No es un ranking
-          de valor; todas conviven en ti, esta es la que hoy manda. */}
-      <div className="mb-10 rounded-xl bg-[#272727]/[0.03] px-5 py-5">
-        <p className="text-xs tracking-widest uppercase text-[#272727]/40 mb-2">{en ? 'The 7 masks' : 'Las 7 máscaras'}</p>
-        <p className="text-sm leading-relaxed text-[#272727]/70 mb-4">
-          {en
-            ? 'They all live in you. These are the ones that weigh most today and the ones barely surfacing now.'
-            : 'Todas conviven en ti. Estas son las que hoy pesan más y las que ahora apenas asoman.'}
-        </p>
-        <ul className="flex flex-col gap-1.5">
-          {ranked.map(m => {
-            const score = scores[m.code] ?? 0
-            const activo = m.code === dominant
-            const nivel =
-              score >= MASKS_THRESHOLDS.dominant
-                ? (en ? 'governs you' : 'te gobierna')
-                : score >= MASKS_THRESHOLDS.secondary
-                  ? (en ? 'surfacing' : 'asoma')
-                  : (en ? 'not defining you now' : 'no te define ahora')
-            return (
-              <li
-                key={m.code}
-                className={`flex items-baseline justify-between text-sm ${
-                  activo ? 'text-[#272727] font-medium' : 'text-[#272727]/55'
-                }`}
-              >
-                <span>
-                  {activo && <span className="text-[#c2866b] mr-1.5">●</span>}
-                  {m.name}
-                </span>
-                <span className="text-xs text-[#272727]/35 ml-3 shrink-0">{nivel}</span>
-              </li>
-            )
-          })}
-        </ul>
-      </div>
-
-      {/* Cierre sin juicio */}
-      <div className="py-2 text-center mb-10">
-        <p className="text-sm leading-relaxed text-[#272727]/70 mb-4">{closing.noJudgement}</p>
-        <p className="font-[family-name:var(--font-cormorant)] text-xl italic text-[#c2866b] leading-relaxed">
-          {closing.reframe}
-        </p>
-      </div>
-
-      {/* Compartir / guardar en PDF. En móvil abre el menú nativo para
-          guardarlo en Archivos o enviarlo. No se exporta al propio PDF. */}
-      <div className="mb-4 text-center print:hidden mask-no-export">
-        <button
-          onClick={compartir}
-          className="w-full py-3 bg-[#c2866b] text-[#FDFBF7] text-xs tracking-widest uppercase hover:bg-[#272727] transition-colors"
+        {/* Portada */}
+        <header
+          data-pdf-block
+          data-pdf-break="before"
+          className="relative overflow-hidden rounded-[2rem] bg-[#F8F4ED] text-center shadow-[0_28px_90px_rgba(39,36,32,0.14)] mask-avoid-break"
         >
-          {generandoPdf ? (en ? 'Generating…' : 'Generando…') : (en ? 'Share my report' : 'Compartir mi informe')}
-        </button>
-        <button
-          onClick={guardarPdf}
-          disabled={generandoPdf}
-          className="w-full py-3 mt-3 border border-[#272727] text-[#272727] text-xs tracking-widest uppercase hover:bg-[#272727] hover:text-[#FDFBF7] transition-colors disabled:opacity-40"
-        >
-          {generandoPdf ? (en ? 'Generating…' : 'Generando…') : (en ? 'Download my report as PDF' : 'Descargar mi informe en PDF')}
-        </button>
-        <p className="text-xs text-[#272727]/40 mt-2">{en ? 'Your result, to take with you or return to.' : 'Tu resultado, para llevártelo o volver a él.'}</p>
-      </div>
-
-      {/* Pie de marca: solo aparece en el PDF, para que quien lo reciba sepa
-          dónde hacer su propio test. El QR lleva a ikigaier.com. */}
-      <div className="mask-print-only mt-10 pt-6 border-t border-[#272727]/15 mask-avoid-break">
-        <div className="flex items-center justify-center gap-5">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/paso-qr.png"
-            alt="ikigaier.com"
-            width={88}
-            height={88}
-            className="w-[88px] h-[88px] shrink-0"
-          />
-          <div className="text-left">
-            <p className="text-xs tracking-[0.3em] uppercase text-[#c2866b] mb-1">{en ? 'The mirror' : 'El espejo'}</p>
-            <p className="font-[family-name:var(--font-cormorant)] text-lg leading-snug text-[#272727]">
-              {en ? 'Discover which mask governs your life at ikigaier.com' : 'Descubre qué máscara gobierna tu vida en ikigaier.com'}
+          <div className="relative isolate overflow-hidden bg-[#242320] px-6 pb-16 pt-12 sm:px-10 sm:pb-20 sm:pt-14">
+            <div className="absolute -left-16 -top-20 -z-10 h-52 w-52 rounded-full bg-[#84937A] sm:-left-20 sm:-top-24 sm:h-64 sm:w-64" />
+            <div className="absolute -bottom-28 -right-20 -z-10 h-48 w-48 rounded-full bg-[#C7896D]/90 sm:h-56 sm:w-56" />
+            <div className="absolute left-8 top-8 sm:left-11 sm:top-10">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/brand/ikigaier-isotipo-crema.png"
+                alt="IKIGAIER"
+                className="block h-12 w-12 object-contain opacity-90 sm:h-14 sm:w-14"
+              />
+            </div>
+            <p className="mb-7 mt-12 text-[11px] uppercase tracking-[0.38em] text-[#D2A857] sm:mt-14">
+              {en ? 'The mask that governs you most' : 'La máscara que más te gobierna'}
             </p>
+            <h1 className="mx-auto max-w-lg font-[family-name:var(--font-cormorant)] text-5xl leading-[1.05] text-[#F8F4ED] sm:text-6xl">
+              {mask.name}
+            </h1>
+          </div>
+
+          <div className="relative overflow-hidden px-6 py-11 sm:px-10 sm:py-14">
+            <div className="absolute -bottom-28 -right-24 h-48 w-48 rounded-full bg-[#C7896D] sm:-bottom-36 sm:-right-28 sm:h-60 sm:w-60" />
+            <p className="mx-auto mb-9 max-w-md font-[family-name:var(--font-cormorant)] text-2xl leading-snug text-[#272727] sm:text-3xl">
+              {en
+                ? 'Not a label. A mirror of what protects you today.'
+                : 'No es una etiqueta. Es un espejo de lo que hoy te protege.'}
+            </p>
+            <div className="relative mx-auto max-w-md">
+              <p className="font-[family-name:var(--font-cormorant)] text-2xl leading-snug text-[#272727]">
+                {en ? `Underneath lies the ${mask.fear}.` : `Debajo late el ${mask.fear}.`}
+              </p>
+              <p className="mt-2 mb-7 text-sm leading-relaxed text-[#272727]/60">
+                {en
+                  ? 'When you name the fear, the mask loses its grip.'
+                  : 'Cuando le pones nombre al miedo, la máscara pierde fuerza.'}
+              </p>
+              <div className="border-t border-[#C7896D]/35 pt-7">
+                <p className="mb-3 text-[10px] uppercase tracking-[0.3em] text-[#C7896D]">
+                  {en ? 'How it shows' : 'Cómo se manifiesta'}
+                </p>
+                <p className="text-[15px] leading-relaxed text-[#272727]/72">{mask.description}</p>
+              </div>
+              <div className="mx-auto my-7 h-px w-24 bg-[#C7896D]/70" />
+              <p className="text-xs leading-relaxed text-[#272727]/45">
+                {en ? 'There are 7 masks. This is the one leading today.' : 'Existen 7 máscaras. Esta es la que hoy manda.'}
+              </p>
+            </div>
+          </div>
+        </header>
+
+        {/* 01 · Las siete, puntuadas */}
+        <MaskSection
+          number="01"
+          title={en ? 'Your mask compass' : 'Tu brújula de máscaras'}
+          intro={
+            en
+              ? 'All seven live in you. The chart shows how strongly each one is acting right now, on the book’s scale: 4–5 governs, 3 surfaces, 1–2 doesn’t define you now.'
+              : 'Las siete conviven en ti. El gráfico muestra con cuánta fuerza actúa cada una ahora mismo, con la escala del libro: 4–5 gobierna, 3 asoma, 1–2 no te define ahora.'
+          }
+        >
+          <div data-pdf-block className="rounded-2xl bg-[#272727]/[0.035] px-5 py-6 sm:px-7">
+            <MaskBars ranked={ranked} scores={scores} dominant={dominant} en={en} />
+          </div>
+          <div data-pdf-block className="mt-8 rounded-xl border border-[#c2866b]/20 bg-[#c2866b]/[0.055] px-5 py-5">
+            <p className="text-[10px] font-medium uppercase tracking-[0.28em] text-[#c2866b]">
+              {en ? 'In your case' : 'En tu caso'}
+            </p>
+            <div className="mt-3 space-y-3">
+              {active.map(m => {
+                const gobierna = (scores[m.code] ?? 0) >= MASKS_THRESHOLDS.dominant
+                return (
+                  <p key={m.code} className="text-sm leading-relaxed text-[#272727]/78">
+                    {m.name} {gobierna ? (en ? 'governs you' : 'te gobierna') : (en ? 'surfaces' : 'asoma')}
+                    {': '}
+                    {m.weave}.
+                  </p>
+                )
+              })}
+              {quiet.length > 0 && (
+                <p className="text-sm leading-relaxed text-[#272727]/55">
+                  {en ? 'Not defining you now: ' : 'No te definen ahora: '}
+                  {quiet.map(m => m.name).join(', ')}.
+                </p>
+              )}
+            </div>
+          </div>
+        </MaskSection>
+
+        {/* 02 · Las que hoy llevas puestas y cómo se combinan */}
+        {active.length > 1 && (
+          <MaskSection
+            number="02"
+            title={en ? 'The ones you wear today' : 'Las que hoy llevas puestas'}
+            intro={
+              en
+                ? 'You may recognise yourself in more than one. That’s normal: they aren’t sealed compartments. Behind each one, a fear.'
+                : 'Posiblemente te reconozcas en más de una. Es normal: no son compartimentos estancos. Detrás de cada una, un miedo.'
+            }
+          >
+            <div data-pdf-block className="grid gap-px overflow-hidden rounded-2xl border border-[#272727]/10 bg-[#272727]/10 sm:grid-cols-2">
+              {active.map(m => (
+                <div key={m.code} className="bg-[#FDFBF7] px-5 py-5 sm:px-6">
+                  <p className="font-[family-name:var(--font-cormorant)] text-xl text-[#272727]">{m.name}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-[#272727]/75">{m.description}</p>
+                  <p className="mt-3 border-l-2 border-[#c2866b]/45 pl-3 text-xs leading-relaxed text-[#272727]/60">
+                    {en ? 'The fear behind: ' : 'El miedo detrás: '}
+                    {m.fear}
+                  </p>
+                </div>
+              ))}
+            </div>
+            {combination.length > 0 && (
+              <div data-pdf-block className="mt-8 border-t border-[#272727]/10 pt-8 pb-4">
+                <p className="mb-4 text-[10px] font-medium uppercase tracking-[0.28em] text-[#c2866b]">
+                  {en ? 'How they combine in you' : 'Cómo se combinan en ti'}
+                </p>
+                <div className="space-y-3">
+                  {combination.slice(0, -1).map((linea, i) => (
+                    <p
+                      key={i}
+                      className={`text-sm leading-relaxed text-[#272727]/78 ${i > 0 ? 'border-l-2 border-[#C7896D]/45 pl-4' : ''}`}
+                    >
+                      {linea}
+                    </p>
+                  ))}
+                </div>
+                <p className="mt-6 font-[family-name:var(--font-cormorant)] text-2xl leading-snug text-[#c2866b]">
+                  {combination[combination.length - 1]}
+                </p>
+              </div>
+            )}
+          </MaskSection>
+        )}
+
+        {/* 03 · La dominante, de cerca */}
+        <MaskSection
+          number={active.length > 1 ? '03' : '02'}
+          title={en ? 'Your mask, up close' : 'Tu máscara, de cerca'}
+          intro={
+            en
+              ? 'What it protects, how it acts and what it asks of you. It isn’t a villain: it got you this far.'
+              : 'Qué protege, cómo actúa y qué te pide. No es una villana: te ha traído hasta aquí.'
+          }
+        >
+          <div data-pdf-block className="grid gap-px overflow-hidden rounded-2xl border border-[#272727]/10 bg-[#272727]/10 sm:grid-cols-2 mask-avoid-break">
+            <MaskField label={en ? 'What it protects' : 'Qué protege'} text={en ? `From the ${mask.fear}.` : `Del ${mask.fear}.`} />
+            <MaskField label={en ? 'How it acts' : 'Cómo actúa'} text={mask.weave.charAt(0).toUpperCase() + mask.weave.slice(1) + '.'} />
+            <MaskField label={en ? 'Where it comes from' : 'De dónde viene'} text={closing.noJudgement} />
+            <MaskField label={en ? 'What it asks of you' : 'Qué te pide'} text={closing.reframe} />
+          </div>
+        </MaskSection>
+
+        {/* Libro de donde sale la brújula */}
+        <div data-pdf-block className="mt-10 rounded-2xl border border-[#c2866b]/25 bg-[#c2866b]/[0.06] px-6 py-6 text-center mask-avoid-break">
+          <p className="text-xs tracking-widest uppercase text-[#c2866b] mb-2">
+            {en ? 'The notebook this compass comes from' : 'El cuaderno de donde sale esta brújula'}
+          </p>
+          <a
+            href="https://amzn.eu/d/01keLRwF"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackEvent('mascaras_libro_click', { libro: 'Camina sin separarte de ti' })}
+            className="group inline-block"
+          >
+            <span className="font-[family-name:var(--font-cormorant)] text-2xl text-[#272727] underline decoration-[#c2866b]/40 underline-offset-4 group-hover:decoration-[#c2866b]">
+              Camina sin separarte de ti
+            </span>
+            <span className="block text-xs tracking-widest uppercase text-[#c2866b] mt-2">
+              {en ? 'See on Amazon →' : 'Ver en Amazon →'}
+            </span>
+          </a>
+        </div>
+
+        {/* Compartir / guardar en PDF. En móvil abre el menú nativo para
+            guardarlo en Archivos o enviarlo. No se exporta al propio PDF. */}
+        <div className="mt-4 mb-4 text-center print:hidden mask-no-export">
+          <button
+            onClick={compartir}
+            className="w-full py-3 bg-[#c2866b] text-[#FDFBF7] text-xs tracking-widest uppercase hover:bg-[#272727] transition-colors"
+          >
+            {generandoPdf ? (en ? 'Generating…' : 'Generando…') : (en ? 'Share my report' : 'Compartir mi informe')}
+          </button>
+          <button
+            onClick={guardarPdf}
+            disabled={generandoPdf}
+            className="w-full py-3 mt-3 border border-[#272727] text-[#272727] text-xs tracking-widest uppercase hover:bg-[#272727] hover:text-[#FDFBF7] transition-colors disabled:opacity-40"
+          >
+            {generandoPdf ? (en ? 'Generating…' : 'Generando…') : (en ? 'Download my report as PDF' : 'Descargar mi informe en PDF')}
+          </button>
+          <p className="text-xs text-[#272727]/40 mt-2">{en ? 'Your result, to take with you or return to.' : 'Tu resultado, para llevártelo o volver a él.'}</p>
+        </div>
+
+        {/* Pie de marca: solo aparece en el PDF. El QR lleva a ikigaier.com. */}
+        <div data-pdf-block className="mask-print-only mt-10 pt-6 border-t border-[#272727]/15">
+          <div className="flex items-center justify-center gap-5">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/paso-qr.png" alt="ikigaier.com" width={88} height={88} className="w-[88px] h-[88px] shrink-0" />
+            <div className="flex min-w-0 flex-col items-start gap-2 text-left">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/brand/ikigaier-marca-completa.png" alt="IKIGAIER" className="h-auto w-44 max-w-full" />
+              <p className="text-xs leading-snug text-[#272727]/60">
+                {en ? 'This compass is done in IKIGAIER workshops · www.ikigaier.com' : 'Esta brújula se hace en los talleres IKIGAIER · www.ikigaier.com'}
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+
+        {/* Nota de encuadre */}
+        <p data-pdf-block className="mt-10 pb-4 text-center text-xs leading-relaxed text-[#272727]/40 px-2">
+          {en
+            ? 'This is not a scientific test or a diagnosis. It’s a mirror: what your answers draw today. Masks shift with time and personal work — come back to it in a few months.'
+            : 'No es un test científico ni un diagnóstico. Es un espejo: lo que dibujan hoy tus respuestas. Las máscaras se mueven con el tiempo y el trabajo personal; vuelve a ella dentro de unos meses.'}
+        </p>
       </div>
 
       {/* Ejercicio "Mi máscara dominante" (4 partes, de Camina).
@@ -589,6 +654,105 @@ function Result({
           </Link>
         </div>
       )}
+    </div>
+  )
+}
+
+// ---------- Piezas del informe (mismo lenguaje editorial que PASO) ----------
+
+function MaskSection({
+  number,
+  title,
+  intro,
+  children,
+}: {
+  number: string
+  title: string
+  intro: string
+  children: React.ReactNode
+}) {
+  return (
+    <section className="mt-12">
+      <div data-pdf-block data-pdf-break="before" data-pdf-keep-next="true" className="mb-6 pb-4">
+        <div className="mb-3 flex items-center gap-3" aria-hidden="true">
+          <span className="text-[10px] font-medium tracking-[0.28em] text-[#c2866b]">{number}</span>
+          <span className="h-px w-10 bg-[#c2866b]/40" />
+        </div>
+        <h2 className="font-[family-name:var(--font-cormorant)] text-3xl leading-none text-[#272727]">{title}</h2>
+        <p className="mt-2 max-w-lg text-sm leading-relaxed text-[#272727]/60">{intro}</p>
+      </div>
+      {children}
+    </section>
+  )
+}
+
+function MaskField({ label, text }: { label: string; text: string }) {
+  return (
+    <div className="bg-[#FDFBF7] px-5 py-5 sm:px-6 sm:py-6">
+      <p className="text-xs tracking-widest uppercase text-[#c2866b] mb-1">{label}</p>
+      <p className="text-sm leading-relaxed text-[#272727]/80">{text}</p>
+    </div>
+  )
+}
+
+// Barras horizontales 1-5, de mayor a menor. Terracota = gobierna (4-5),
+// salvia = asoma (3), gris = no te define ahora (1-2). Las guías marcan los
+// umbrales del libro. Con divs (no SVG) para que los nombres largos respiren
+// en móvil y html2canvas los capture igual.
+function MaskBars({
+  ranked,
+  scores,
+  dominant,
+  en,
+}: {
+  ranked: Mask[]
+  scores: Record<string, number>
+  dominant: string
+  en: boolean
+}) {
+  const pct = (v: number) => `${(v / 5) * 100}%`
+  return (
+    <div>
+      {/* Cada fila: nombre y puntuación arriba, barra debajo (los nombres
+          largos no se cortan ni en móvil ni en el PDF). */}
+      <ul className="flex flex-col gap-4">
+        {ranked.map(m => {
+          const v = scores[m.code] ?? 0
+          const color =
+            v >= MASKS_THRESHOLDS.dominant ? '#c2866b' : v >= MASKS_THRESHOLDS.secondary ? '#9cab92' : 'rgba(39,39,39,0.16)'
+          const isDom = m.code === dominant
+          return (
+            <li key={m.code}>
+              <div className="mb-2 flex items-baseline justify-between gap-3">
+                <span
+                  className={`font-[family-name:var(--font-cormorant)] text-lg leading-snug ${
+                    isDom ? 'text-[#272727]' : 'text-[#272727]/65'
+                  }`}
+                >
+                  {m.name}
+                </span>
+                <span className="text-sm font-semibold text-[#272727]">{v}</span>
+              </div>
+              <div className="relative h-3 rounded-full bg-[#272727]/[0.06]">
+                <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: pct(v), background: color }} />
+                {/* Guías de umbral del libro: 3 asoma, 4 gobierna */}
+                {[MASKS_THRESHOLDS.secondary, MASKS_THRESHOLDS.dominant].map(t => (
+                  <div
+                    key={t}
+                    className="absolute -inset-y-1 border-l border-dashed border-[#272727]/30"
+                    style={{ left: pct(t) }}
+                  />
+                ))}
+              </div>
+            </li>
+          )
+        })}
+      </ul>
+      <div className="mt-5 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-[#272727]/55">
+        <span className="flex items-center gap-1.5"><span className="h-2.5 w-4 rounded-sm bg-[#c2866b]" />{en ? 'Governs (4–5)' : 'Gobierna (4–5)'}</span>
+        <span className="flex items-center gap-1.5"><span className="h-2.5 w-4 rounded-sm bg-[#9cab92]" />{en ? 'Surfaces (3)' : 'Asoma (3)'}</span>
+        <span className="flex items-center gap-1.5"><span className="h-2.5 w-4 rounded-sm bg-[#272727]/15" />{en ? 'Not now (1–2)' : 'No ahora (1–2)'}</span>
+      </div>
     </div>
   )
 }
