@@ -608,22 +608,18 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
 
         {/* Guardado / CTA cuenta */}
         <div className="mt-8 text-center print:hidden paso-no-export">
+          <LeadCapture codigo={codigo} locale={locale} informe={inf} />
           {userId ? (
-            saved && <p className="text-xs text-[#272727]/50">{t('saved')}</p>
+            saved && <p className="mt-5 text-xs text-[#272727]/50">{t('saved')}</p>
           ) : (
-            <div className="space-y-5">
-              {/* Captura de email (lead magnet): promesa abierta de recibir las
-                  herramientas de IKIGAIER. Single opt-in con checkbox explícito. */}
-              <LeadCapture codigo={codigo} locale={locale} informe={inf} />
-              <div className="rounded-xl bg-[#272727]/[0.03] px-5 py-5">
-                <p className="text-sm text-[#272727]/70 mb-4">{t('cta_account')}</p>
-                <Link
-                  href={`/${locale}/login`}
-                  className="inline-block px-6 py-3 bg-[#272727] text-[#FDFBF7] text-xs tracking-widest hover:bg-[#c2866b] transition-colors"
-                >
-                  {t('cta_button')}
-                </Link>
-              </div>
+            <div className="mt-5 rounded-xl bg-[#272727]/[0.03] px-5 py-5">
+              <p className="text-sm text-[#272727]/70 mb-4">{t('cta_account')}</p>
+              <Link
+                href={`/${locale}/login`}
+                className="inline-block px-6 py-3 bg-[#272727] text-[#FDFBF7] text-xs tracking-widest hover:bg-[#c2866b] transition-colors"
+              >
+                {t('cta_button')}
+              </Link>
             </div>
           )}
         </div>
