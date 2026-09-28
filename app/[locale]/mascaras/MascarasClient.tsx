@@ -28,7 +28,9 @@ interface Initial {
 }
 
 interface Props {
-  userId: string
+  // null = modo taller sin cuenta: el test funciona igual, pero no se guarda
+  // en la base de datos (solo se lo lleva en PDF).
+  userId: string | null
   locale: string
   volver: string | null
   initial: Initial
@@ -74,6 +76,7 @@ export default function MascarasClient({ userId, locale, volver, initial }: Prop
     (id: string, value: string, all: Record<string, string>) => {
       const next = { ...all, [id]: value }
       clearTimeout(timers.current[id])
+      if (!userId) return
       timers.current[id] = setTimeout(async () => {
         const { error } = await supabase
           .from('mask_results')
@@ -110,6 +113,7 @@ export default function MascarasClient({ userId, locale, volver, initial }: Prop
     finalScores: Record<string, number>,
     r: { dominant: string | null; top3: string[]; fear: string | null }
   ) {
+    if (!userId) return true
     const { error } = await supabase
       .from('mask_results')
       .upsert(
@@ -156,7 +160,7 @@ export default function MascarasClient({ userId, locale, volver, initial }: Prop
   }
 
   return (
-    <Shell locale={locale} tn={tn}>
+    <Shell locale={locale} tn={tn} anonimo={!userId}>
       <div className="w-full max-w-md">
         {phase === 'intro' && <Intro onStart={() => setPhase('test')} locale={locale} />}
         {phase === 'test' && (
@@ -635,10 +639,12 @@ function ReflectionField({
 function Shell({
   locale,
   tn,
+  anonimo,
   children,
 }: {
   locale: string
   tn: (k: string) => string
+  anonimo: boolean
   children: React.ReactNode
 }) {
   const supabase = createClient()
@@ -648,6 +654,11 @@ function Shell({
   }
   return (
     <div className="min-h-screen flex flex-col items-center bg-[#FDFBF7] px-4 py-8">
+      {anonimo ? (
+        <div className="w-full max-w-md mb-8 text-center text-xs tracking-[0.3em] uppercase text-[#272727]/40">
+          IKIGAIER
+        </div>
+      ) : (
       <div className="w-full max-w-md flex items-center justify-between mb-8">
         <Link
           href={`/${locale}/dashboard`}
@@ -662,6 +673,7 @@ function Shell({
           {tn('logout')}
         </button>
       </div>
+      )}
       {children}
     </div>
   )

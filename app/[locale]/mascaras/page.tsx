@@ -1,6 +1,5 @@
 export const dynamic = 'force-dynamic'
 
-import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { hasAccess } from '@/lib/entitlements'
 import { tallerAbierto } from '@/lib/taller-acceso'
@@ -20,14 +19,24 @@ export default async function MascarasPage({
   } = await supabase.auth.getUser()
 
   // Acceso: quien tiene la herramienta concedida entra siempre. Durante la
-  // ventana del taller (QR fijo) entra cualquiera con cuenta; sin cuenta, se
-  // le manda a entrar y vuelve aquí. Fuera de la ventana, aviso de taller.
+  // ventana del taller (QR fijo) entra cualquiera, también sin cuenta: en ese
+  // caso hace el test sin login y no se guarda (se lo lleva en PDF). Fuera de
+  // la ventana, aviso de ir al próximo taller.
   const concedida = user ? await hasAccess('mascaras') : false
-  if (!concedida) {
-    if (!tallerAbierto('mascaras')) return <TallerCerrado locale={locale} />
-    if (!user) redirect(`/${locale}/login?next=${encodeURIComponent(`/${locale}/mascaras`)}`)
+  if (!concedida && !tallerAbierto('mascaras')) return <TallerCerrado locale={locale} />
+
+  const volverSinCuenta =
+    searchParams.volver && searchParams.volver.startsWith('/') ? searchParams.volver : null
+  if (!user) {
+    return (
+      <MascarasClient
+        userId={null}
+        locale={locale}
+        volver={volverSinCuenta}
+        initial={{ scores: {}, dominant: null, top3: [], fear: null, reflection: {} }}
+      />
+    )
   }
-  if (!user) redirect(`/${locale}/login`)
 
   // Resultado guardado del usuario (privado por RLS). Una fila por usuario.
   const { data: result } = await supabase
