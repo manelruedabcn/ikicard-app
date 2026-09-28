@@ -10,6 +10,7 @@ const ALLOWED_ORIGINS = new Set([
   'https://ikigaier.com',
 ])
 const EVENT_CODE = 'taller-2026-09-29-vilanova'
+const REGISTRATION_CLOSED = true
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const PHONE_RE = /^[+()\d\s.-]{7,24}$/
 
@@ -32,6 +33,9 @@ export async function POST(req: Request) {
   const headers = cors(origin)
   if (!origin || !ALLOWED_ORIGINS.has(origin)) {
     return NextResponse.json({ ok: false, error: 'origin not allowed' }, { status: 403, headers })
+  }
+  if (REGISTRATION_CLOSED) {
+    return NextResponse.json({ ok: false, error: 'registration closed' }, { status: 410, headers })
   }
 
   const body = await req.json().catch(() => null)
