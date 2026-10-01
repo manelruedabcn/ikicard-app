@@ -18,6 +18,8 @@ const VENTANAS: Record<string, VentanaTaller[]> = {
   mascaras: [
     // Taller del 29/09/2026: abierto hasta las 20:00 (hora de Madrid).
     { desde: '2026-09-28T23:45:00+02:00', hasta: '2026-09-29T20:00:00+02:00' },
+    // Taller privado: abierto desde ahora hasta el 02/10/2026 a las 14:00 (hora de Madrid).
+    { desde: '2026-10-01T23:00:00+02:00', hasta: '2026-10-02T14:00:00+02:00' },
   ],
 }
 
