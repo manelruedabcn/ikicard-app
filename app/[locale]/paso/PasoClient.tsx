@@ -221,7 +221,7 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
         : t('example_done')
 
     return (
-      <Shell locale={locale} tn={tn} userId={userId}>
+      <Shell locale={locale} tn={tn} userId={userId} showLanguageSelector volver={volver}>
         <div className="w-full max-w-md text-center mt-4 sm:mt-8">
           <img
             src="/brand/ikigaier-isotipo.png"
@@ -1184,11 +1184,15 @@ function Shell({
   locale,
   tn,
   userId,
+  showLanguageSelector = false,
+  volver = null,
   children,
 }: {
   locale: string
   tn: (k: string) => string
   userId: string | null
+  showLanguageSelector?: boolean
+  volver?: string | null
   children: React.ReactNode
 }) {
   return (
@@ -1200,6 +1204,29 @@ function Shell({
         >
           ← {tn('title')}
         </Link>
+        {showLanguageSelector && (
+          <nav aria-label={locale === 'en' ? 'Language' : 'Idioma'} className="flex items-center gap-1">
+            {([
+              ['es', 'Español'],
+              ['en', 'English'],
+            ] as const).map(([language, label]) => (
+              <Link
+                key={language}
+                href={{ pathname: `/${language}/paso`, query: volver ? { volver } : {} }}
+                hrefLang={language}
+                lang={language}
+                aria-current={locale === language ? 'page' : undefined}
+                className={`inline-flex min-h-11 items-center rounded-full px-3 text-xs transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c2866b] ${
+                  locale === language
+                    ? 'bg-[#c2866b]/10 text-[#272727] font-medium'
+                    : 'text-[#272727]/60 hover:text-[#c2866b]'
+                }`}
+              >
+                {label}
+              </Link>
+            ))}
+          </nav>
+        )}
       </div>
       {children}
     </div>
