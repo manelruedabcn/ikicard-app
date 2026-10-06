@@ -149,6 +149,8 @@
     "firma_desc": "Así se reparte hoy tu forma de caminar. El centro marca el equilibrio; cuanto más se desplaza una forma, más o menos presencia tiene en ti.",
     "firma_low": "Menos presente",
     "firma_balance": "Equilibrio",
+    "firma_alta": "Alta",
+    "firma_baja": "Baja",
     "firma_high": "Más presente",
     "separas_title": "Cuando lo de fuera y lo de dentro no coinciden",
     "separas_gap": "La brecha más grande está en «{dim}». Es la distancia entre lo que muestras por fuera y el terreno que llevas dentro.",

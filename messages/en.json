@@ -149,6 +149,8 @@
     "firma_desc": "This is how your way of walking is distributed today. The centre marks balance; each direction shows how present each form is in you.",
     "firma_low": "Less present",
     "firma_balance": "Balance",
+    "firma_alta": "High",
+    "firma_baja": "Low",
     "firma_high": "More present",
     "separas_title": "When the outside and inside do not quite match",
     "separas_gap": "The biggest gap is in «{dim}». It's the distance between what you show on the outside and the terrain you carry inside.",

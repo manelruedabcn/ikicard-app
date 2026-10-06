@@ -11,7 +11,7 @@ import {
   DIMS,
   TOTAL_GRUPOS,
   calcularInformePaso,
-  getPatron,
+  getLocalizedPatron,
   type Dim,
   type Answer,
   type InformePaso,
@@ -408,7 +408,11 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
   // de P·A·S·O y, a partir de ella, el Caminante.
   const segmentos = calcularSegmentos(inf.scores)
   const codigo = resolverCodigoPorSegmentos(segmentos)
-  const patron = getPatron(codigo)
+  // El Caminante se resuelve en el idioma del informe: el dataset EN
+  // (PASO_PATTERNS_EN) espeja los 15 códigos del español. Antes se usaba
+  // getPatron (siempre ES), y el nombre, el retrato y las cuatro tarjetas
+  // salían en español aunque el informe estuviera en inglés.
+  const patron = getLocalizedPatron(codigo, locale)
   // Eje dominante POR SEGMENTOS (zona más alta, empate → orden P-A-S-O): la misma
   // fuente que da el nombre del Caminante, para que el titular no lo contradiga.
   const dominante = DIMS.reduce((a, b) => (segmentos[a] >= segmentos[b] ? a : b))
@@ -1016,8 +1020,8 @@ function FirmaBarChart({
           </g>
         ))}
 
-        <text x="12" y={top + 5} fill="#272727" fillOpacity="0.42" fontSize="15">Alta</text>
-        <text x="12" y={baseY + 1} fill="#272727" fillOpacity="0.42" fontSize="15">Baja</text>
+        <text x="12" y={top + 5} fill="#272727" fillOpacity="0.42" fontSize="15">{t('firma_alta')}</text>
+        <text x="12" y={baseY + 1} fill="#272727" fillOpacity="0.42" fontSize="15">{t('firma_baja')}</text>
         <text x={W - right - 2} y={y(ZONA_EQUILIBRIO) - 10} textAnchor="end" fill="#272727" fillOpacity="0.42" fontSize="15">
           {t('firma_balance')}
         </text>
