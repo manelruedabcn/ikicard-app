@@ -11,7 +11,7 @@
 
 import { type Dim, type InformePaso } from './paso-content'
 
-type Locale = 'es' | 'en'
+type Locale = 'es' | 'ca' | 'en'
 type Direccion = 'exige_de_mas' | 'esconde' | 'alineado'
 
 export interface NarrativaPaso {
@@ -33,6 +33,7 @@ const UMBRAL_NARRAR = 2
 const NOMBRE_EJE: Record<Locale, Record<Dim, string>> = {
   es: { P: 'Pisar firme', A: 'Acompañar', S: 'Sostener', O: 'Observar' },
   en: { P: 'Press on', A: 'Accompany', S: 'Sustain', O: 'Observe' },
+  ca: { P: 'Trepitjar fort', A: 'Acompanyar', S: 'Sostenir', O: 'Observar' },
 }
 
 // Frase por (eje, dirección). "exige" = la máscara empuja el rasgo por encima de
@@ -90,6 +91,32 @@ const FRASE: Record<Locale, Record<Dim, { exige: string; esconde: string }>> = {
         'On the outside you seem to jump in without overthinking. But inside you observe and calculate far more than you show: you hold back a caution you don\'t reveal.',
     },
   },
+  ca: {
+    P: {
+      exige:
+        "Per fora et mostres ferm i directe, sempre empenyent endavant. Però per dins no et surt anar amb tanta empenta: t'exigeixes avançar i resoldre més del que de debò necessites.",
+      esconde:
+        'Per fora gairebé no empenys, deixes que les coses arribin al seu ritme. Però per dins portes més determinació de la que ensenyes: guardes una força per decidir que gairebé no treus a la llum.',
+    },
+    A: {
+      exige:
+        "Per fora et mostres sociable i afable, molt pendent dels altres. Però per dins no et surt estar tan disponible: t'esforces per agradar més del que de debò necessites.",
+      esconde:
+        "Per fora sembla que vagis a la teva, sense dependre de ningú. Però per dins la gent t'importa molt més del que deixes veure: guardes una necessitat de companyia que no mostres.",
+    },
+    S: {
+      exige:
+        "Per fora et mostres constant i en calma, amb el ritme sempre sota control. Però per dins no sempre estàs així: t'exigeixes aguantar i sostenir més del que et surt.",
+      esconde:
+        'Per fora mostres poca paciència i vas canviant el pas. Però per dins sostens molt més del que ensenyes: guardes una constància que no deixes veure.',
+    },
+    O: {
+      exige:
+        'Per fora et mostres detallista i prudent, mirant bé abans de fer cada pas. Però per dins no necessites tant de control: revises i calcules més del que et surt.',
+      esconde:
+        'Per fora sembla que et llencis sense donar-hi gaires voltes. Però per dins observes i calcules molt més del que ensenyes: guardes una cautela que no mostres.',
+    },
+  },
 }
 
 const TEXTO: Record<
@@ -114,10 +141,22 @@ const TEXTO: Record<
     alineadoIntro:
       'In your answers, the style you make visible and your spontaneous tendency largely go hand in hand. You adapt, as everyone does, without moving too far from what comes naturally.',
   },
+  ca: {
+    intro:
+      "En comparar les dues línies apareix on la teva manera visible d'actuar coincideix amb la teva tendència espontània i on necessita adaptació. Aquesta és la lectura que dibuixen les teves respostes.",
+    sintesis: dim =>
+      `La distància més gran apareix a «${dim}». No vol dir que estiguis fingint: aquí pot haver-hi una adaptació que t'ajuda, o un esforç que comença a pesar-te.`,
+    invitacion:
+      "La pregunta no és quina part és la correcta, sinó si aquesta distància t'ajuda o et pesa.",
+    alineadoIntro:
+      "En les teves respostes, la forma que fas visible i la teva tendència espontània van força de la mà. T'adaptes, com tothom, però sense allunyar-te massa del que et surt de manera natural.",
+  },
 }
 
 function esLocale(locale: string): Locale {
-  return locale === 'en' ? 'en' : 'es'
+  if (locale === 'en') return 'en'
+  if (locale === 'ca') return 'ca'
+  return 'es'
 }
 
 export function generarNarrativa(inf: InformePaso, locale: string): NarrativaPaso {

@@ -394,10 +394,102 @@ const IKIBOARD_STEPS_EN: IkiStep[] = [
   },
 ]
 
+const IKIBOARD_STEPS_CA: IkiStep[] = [
+  {
+    id: 'deseo_reconocido',
+    kind: 'prompt',
+    section: 'La terra desitjada',
+    title: "Quin desig no t'atreveixes a reconèixer?",
+    hint: "Pot ser una manera de viure, una relació, un projecte, una casa, diners, descans o llibertat. Encara no cal que ho justifiquis.",
+    placeholder: 'El que de debò desitjo és…',
+  },
+  {
+    id: 'ya_no_representa',
+    kind: 'prompt',
+    section: 'La terra desitjada',
+    title: 'Què funciona, però ja no et representa?',
+    hint: "De vegades el que ocupa espai a la teva vida impedeix veure el que desitges. Escriu-ho per no portar-ho sense voler al teu àlbum.",
+    placeholder: 'Això ja no em representa…',
+    optional: true,
+  },
+  {
+    id: 'amas',
+    kind: 'prompt',
+    section: 'Veure clar',
+    title: 'El que estimes',
+    hint: "Què fas que se t'escapa el temps sense adonar-te'n? Allò que faries encara que ningú no et pagués.",
+    placeholder: 'Escriu el que et vingui, sense filtrar…',
+  },
+  {
+    id: 'talento',
+    kind: 'prompt',
+    section: 'Veure clar',
+    title: "El que se't dona bé",
+    hint: 'Allò que a tu et surt fàcil i als altres els costa. El que la gent et reconeix o et demana.',
+    placeholder: 'Escriu el que et vingui…',
+  },
+  {
+    id: 'necesitan',
+    kind: 'prompt',
+    section: 'Veure clar',
+    title: "Què necessiten de tu els qui t'envolten",
+    hint: 'Mira al teu voltant: la teva gent, la teva feina, la teva comunitat. Què falta que tu podries aportar?',
+    placeholder: 'Escriu el que et vingui…',
+  },
+  {
+    id: 'sostiene',
+    kind: 'prompt',
+    section: 'Veure clar',
+    title: 'Què et podria sostenir',
+    hint: "De tot l'anterior, què podria, a més, donar-te per viure? És opcional: no tot ho ha de fer.",
+    placeholder: 'Ho pots deixar en blanc…',
+    optional: true,
+  },
+  {
+    id: 'proposito',
+    kind: 'proposito',
+    section: 'El teu propòsit',
+    title: 'El teu propòsit, en una frase',
+    hint: "Reuneix tot l'anterior en una sola frase positiva. No busquis la perfecta: aquesta frase és el teu camí de tornada a tu, i presidirà el teu tauler.",
+    placeholder: 'Vull…',
+  },
+  {
+    id: 'identidad',
+    kind: 'prompt',
+    section: 'Qui estàs sent',
+    title: 'Estic sent algú que…',
+    hint: "El propòsit no s'assoleix, s'habita. No es tracta de convertir-te en una altra persona, sinó de ser més tu. Completa-ho en present.",
+    placeholder: 'Estic sent algú que…',
+  },
+  {
+    id: 'lo_que_das',
+    kind: 'prompt',
+    section: 'El que dones',
+    title: 'Què millora al teu voltant?',
+    hint: 'Quan camines cap a això, a qui més arriba? Què reben els altres pel fet que tu siguis així?',
+    placeholder: 'Escriu el que et vingui…',
+  },
+  {
+    id: 'frenos',
+    kind: 'frenos',
+    section: 'Què et frena',
+    title: "Què t'atura des de dins avui",
+    hint: "Per caminar-hi, primer has de veure què et frena. No és una etiqueta: és un mirall.",
+  },
+  {
+    id: 'paso',
+    kind: 'paso',
+    section: 'El teu pas',
+    title: 'Un pas concret',
+    hint: "El propòsit es poleix al món, no s'amaga al cap. No necessites un pla: només un gest petit i quan el faràs.",
+  },
+]
+
 // Devuelve los pasos en el idioma del contenido (para PINTAR). La
 // lógica del recorrido usa el canónico IKIBOARD_STEPS.
 export function getIkiSteps(locale: string): IkiStep[] {
-  return contentLang(locale) === 'en' ? IKIBOARD_STEPS_EN : IKIBOARD_STEPS
+  const l = contentLang(locale)
+  return l === 'en' ? IKIBOARD_STEPS_EN : l === 'ca' ? IKIBOARD_STEPS_CA : IKIBOARD_STEPS
 }
 
 // ------------------------------------------------------------
@@ -418,8 +510,16 @@ const IKIBOARD_AMBITOS_EN: IkiAmbito[] = [
   { id: 'vocacion', label: 'Vocation', hint: 'Your work, your project, what you contribute.' },
 ]
 
+const IKIBOARD_AMBITOS_CA: IkiAmbito[] = [
+  { id: 'cuerpo', label: 'Cos i vida', hint: 'La teva salut, la teva energia, el teu ritme, el descans.' },
+  { id: 'vinculos', label: 'Vincles', hint: 'Amor, família, amistat, la teva comunitat.' },
+  { id: 'material', label: 'El material', hint: 'El teu habitatge, el teu cotxe, els teus mitjans, els llocs.' },
+  { id: 'vocacion', label: 'Vocació', hint: 'La teva feina, el teu projecte, el que aportes.' },
+]
+
 export function getIkiAmbitos(locale: string): IkiAmbito[] {
-  return contentLang(locale) === 'en' ? IKIBOARD_AMBITOS_EN : IKIBOARD_AMBITOS_ES
+  const l = contentLang(locale)
+  return l === 'en' ? IKIBOARD_AMBITOS_EN : l === 'ca' ? IKIBOARD_AMBITOS_CA : IKIBOARD_AMBITOS_ES
 }
 
 // ------------------------------------------------------------
@@ -715,7 +815,153 @@ const COPY_EN: IkiboardCopy = {
   },
 }
 
+const COPY_CA: IkiboardCopy = {
+  intro: {
+    kicker: 'IKIBOARD',
+    title: 'Troba el que de debò vols',
+    hook: "No el que hauries de voler, ni el que volen els altres. El que és teu.",
+    body: "La majoria dels taulers de visió són una llista de coses que vols tenir. Aquest comença per dins: descobrir el que de debò vols, perquè puguis ser la persona que ja ets quan ningú no et diu com has de ser.",
+    cta: 'Comença',
+  },
+  coordinates: {
+    kicker: 'El teu punt de partida',
+    title: 'Això és el que ja sabem de tu',
+    body: "Farem servir el que ja has descobert. No cal que repeteixis cap eina; pots completar el que et falta ara o continuar amb el que ja tens.",
+    paso: 'Com camines',
+    estrella: 'Com ets en el món',
+    camino: 'Quines capacitats tens',
+    mascara: 'Què et pot frenar',
+    ready: 'Disponible',
+    missing: 'Descobreix',
+    continue: 'Continua amb el meu mapa',
+  },
+  frenos: {
+    body: "Descobreix-ho amb el mirall de les màscares. Quan acabis, tornes aquí amb el teu resultat.",
+    cta: 'Descobreix què em frena',
+    ctaHecho: 'Revisa la meva màscara',
+    yaTienes: 'Ja saps quina màscara et governa més avui:',
+  },
+  paso: {
+    queLabel: 'El meu pas',
+    quePlaceholder: 'Aquesta setmana faré…',
+    cuandoLabel: 'Quan',
+    cuandoPlaceholder: 'Dimarts al matí / quan arribi a casa…',
+    semilla: 'Ho has portat de la teva màscara. Ajusta-ho si vols.',
+  },
+  definido: {
+    kicker: 'El camí de tornada a tu',
+    title: 'Has posat en paraules el que de debò vols',
+    body: "Aquesta és l'arrel. Ara la converteixes en imatge: construeixes l'àlbum de la teva vida que ve, per tenir-lo davant cada dia.",
+    cta: 'Construeix el meu àlbum',
+  },
+  borrador: {
+    kicker: 'El teu esborrany',
+    title: 'El que dibuixen les teves respostes de tu',
+    sub: "No me l'he inventat: surt de creuar com ets, en què ets bo i què et frena avui.",
+    identidadLabel: 'Qui estàs sent',
+    vocacionLabel: 'El teu terreny per aportar',
+    vocacionEjemplo: 'Algú ho va encarnar abans que tu',
+    instruccionesLabel: 'Per seguir el teu camí',
+    faltanTitle: 'Per completar el teu retrat',
+    faltanSub: 'Cada peça afina el creuament. Les pots fer ara o tornar-hi més tard.',
+    estrellaCta: 'Descobreix el teu estil (Els quatre estels)',
+    estrellaHecho: 'El teu estil',
+    caminoCta: 'Descobreix les teves capacitats (Test CAMINO)',
+    caminoHecho: 'Les teves capacitats',
+  },
+  board: {
+    kicker: "L'àlbum de la teva vida que ve",
+    title: 'La vida que ja estàs vivint',
+    sub: 'Cada zona és una pàgina. Mira-les juntes: com de prop estàs de cadascuna a la teva vida.',
+    proposito: 'El teu propòsit',
+    empty: "Encara no hi has posat cap foto.",
+    add: 'Afegeix una foto',
+    addTitle: 'Una foto de la teva vida',
+    iconLabel: 'Tria una imatge',
+    fraseLabel: 'En present',
+    frasePlaceholder: 'Visc… / Ja soc…',
+    fraseHint: "No l'objecte: qui ets quan ja ho vius.",
+    doyLabel: 'Què dono amb això?',
+    doyPlaceholder: 'A qui arriba, què millora al teu voltant…',
+    doyHint: 'El que et sosté, girat cap enfora.',
+    save: "Posa-ho a l'àlbum",
+    remove: 'Treure',
+    back: "Torna a l'àlbum",
+    cercaniaLabel: 'Quant ho vius ja?',
+    estados: {
+      lejos: 'Encara lluny',
+      en_proceso: 'Ho estic vivint',
+      conseguido: 'Ja és meu',
+    },
+    zonaResumen: 'viscut',
+    zonaVacia: 'Encara cap foto',
+    motor: 'Què mou el teu àlbum',
+    frenoLabel: 'Què et frena avui',
+    frenoVacio: 'Encara no descobert',
+    pasoLabel: 'El teu pas',
+    pasoVacio: 'Encara no definit',
+    priority: 'La meva escena ara',
+    makePriority: 'Mou aquesta escena',
+    evolution: 'El teu àlbum avui',
+    farCount: 'encara lluny',
+    processCount: 'prenent forma',
+    achievedCount: 'ja a la teva vida',
+    repasar: 'Repassa el meu propòsit',
+  },
+  ui: {
+    navBack: '← Enrere',
+    navFinish: 'Acabar',
+    navSkip: 'Saltar',
+    navNext: 'Continuar',
+    donePropositoLabel: 'El teu propòsit',
+    doneReview: 'Repassa el que he definit',
+    borradorPasoLabel: 'Com camines',
+    borradorSeedDone: '✓ Ja hi ha una escena a Vocació',
+    borradorSeedCta: "Fes-la servir d'esborrany al meu àlbum",
+    seedTmpl: (x: string) => `Estic explorant ${x}.`,
+    frenoMiedoLabel: 'La por que hi ha darrere:',
+    boardAddShort: '+ Afegeix',
+    boardVerMapa: 'Veure i descarregar el meu mapa',
+    boardDoyPrefix: 'Dono:',
+    toolPaso: 'PASO',
+    toolEstrella: 'Els quatre estels',
+    toolCamino: 'CAMINO',
+    toolMascara: 'Màscares',
+    addModeIcon: 'Tria icona',
+    addModePhoto: 'Puja la meva foto',
+    addCancel: 'Cancel·la',
+    addSaving: 'Desant…',
+    addSaveError: "No s'ha pogut desar. La teva escena encara és aquí perquè ho tornis a provar.",
+    photoFormatError: 'Format no admès. Fes servir una imatge JPG, PNG, WEBP o HEIC.',
+    photoSizeError: "La imatge supera els 8 MB. Prova'n una de més lleugera.",
+    mapBack: "← Torna a l'àlbum",
+    mapSavePdf: 'Desar en PDF',
+    mapKicker: 'IKIBOARD',
+    mapTitle: 'El teu mapa de tornada a tu',
+    mapSub: "El teu àlbum mostra la vida que desitges. Aquest mapa reuneix d'on parteixes i què et pot ajudar a caminar-la.",
+    mapSecAnsias: 'La vida que de debò desitges',
+    mapPropositoInline: 'El teu propòsit:',
+    mapSecPartes: "D'on parteixes",
+    mapLblComoCaminas: 'Com camines',
+    mapLblComoEstas: 'Com ets en el món',
+    mapLblTerreno: 'Un terreny que podries explorar',
+    mapReferentePrefix: 'Referent:',
+    mapLblDesviarte: 'Què et pot desviar',
+    mapSecAlbum: "L'àlbum de la teva vida que ve",
+    mapAunPorDibujar: 'Encara per dibuixar.',
+    mapSecRuta: 'La teva ruta de partida',
+    mapLblEscena: "L'escena que mous",
+    mapLblGesto: 'El teu següent gest',
+    mapLblFreno: 'Quan apareix el bloqueig',
+    mapReconoceTmpl: (name: string) => `Reconeix ${name} abans que decideixi per tu.`,
+    mapRutaVacia: 'Tria una sola escena del teu àlbum per començar a moure-la.',
+    mapFooter: 'Aquest mapa és un mirall i una direcció possible. Tu tries el destí i corregeixes el camí quan ja no et representa.',
+    pasoFallbackName: 'La teva manera de caminar',
+  },
+}
+
 // Devuelve todo el copy de IKIBOARD en el idioma del contenido.
 export function getIkiboardCopy(locale: string): IkiboardCopy {
-  return contentLang(locale) === 'en' ? COPY_EN : COPY_ES
+  const l = contentLang(locale)
+  return l === 'en' ? COPY_EN : l === 'ca' ? COPY_CA : COPY_ES
 }

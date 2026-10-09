@@ -272,18 +272,130 @@ const CAMINO_CLOSING_EN = {
     'The type with the highest score is your leading direction. If two are very close, you’re probably a blend of both: perfectly normal and common.',
 }
 
+const CAMINO_STATEMENTS_CA: CaminoStatement[] = [
+  { n: 1, camino: 'constructor', text: "Gaudeixes treballant a l'aire lliure i resolent problemes pràctics?" },
+  { n: 2, camino: 'constructor', text: "Et sents satisfet quan construeixes o repares alguna cosa tangible?" },
+  { n: 3, camino: 'constructor', text: "Prefereixes tasques que impliquin fer servir eines o maquinària?" },
+  { n: 4, camino: 'constructor', text: "T'agrada passar a l'acció de seguida per resoldre problemes físics?" },
+  { n: 5, camino: 'constructor', text: "Et motiva transformar idees en alguna cosa tangible i funcional?" },
+  { n: 6, camino: 'analista', text: "T'interessa investigar les causes i els efectes de problemes complexos?" },
+  { n: 7, camino: 'analista', text: "T'agrada analitzar dades i treure'n conclusions?" },
+  { n: 8, camino: 'analista', text: "Prefereixes activitats que requereixin precisió i una atenció detallada?" },
+  { n: 9, camino: 'analista', text: "T'entusiasma trobar solucions científiques a problemes globals?" },
+  { n: 10, camino: 'analista', text: "Et motiva explorar temes relacionats amb la ciència o la tecnologia?" },
+  { n: 11, camino: 'maestro', text: "T'interessa ajudar els altres a assolir els seus objectius?" },
+  { n: 12, camino: 'maestro', text: "Gaudeixes ensenyant o participant com a mentor en àrees específiques?" },
+  { n: 13, camino: 'maestro', text: "Prefereixes treballar en entorns col·laboratius?" },
+  { n: 14, camino: 'maestro', text: "Et motiva liderar projectes que impactin positivament en les persones?" },
+  { n: 15, camino: 'maestro', text: "Sents satisfacció quan dones suport als altres emocionalment i professionalment?" },
+  { n: 16, camino: 'innovador', text: "T'agrada expressar-te a través de mitjans artístics o creatius?" },
+  { n: 17, camino: 'innovador', text: "Prefereixes feines que permetin innovació i llibertat creativa?" },
+  { n: 18, camino: 'innovador', text: "Trobes satisfacció a crear alguna cosa única que inspiri els altres?" },
+  { n: 19, camino: 'innovador', text: "Et motiva dissenyar solucions creatives per a reptes quotidians?" },
+  { n: 20, camino: 'innovador', text: "T'interessa explorar idees abstractes i poc convencionals?" },
+  { n: 21, camino: 'negociador', text: "Gaudeixes liderant equips cap a metes ambicioses?" },
+  { n: 22, camino: 'negociador', text: "Et motiva convèncer els altres perquè donin suport a les teves idees o projectes?" },
+  { n: 23, camino: 'negociador', text: "Prefereixes entorns dinàmics on puguis prendre decisions ràpides?" },
+  { n: 24, camino: 'negociador', text: "Et sents còmode assumint riscos calculats per innovar?" },
+  { n: 25, camino: 'negociador', text: "T'interessa identificar oportunitats de negoci i actuar-hi?" },
+  { n: 26, camino: 'organizador', text: "Prefereixes feines amb processos clars i estructures establertes?" },
+  { n: 27, camino: 'organizador', text: "Et sents còmode organitzant dades i assegurant la precisió?" },
+  { n: 28, camino: 'organizador', text: "Et motiva mantenir registres detallats i ben organitzats?" },
+  { n: 29, camino: 'organizador', text: "Prefereixes entorns on puguis seguir regles establertes?" },
+  { n: 30, camino: 'organizador', text: "T'interessa optimitzar sistemes i processos per a més eficiència?" },
+]
+
+const CAMINOS_CA: Camino[] = [
+  {
+    code: 'constructor',
+    name: 'Constructor',
+    description: 'Pràctic, orientat a resultats tangibles.',
+    caracteristicas: "Pràctic i orientat a l'acció. Gaudeix treballant amb les mans i obtenint resultats concrets.",
+    fortalezas: 'Treball pràctic, resolució de problemes físics, transformar idees en realitats.',
+    desafios: 'Pot subestimar el valor del pensament estratègic a llarg termini.',
+    profesiones: 'Enginyer, mecànic, arquitecte, tècnic, constructor, pagès.',
+    referente: 'Emily Warren Roebling: va aprendre enginyeria pel seu compte per acabar el Pont de Brooklyn.',
+  },
+  {
+    code: 'analista',
+    name: 'Analista',
+    description: 'Curiós, meticulós, buscador del perquè.',
+    caracteristicas: 'Curiós i meticulós. Sempre buscant comprendre el perquè de les coses.',
+    fortalezas: 'Pensament crític, anàlisi de dades, resolució de problemes abstractes.',
+    desafios: "Pot tenir dificultats per comunicar les seves troballes d'una manera accessible.",
+    profesiones: 'Científic, analista de dades, programador, investigador, economista.',
+    referente: "Rosalind Franklin: el seu rigor analític va ser fonamental per descobrir l'estructura de l'ADN.",
+  },
+  {
+    code: 'maestro',
+    name: 'Mestre',
+    description: "Empàtic, guia, orientat a l'impacte humà.",
+    caracteristicas: 'Destaca connectant amb les persones i guiant-les cap al creixement.',
+    fortalezas: 'Comunicació empàtica, ensenyament, orientació, construcció de relacions.',
+    desafios: 'Pot descuidar les seves pròpies necessitats mentre cuida les dels altres.',
+    profesiones: 'Professor, coach, psicòleg, treballador social, mentor, terapeuta.',
+    referente: "Maria Montessori: va revolucionar l'educació posant la persona al centre.",
+  },
+  {
+    code: 'innovador',
+    name: 'Innovador',
+    description: 'Creatiu, expressiu, agent de canvi.',
+    caracteristicas: "Creatiu per naturalesa, amb un fort desig d'expressar-se i explorar idees noves.",
+    fortalezas: 'Creativitat, disseny, autoexpressió, pensar més enllà dels límits establerts.',
+    desafios: 'Pot tenir dificultats per portar les seves idees a la pràctica de manera sostenible.',
+    profesiones: 'Artista, dissenyador, escriptor, músic, publicista, director creatiu.',
+    referente: 'Frida Kahlo: va convertir la seva experiència més personal en un llenguatge universal.',
+  },
+  {
+    code: 'negociador',
+    name: 'Negociador',
+    description: 'Líder, persuasiu, orientat al repte.',
+    caracteristicas: 'Líder dinàmic i persuasiu amb energia per assumir riscos i prendre decisions.',
+    fortalezas: 'Lideratge, persuasió, presa de decisions, visió estratègica.',
+    desafios: 'Pot sobrecarregar-se assumint massa fronts alhora.',
+    profesiones: 'Empresari, gerent de vendes, consultor, estratega, fundador.',
+    referente: 'Madam C.J. Walker: la primera dona milionària feta a si mateixa als Estats Units.',
+  },
+  {
+    code: 'organizador',
+    name: 'Organitzador',
+    description: "Metòdic, fiable, amant de l'ordre.",
+    caracteristicas: "Metòdic i fiable, amb habilitat natural per estructurar processos i mantenir l'ordre.",
+    fortalezas: 'Planificació, atenció al detall, gestió de sistemes i processos.',
+    desafios: "Pot resistir-se als canvis imprevistos o a l'ambigüitat.",
+    profesiones: "Gestor d'operacions, comptable, administrador, cap de projecte.",
+    referente: 'Florence Nightingale: va salvar vides implementant sistemes de gestió hospitalària basats en dades.',
+  },
+]
+
+const CAMINO_INTRO_CA = {
+  title: 'Test CAMINO',
+  hook: 'Sis grans orientacions que pots explorar en la teva vida professional. Quina domina avui la teva manera de treballar.',
+  instructions:
+    "Fes servir una escala de l'1 al 5 per avaluar cada afirmació, sent 1 «gens d'acord» i 5 «totalment d'acord». No hi ha respostes correctes ni incorrectes.",
+}
+
+const CAMINO_CLOSING_CA = {
+  reframe:
+    'El tipus amb més puntuació és la teva orientació dominant. Si dos tipus estan molt igualats, probablement ets una combinació de tots dos — una cosa perfectament normal i freqüent. Llegeix les descripcions de les teves dues puntuacions més altes.',
+}
+
 // Getters por idioma del contenido.
 export function getCaminos(locale: string): Camino[] {
-  return contentLang(locale) === 'en' ? CAMINOS_EN : CAMINOS_ES
+  const l = contentLang(locale)
+  return l === 'en' ? CAMINOS_EN : l === 'ca' ? CAMINOS_CA : CAMINOS_ES
 }
 export function getCaminoStatements(locale: string): CaminoStatement[] {
-  return contentLang(locale) === 'en' ? CAMINO_STATEMENTS_EN : CAMINO_STATEMENTS_ES
+  const l = contentLang(locale)
+  return l === 'en' ? CAMINO_STATEMENTS_EN : l === 'ca' ? CAMINO_STATEMENTS_CA : CAMINO_STATEMENTS_ES
 }
 export function getCaminoIntro(locale: string) {
-  return contentLang(locale) === 'en' ? CAMINO_INTRO_EN : CAMINO_INTRO_ES
+  const l = contentLang(locale)
+  return l === 'en' ? CAMINO_INTRO_EN : l === 'ca' ? CAMINO_INTRO_CA : CAMINO_INTRO_ES
 }
 export function getCaminoClosing(locale: string) {
-  return contentLang(locale) === 'en' ? CAMINO_CLOSING_EN : CAMINO_CLOSING_ES
+  const l = contentLang(locale)
+  return l === 'en' ? CAMINO_CLOSING_EN : l === 'ca' ? CAMINO_CLOSING_CA : CAMINO_CLOSING_ES
 }
 
 // Suma por bloques → orientación dominante. Determinista e independiente

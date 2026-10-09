@@ -3,6 +3,7 @@
 // Lógica de cálculo portada de paso-logic.js (validada en prototipo).
 
 import { PASO_GROUPS_EN, PASO_PATTERNS_EN } from './paso-content-en'
+import { PASO_GROUPS_CA, PASO_PATTERNS_CA } from './paso-content-ca'
 
 export type Dim = 'P' | 'A' | 'S' | 'O'
 export const DIMS: Dim[] = ['P', 'A', 'S', 'O']
@@ -511,11 +512,15 @@ export function getPatron(codigo: string): Patron | undefined {
 }
 
 export function getPasoGroups(locale: string): Grupo[] {
-  return locale === 'en' ? PASO_GROUPS_EN : PASO_GRUPOS
+  if (locale === 'en') return PASO_GROUPS_EN
+  if (locale === 'ca') return PASO_GROUPS_CA
+  return PASO_GRUPOS
 }
 
 export function getPasoPatterns(locale: string): Patron[] {
-  return locale === 'en' ? PASO_PATTERNS_EN : PASO_PATRONES
+  if (locale === 'en') return PASO_PATTERNS_EN
+  if (locale === 'ca') return PASO_PATTERNS_CA
+  return PASO_PATRONES
 }
 
 export function getLocalizedPatron(codigo: string, locale: string): Patron | undefined {

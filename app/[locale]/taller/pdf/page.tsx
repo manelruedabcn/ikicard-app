@@ -5,7 +5,8 @@ import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import { hasAccess } from '@/lib/entitlements'
-import { TALLER_CONTENT, type Block } from '@/lib/taller-content'
+import { type Block } from '@/lib/taller-content'
+import { getTallerContent } from '@/lib/taller-l10n'
 import PrintButton from './PrintButton'
 
 export default async function TallerPdfPage({ params: { locale } }: { params: { locale: string } }) {
@@ -16,6 +17,7 @@ export default async function TallerPdfPage({ params: { locale } }: { params: { 
   if (!(await hasAccess('taller'))) redirect(`/${locale}/dashboard`)
 
   const t = await getTranslations('taller')
+  const content = getTallerContent(locale)
 
   const { data: rows } = await supabase
     .from('taller_answers')
@@ -60,13 +62,13 @@ export default async function TallerPdfPage({ params: { locale } }: { params: { 
         <header className="mb-16 text-center">
           <p className="mb-4 text-sm tracking-[0.3em] uppercase text-[#c2866b]">━ ✦ ━</p>
           <h1 className="font-[family-name:var(--font-cormorant)] text-4xl font-light">
-            Camina sin separarte de ti
+            {locale === 'ca' ? 'Camina sense allunyar-te de tu' : 'Camina sin separarte de ti'}
           </h1>
-          <p className="mt-2 text-sm text-[#272727]/60">Cuaderno de trabajo</p>
+          <p className="mt-2 text-sm text-[#272727]/60">{locale === 'ca' ? 'Quadern de treball' : 'Cuaderno de trabajo'}</p>
           {name && <p className="mt-8 font-[family-name:var(--font-cormorant)] text-xl">{name}</p>}
         </header>
 
-        {TALLER_CONTENT.map(section => (
+        {content.map(section => (
           <section key={section.id} className="pdf-section mb-12">
             <div className="mb-10 text-center">
               {section.label && (

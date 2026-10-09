@@ -100,6 +100,41 @@ const MATRIZ_EN: Matriz = {
   },
 }
 
+const MATRIZ_CA: Matriz = {
+  explorador: {
+    constructor: { orientacion: "Projectes a l'aire lliure", ejemplo: 'Thomas Andrews, dissenyador del Titanic' },
+    analista: { orientacion: 'Investigadors de camp', ejemplo: 'Alexander von Humboldt, explorador' },
+    maestro: { orientacion: 'Guies que ensenyen explorant', ejemplo: 'Freya Stark, escriptora' },
+    innovador: { orientacion: 'Artistes inspirats en la natura', ejemplo: 'Mary Anning, pintora botànica' },
+    negociador: { orientacion: "Emprenedors d'experiències úniques", ejemplo: 'Jacques Cousteau' },
+    organizador: { orientacion: 'Planificadors científics', ejemplo: 'Isabella Bird, exploradora' },
+  },
+  comunicador: {
+    constructor: { orientacion: 'Líders que inspiren equips tècnics', ejemplo: 'Louise B. Bethune, arquitecta' },
+    analista: { orientacion: 'Divulgadors científics', ejemplo: 'Mae Jemison, astronauta' },
+    maestro: { orientacion: 'Professors que motiven', ejemplo: 'Jaime Escalante, educador' },
+    innovador: { orientacion: 'Directors creatius', ejemplo: 'Paul Rand, dissenyador gràfic' },
+    negociador: { orientacion: 'Líders de vendes', ejemplo: 'Estée Lauder, empresària' },
+    organizador: { orientacion: 'Gestors administratius', ejemplo: 'Grace Hopper, informàtica' },
+  },
+  protector: {
+    constructor: { orientacion: 'Infraestructures segures', ejemplo: 'Gustave Eiffel, enginyer' },
+    analista: { orientacion: 'Investigadors en salut pública', ejemplo: 'Ellen Swallow Richards' },
+    maestro: { orientacion: 'Educadors socials', ejemplo: 'Clara Barton, Creu Roja' },
+    innovador: { orientacion: 'Terapeutes artístics', ejemplo: 'Mary Cassatt, pintora' },
+    negociador: { orientacion: "Líders d'ONG", ejemplo: 'Wangari Maathai, activista' },
+    organizador: { orientacion: 'Reformadors socials', ejemplo: 'Dorothea Dix' },
+  },
+  visionario: {
+    constructor: { orientacion: 'Urbanistes amb impacte social', ejemplo: 'Zaha Hadid, arquitecta' },
+    analista: { orientacion: 'Científics visionaris', ejemplo: 'Carl Sagan, astrofísic' },
+    maestro: { orientacion: 'Mentors estratègics', ejemplo: 'Oprah Winfrey' },
+    innovador: { orientacion: 'Dissenyadors de tecnologia', ejemplo: 'Steve Jobs, Apple' },
+    negociador: { orientacion: 'CEOs transformadors', ejemplo: 'Sheryl Sandberg' },
+    organizador: { orientacion: 'Planificadors estratègics', ejemplo: 'Katherine Johnson, NASA' },
+  },
+}
+
 // Busca la celda del cruce en el idioma del contenido. Devuelve null
 // si falta algún test.
 export function cruzar(
@@ -108,7 +143,8 @@ export function cruzar(
   locale = 'es'
 ): MatrizCelda | null {
   if (!estrella || !camino) return null
-  const matriz = contentLang(locale) === 'en' ? MATRIZ_EN : MATRIZ_ES
+  const l = contentLang(locale)
+  const matriz = l === 'en' ? MATRIZ_EN : l === 'ca' ? MATRIZ_CA : MATRIZ_ES
   const fila = matriz[estrella as EstrellaCode]
   if (!fila) return null
   return fila[camino as CaminoCode] ?? null

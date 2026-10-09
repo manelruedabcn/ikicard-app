@@ -20,8 +20,9 @@ export default function LoginForm({ locale, next = null }: { locale: string; nex
   const [loading, setLoading] = useState(false)
 
   const languages = [
-    { code: 'en', label: 'EN' },
     { code: 'es', label: 'ES' },
+    { code: 'ca', label: 'CA' },
+    { code: 'en', label: 'EN' },
   ]
 
   function switchMode(next: 'login' | 'register' | 'forgot') {

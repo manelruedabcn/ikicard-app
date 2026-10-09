@@ -205,18 +205,101 @@ const ESTRELLAS_CLOSING_EN = {
     'The star with the most points is your leading style. If you’re between two, don’t worry: many people are a blend.',
 }
 
+const ESTRELLAS_STATEMENTS_CA: EstrellaStatement[] = [
+  { n: 1, estrella: 'explorador', text: "M'agrada explorar llocs nous i afrontar reptes desconeguts." },
+  { n: 2, estrella: 'explorador', text: 'Prefereixo aprendre fent coses pràctiques o descobrint pel meu compte.' },
+  { n: 3, estrella: 'explorador', text: "Gaudeixo de l'aventura i em sento còmode fora de la meva zona de confort." },
+  { n: 4, estrella: 'explorador', text: 'Em sento atret per activitats físiques o que impliquin acció.' },
+  { n: 5, estrella: 'explorador', text: 'Em considero una persona curiosa, sempre buscant alguna cosa nova.' },
+  { n: 6, estrella: 'comunicador', text: "M'encanta compartir idees i comunicar-me amb claredat." },
+  { n: 7, estrella: 'comunicador', text: 'Prefereixo entorns on pugui interactuar i connectar amb altres persones.' },
+  { n: 8, estrella: 'comunicador', text: 'Em sento còmode expressant-me davant de grups o liderant converses.' },
+  { n: 9, estrella: 'comunicador', text: 'Gaudeixo ensenyant, explicant o convencent els altres sobre els meus punts de vista.' },
+  { n: 10, estrella: 'comunicador', text: 'Valoro la interacció humana com a part fonamental de la meva vida diària.' },
+  { n: 11, estrella: 'protector', text: "M'agrada protegir i cuidar les persones properes a mi." },
+  { n: 12, estrella: 'protector', text: 'Prefereixo ambients on pugui contribuir al benestar dels altres.' },
+  { n: 13, estrella: 'protector', text: "Em sento realitzat quan ajudo a resoldre els problemes d'algú." },
+  { n: 14, estrella: 'protector', text: 'Em motiva defensar causes que beneficien les persones més vulnerables.' },
+  { n: 15, estrella: 'protector', text: 'Sento satisfacció quan em veuen com algú fiable i solidari.' },
+  { n: 16, estrella: 'visionario', text: 'Tinc una visió clara del que vull assolir a llarg termini.' },
+  { n: 17, estrella: 'visionario', text: 'Prefereixo projectes que em permetin innovar i pensar a gran escala.' },
+  { n: 18, estrella: 'visionario', text: 'Gaudeixo trobant solucions creatives que puguin tenir impacte futur.' },
+  { n: 19, estrella: 'visionario', text: 'Em motiva inspirar els altres amb les meves idees i la meva perspectiva.' },
+  { n: 20, estrella: 'visionario', text: 'Valoro la planificació estratègica i la possibilitat de liderar amb propòsit.' },
+]
+
+const ESTRELLAS_CA: Estrella[] = [
+  {
+    code: 'explorador',
+    name: 'Exploradora',
+    description: 'Curiosa, aventurera, amant del desconegut.',
+    caracteristicas: 'Curiosa, aventurera, amant dels reptes pràctics.',
+    fortalezas: 'Adaptació al canvi, aprendre sobre la marxa, enfocament en experiències.',
+    desafios: 'Pot perdre interès en tasques rutinàries o estructures rígides.',
+    profesiones: 'Investigador, emprenedor, consultor, guia, explorador creatiu.',
+    referente: 'Ada Lovelace: va aprendre el que ningú no li va ensenyar per fer el que ningú no havia fet.',
+  },
+  {
+    code: 'comunicador',
+    name: 'Comunicadora',
+    description: 'Extravertida, carismàtica, connectora de persones.',
+    caracteristicas: 'Extravertida, carismàtica, hàbil compartint idees i connectant amb persones.',
+    fortalezas: "Claredat en l'expressió, persuasió, lideratge col·laboratiu.",
+    desafios: 'Pot centrar-se massa en la interacció i descuidar el treball independent.',
+    profesiones: "Docent, facilitador, comunicador, líder d'equips, divulgador.",
+    referente: "Maria Montessori: va construir un mètode educatiu sencer des de l'empatia i l'escolta.",
+  },
+  {
+    code: 'protector',
+    name: 'Protectora',
+    description: 'Solidària, fiable, orientada al benestar dels altres.',
+    caracteristicas: 'Solidària, fiable, orientada a la cura i el benestar dels altres.',
+    fortalezas: 'Empatia profunda, resolució de conflictes, orientació social.',
+    desafios: 'Pot descuidar el seu propi benestar mentre cuida el dels altres.',
+    profesiones: 'Terapeuta, treballador social, educador, infermer, mediador.',
+    referente: 'Mieko Kamiya: va dedicar la seva vida professional a qui ningú no volia cuidar.',
+  },
+  {
+    code: 'visionario',
+    name: 'Visionària',
+    description: 'Innovadora, estratègica, pensadora a llarg termini.',
+    caracteristicas: 'Innovadora, estratègica, centrada en objectius i possibilitats futures.',
+    fortalezas: 'Creativitat, lideratge amb propòsit, pensament a gran escala.',
+    desafios: "Pot perdre's en idees abstractes sense concretar-les.",
+    profesiones: 'Emprenedor, director creatiu, estratega, fundador de projectes.',
+    referente: 'Frida Kahlo: va transformar la seva realitat més difícil en visió i llegat.',
+  },
+]
+
+// Gancho de entrada (voz de Manel, muestreada del libro).
+const ESTRELLAS_INTRO_CA = {
+  title: 'Els quatre estels',
+  hook: "Un mirall, no un diagnòstic definitiu. Quin dels quatre estils domina avui la teva manera d'estar i de relacionar-te.",
+  instructions:
+    "Llegeix cada pregunta i puntua de l'1 al 5 quant et representa, sent 1 «gens» i 5 «completament». Respon sense pensar-ho massa.",
+}
+
+const ESTRELLAS_CLOSING_CA = {
+  reframe:
+    "L'estel amb més punts és el teu estil dominant. Si estàs entre dues, no et preocupis: moltes persones són una combinació. Llegeix les descripcions de les teves dues més altes.",
+}
+
 // Getters por idioma del contenido.
 export function getEstrellas(locale: string): Estrella[] {
-  return contentLang(locale) === 'en' ? ESTRELLAS_EN : ESTRELLAS_ES
+  const l = contentLang(locale)
+  return l === 'en' ? ESTRELLAS_EN : l === 'ca' ? ESTRELLAS_CA : ESTRELLAS_ES
 }
 export function getEstrellasStatements(locale: string): EstrellaStatement[] {
-  return contentLang(locale) === 'en' ? ESTRELLAS_STATEMENTS_EN : ESTRELLAS_STATEMENTS_ES
+  const l = contentLang(locale)
+  return l === 'en' ? ESTRELLAS_STATEMENTS_EN : l === 'ca' ? ESTRELLAS_STATEMENTS_CA : ESTRELLAS_STATEMENTS_ES
 }
 export function getEstrellasIntro(locale: string) {
-  return contentLang(locale) === 'en' ? ESTRELLAS_INTRO_EN : ESTRELLAS_INTRO_ES
+  const l = contentLang(locale)
+  return l === 'en' ? ESTRELLAS_INTRO_EN : l === 'ca' ? ESTRELLAS_INTRO_CA : ESTRELLAS_INTRO_ES
 }
 export function getEstrellasClosing(locale: string) {
-  return contentLang(locale) === 'en' ? ESTRELLAS_CLOSING_EN : ESTRELLAS_CLOSING_ES
+  const l = contentLang(locale)
+  return l === 'en' ? ESTRELLAS_CLOSING_EN : l === 'ca' ? ESTRELLAS_CLOSING_CA : ESTRELLAS_CLOSING_ES
 }
 
 // Suma por bloques → estilo dominante. Determinista e independiente del

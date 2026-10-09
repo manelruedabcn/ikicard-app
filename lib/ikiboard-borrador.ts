@@ -49,7 +49,9 @@ export interface Borrador {
 // Construye el borrador a partir de los tres instrumentos, en el idioma
 // del contenido. Puro y determinista: mismas entradas → mismo borrador.
 export function generarBorrador(input: BorradorInput, locale = 'es'): Borrador {
-  const en = contentLang(locale) === 'en'
+  const l = contentLang(locale)
+  const en = l === 'en'
+  const ca = l === 'ca'
   const estrella = getEstrellas(locale).find(e => e.code === (input.estrella as EstrellaCode)) ?? null
   const camino = getCaminos(locale).find(c => c.code === (input.camino as CaminoCode)) ?? null
   const mask = getMasks(locale).find(m => m.code === (input.maskDominant as MaskCode)) ?? null
@@ -60,7 +62,9 @@ export function generarBorrador(input: BorradorInput, locale = 'es'): Borrador {
   const identidad = estrella
     ? en
       ? `I’m becoming someone ${lowerFirst(estrella.description).replace(/\.$/, '')}`
-      : `Estoy siendo alguien ${lowerFirst(estrella.description).replace(/\.$/, '')}`
+      : ca
+        ? `Estic sent algú ${lowerFirst(estrella.description).replace(/\.$/, '')}`
+        : `Estoy siendo alguien ${lowerFirst(estrella.description).replace(/\.$/, '')}`
     : null
 
   // Instrucciones: celda del cruce + freno + paso, tejidas en orden.
@@ -73,10 +77,15 @@ export function generarBorrador(input: BorradorInput, locale = 'es'): Borrador {
             label: 'Your ground',
             body: `Where your style and your capabilities meet: ${lowerFirst(celda.orientacion)}. Someone embodied it before you — ${celda.ejemplo}.`,
           }
-        : {
-            label: 'Tu terreno',
-            body: `Donde tu estilo y tus capacidades se encuentran: ${lowerFirst(celda.orientacion)}. Alguien lo encarnó antes que tú — ${celda.ejemplo}.`,
-          }
+        : ca
+          ? {
+              label: 'El teu terreny',
+              body: `On es troben el teu estil i les teves capacitats: ${lowerFirst(celda.orientacion)}. Algú ho va encarnar abans que tu — ${celda.ejemplo}.`,
+            }
+          : {
+              label: 'Tu terreno',
+              body: `Donde tu estilo y tus capacidades se encuentran: ${lowerFirst(celda.orientacion)}. Alguien lo encarnó antes que tú — ${celda.ejemplo}.`,
+            }
     )
   }
 
@@ -87,10 +96,15 @@ export function generarBorrador(input: BorradorInput, locale = 'es'): Borrador {
             label: 'Lean on your strengths',
             body: `Your strength is in: ${lowerFirst(camino.fortalezas).replace(/\.$/, '')}. Start there, not with what feels hard.`,
           }
-        : {
-            label: 'Apóyate en lo que se te da bien',
-            body: `Tu fuerza está en: ${lowerFirst(camino.fortalezas).replace(/\.$/, '')}. Empieza por ahí, no por lo que te cuesta.`,
-          }
+        : ca
+          ? {
+              label: "Dona't suport en el que se't dona bé",
+              body: `La teva força és a: ${lowerFirst(camino.fortalezas).replace(/\.$/, '')}. Comença per aquí, no pel que et costa.`,
+            }
+          : {
+              label: 'Apóyate en lo que se te da bien',
+              body: `Tu fuerza está en: ${lowerFirst(camino.fortalezas).replace(/\.$/, '')}. Empieza por ahí, no por lo que te cuesta.`,
+            }
     )
   }
 
@@ -101,16 +115,21 @@ export function generarBorrador(input: BorradorInput, locale = 'es'): Borrador {
             label: 'What holds you back today',
             body: `Underneath is the ${mask.fear}. It doesn’t have to disappear: it’s enough to recognise it when it shows up, so it doesn’t decide for you.`,
           }
-        : {
-            label: 'Lo que hoy te frena',
-            body: `Debajo late el ${mask.fear}. No hace falta que desaparezca: basta con que lo reconozcas cuando aparezca, para que no decida por ti.`,
-          }
+        : ca
+          ? {
+              label: 'El que avui et frena',
+              body: `A sota hi ha la ${mask.fear}. No cal que desaparegui: n'hi ha prou que la reconeguis quan aparegui, perquè no decideixi per tu.`,
+            }
+          : {
+              label: 'Lo que hoy te frena',
+              body: `Debajo late el ${mask.fear}. No hace falta que desaparezca: basta con que lo reconozcas cuando aparezca, para que no decida por ti.`,
+            }
     )
   }
 
   if (input.maskPaso && input.maskPaso.trim()) {
     instrucciones.push({
-      label: en ? 'Your first step' : 'Tu primer paso',
+      label: en ? 'Your first step' : ca ? 'El teu primer pas' : 'Tu primer paso',
       body: input.maskPaso.trim(),
     })
   }

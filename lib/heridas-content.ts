@@ -359,37 +359,177 @@ const REFLECTION_EN: WoundReflection[] = [
   },
 ]
 
+const STATEMENTS_CA: WoundStatement[] = [
+  {
+    id: 'prof_1',
+    block: 'profesional',
+    text: 'Quan penso en el que em queda de vida professional, sento més inquietud que il·lusió.',
+  },
+  {
+    id: 'prof_2',
+    block: 'profesional',
+    text: 'Noto que el meu entorn de treball canvia més de pressa del que puc seguir.',
+  },
+  {
+    id: 'prof_3',
+    block: 'profesional',
+    text: 'Si deixés de produir o de treballar demà, no sabria quina part de mi queda dempeus.',
+  },
+  {
+    id: 'prof_4',
+    block: 'profesional',
+    text: 'Sento que algú amb molta menys experiència que jo pot aconseguir resultats semblants als meus.',
+  },
+  {
+    id: 'prof_5',
+    block: 'profesional',
+    text: "Trobo a faltar sentir-me necessari en l'àmbit professional, d'una manera que abans donava per feta.",
+  },
+  {
+    id: 'rel_1',
+    block: 'relacional',
+    text: 'Les persones amb qui abans parlava de debò han anat desapareixent de la meva vida, sense ruptura, només pel desgast.',
+  },
+  {
+    id: 'rel_2',
+    block: 'relacional',
+    text: 'Des que la gent propera fa cada vegada més la seva pròpia vida, noto un buit que abans no hi era.',
+  },
+  {
+    id: 'rel_3',
+    block: 'relacional',
+    text: 'Podria comptar amb una mà a qui trucaria en plena nit, i abans no era així.',
+  },
+  {
+    id: 'rel_4',
+    block: 'relacional',
+    text: 'Trobo a faltar que algú depengui de mi tal com abans depenia.',
+  },
+  {
+    id: 'rel_5',
+    block: 'relacional',
+    text: 'Mantinc relacions per costum més que per una connexió que senti viva.',
+  },
+  {
+    id: 'vit_1',
+    block: 'vital',
+    text: 'He aconseguit bona part del que em vaig proposar, i tot i així sento un buit que no sé explicar del tot.',
+  },
+  {
+    id: 'vit_2',
+    block: 'vital',
+    text: "La pèrdua, el deteriorament o l'absència d'algú de la generació anterior a la meva m'ha fet sentir que la fila avança i que el següent soc jo.",
+  },
+  {
+    id: 'vit_3',
+    block: 'vital',
+    text: 'Penso en quant de temps em queda més del que pensava abans, no de manera dramàtica, però sí present.',
+  },
+  {
+    id: 'vit_4',
+    block: 'vital',
+    text: 'Em pregunto si tot el que he construït té sentit més enllà del que es veu des de fora.',
+  },
+  {
+    id: 'vit_5',
+    block: 'vital',
+    text: 'Quan alguna cosa em fa pensar en el temps que em queda, canvio de tema o em distrec de seguida.',
+  },
+]
+
+const WOUNDS_CA: WoundMeta[] = [
+  { code: 'profesional', name: 'Professional', label: 'la professional' },
+  { code: 'relacional', name: 'Relacional', label: 'la relacional' },
+  { code: 'vital', name: 'Vital', label: 'la vital' },
+]
+
+// Gancho de entrada (registro sobrio, sin prometer ni dramatizar).
+const INTRO_CA = {
+  title: 'La ferida que més pesa',
+  hook: 'De què et protegeixes, abans de saber com. Quinze frases, tres terrenys: la feina, els vincles, el temps.',
+  instructions:
+    "Respon qui ets avui, en la majoria dels teus dies, no qui voldries ser. Puntua cada frase de l'1 al 5: 1 = gairebé mai, 5 = gairebé sempre. Llegeix-les sense pensar-hi massa.",
+}
+
+// Copy por banda para el mapa de las tres heridas.
+const BANDS_CA: Record<Band, string> = {
+  baja: 'ara mateix no sembla que estigui pesant gaire',
+  activa: 'està activa, encara que potser encara no li havies posat nom',
+  dominante: 'és la que més està governant la insatisfacció de fons ara mateix',
+}
+
+const RESULT_CA: ResultCopy = {
+  profesional:
+    'Ara mateix, el que més pesa sembla estar en la teva vida professional. No és només cansament de treballar: és la sensació que el que fas ja no et torna el que abans et donava. Mereix una mirada, no una resposta ràpida.',
+  relacional:
+    "Ara mateix, el que més pesa sembla estar en els teus vincles. No cal que hi hagi passat res dramàtic: de vegades és només el desgast silenciós de deixar d'estar present en les converses que importaven. Mereix una mirada, no una resposta ràpida.",
+  vital:
+    "Ara mateix, el que més pesa sembla ser una cosa més difícil de nomenar: el temps, el que ja no es pot canviar, la sensació d'haver aconseguit coses i seguir amb un buit que no quadra. És la més incòmoda de les tres, i també la que menys se sol mirar de front. Mereix una mirada, no una resposta ràpida.",
+  tie: (a, b) =>
+    `Avui no hi ha una sola ferida que parli més fort: n'hi ha dues que demanen atenció alhora, ${a} i ${b}. No cal triar quina és «la de debò». Comença per la que t'hagi incomodat més en llegir les seves frases.`,
+  allLow:
+    "Cap de les tres sembla estar pesant gaire ara mateix, o potser és la primera vegada que t'atures a mirar-ne alguna amb aquesta claredat. Val la pena repetir aquest test d'aquí a uns mesos.",
+  allHigh:
+    "Les tres ferides estan pesant alhora ara mateix, i és més habitual del que sembla: quan la ferida vital està activa, sol arrossegar també la professional i la relacional. Tot i així, n'hi ha una que puntua més alt que les altres dues — comença per aquí.",
+}
+
+const DISCLAIMER_CA =
+  "És un qüestionari d'autoinforme, no un diagnòstic clínic tancat. Les tres ferides gairebé mai apareixen del tot aïllades. Alguna frase pot no aplicar igual a tothom (qui no té fills o parella pot puntuar baix en relacional sense que aquest terreny estigui resolt): llegeix el resultat juntament amb el que ja saps de tu, no només el número."
+
+const CROSS_INVITE_CA =
+  "Saber quina ferida pesa és la meitat del diagnòstic. L'altra meitat és saber com et protegeixes de sentir-la. Això ho respon el test de les màscares."
+
+const crossConnectionCa = (maskName: string) =>
+  `Té sentit que ${maskName} aparegui amb força — sol ser una de les maneres de protegir-se d'això.`
+
+const REFLECTION_CA: WoundReflection[] = [
+  { id: 'herida_cual', prompt: 'La meva ferida dominant ara és la…', hint: '' },
+  { id: 'herida_recordo', prompt: "L'última cosa que me la va recordar amb força va ser…", hint: '' },
+  {
+    id: 'herida_gesto',
+    prompt: 'Un gest petit per començar a atendre-la aquesta setmana:',
+    hint: '',
+  },
+]
+
 // ------------------------------------------------------------
 // Getters por idioma del contenido.
 // ------------------------------------------------------------
 export function getStatements(locale: string): WoundStatement[] {
-  return contentLang(locale) === 'en' ? STATEMENTS_EN : STATEMENTS_ES
+  const l = contentLang(locale)
+  return l === 'en' ? STATEMENTS_EN : l === 'ca' ? STATEMENTS_CA : STATEMENTS_ES
 }
 export function getWounds(locale: string): WoundMeta[] {
-  return contentLang(locale) === 'en' ? WOUNDS_EN : WOUNDS_ES
+  const l = contentLang(locale)
+  return l === 'en' ? WOUNDS_EN : l === 'ca' ? WOUNDS_CA : WOUNDS_ES
 }
 export function getHeridasIntro(locale: string) {
-  return contentLang(locale) === 'en' ? INTRO_EN : INTRO_ES
+  const l = contentLang(locale)
+  return l === 'en' ? INTRO_EN : l === 'ca' ? INTRO_CA : INTRO_ES
 }
 export function getBandCopy(locale: string): Record<Band, string> {
-  return contentLang(locale) === 'en' ? BANDS_EN : BANDS_ES
+  const l = contentLang(locale)
+  return l === 'en' ? BANDS_EN : l === 'ca' ? BANDS_CA : BANDS_ES
 }
 export function getResultCopy(locale: string): ResultCopy {
-  return contentLang(locale) === 'en' ? RESULT_EN : RESULT_ES
+  const l = contentLang(locale)
+  return l === 'en' ? RESULT_EN : l === 'ca' ? RESULT_CA : RESULT_ES
 }
 export function getDisclaimer(locale: string): string {
-  return contentLang(locale) === 'en' ? DISCLAIMER_EN : DISCLAIMER_ES
+  const l = contentLang(locale)
+  return l === 'en' ? DISCLAIMER_EN : l === 'ca' ? DISCLAIMER_CA : DISCLAIMER_ES
 }
 export function getCrossInvite(locale: string): string {
-  return contentLang(locale) === 'en' ? CROSS_INVITE_EN : CROSS_INVITE_ES
+  const l = contentLang(locale)
+  return l === 'en' ? CROSS_INVITE_EN : l === 'ca' ? CROSS_INVITE_CA : CROSS_INVITE_ES
 }
 export function crossConnection(maskName: string, locale: string): string {
-  return contentLang(locale) === 'en'
-    ? crossConnectionEn(maskName)
-    : crossConnectionEs(maskName)
+  const l = contentLang(locale)
+  return l === 'en' ? crossConnectionEn(maskName) : l === 'ca' ? crossConnectionCa(maskName) : crossConnectionEs(maskName)
 }
 export function getReflection(locale: string): WoundReflection[] {
-  return contentLang(locale) === 'en' ? REFLECTION_EN : REFLECTION_ES
+  const l = contentLang(locale)
+  return l === 'en' ? REFLECTION_EN : l === 'ca' ? REFLECTION_CA : REFLECTION_ES
 }
 
 // ------------------------------------------------------------

@@ -8,7 +8,7 @@
 
 import { type Dim, type InformePaso } from './paso-content'
 
-type Locale = 'es' | 'en'
+type Locale = 'es' | 'ca' | 'en'
 
 // Titular del eje dominante: "tu fuerza es…". Sale del score más alto.
 const DOMINANTE: Record<Locale, Record<Dim, string>> = {
@@ -23,6 +23,12 @@ const DOMINANTE: Record<Locale, Record<Dim, string>> = {
     A: 'You tend to involve others in what is happening.',
     S: 'You tend to provide continuity and maintain the pace.',
     O: 'You tend to observe and understand before acting.',
+  },
+  ca: {
+    P: 'Tendeixes a decidir i posar les coses en marxa.',
+    A: 'Tendeixes a implicar els altres en el que passa.',
+    S: 'Tendeixes a donar continuïtat i mantenir el ritme.',
+    O: "Tendeixes a observar i comprendre abans d'actuar.",
   },
 }
 
@@ -66,6 +72,24 @@ const BRECHA: Record<Locale, Record<Dim, { exige: string; esconde: string }>> = 
       esconde: 'You observe far more than you reveal.',
     },
   },
+  ca: {
+    P: {
+      exige: 'Per fora empenys més del que per dins demanes.',
+      esconde: 'Guardes més determinació de la que ensenyes.',
+    },
+    A: {
+      exige: 'Agrades més del que de debò necessites.',
+      esconde: "La gent t'importa més del que mostres.",
+    },
+    S: {
+      exige: 'Aparentes més calma de la que sents.',
+      esconde: 'Sostens molt més del que aparentes.',
+    },
+    O: {
+      exige: 'Controles més del que caldria.',
+      esconde: 'Observes molt més del que deixes veure.',
+    },
+  },
 }
 
 const FOCO: Record<Locale, Record<Dim, string>> = {
@@ -81,15 +105,24 @@ const FOCO: Record<Locale, Record<Dim, string>> = {
     S: 'The greatest distance appears between the pace that comes naturally and the one you maintain outwardly.',
     O: 'The greatest distance appears between how much you analyse inside and how much control you show outwardly.',
   },
+  ca: {
+    P: 'La distància més gran apareix entre com decideixes per dins i la fermesa que mostres en avançar.',
+    A: "La distància més gran apareix entre quant t'importen els altres i quant ho deixes veure.",
+    S: 'La distància més gran apareix entre el ritme que et surt de dins i el que sostens per fora.',
+    O: 'La distància més gran apareix entre quant analitzes per dins i quant control mostres per fora.',
+  },
 }
 
 const ALINEADO: Record<Locale, string> = {
   es: 'Hoy caminas muy cerca de ti.',
   en: 'Today you walk very close to yourself.',
+  ca: 'Avui camines molt a prop de tu.',
 }
 
 function esLocale(locale: string): Locale {
-  return locale === 'en' ? 'en' : 'es'
+  if (locale === 'en') return 'en'
+  if (locale === 'ca') return 'ca'
+  return 'es'
 }
 
 // Devuelve los titulares en orden de impacto: el primero es el "gancho" grande
@@ -137,6 +170,11 @@ const TEASER_GANCHO: Record<Locale, { exige: string; esconde: string; alineado: 
     esconde: 'You hold things you barely show. You’ll see which below.',
     alineado: 'Today you walk close to yourself, but there are nuances. See them below.',
   },
+  ca: {
+    exige: 'Et mostres diferent de com ets per dins. A sota veuràs on.',
+    esconde: 'Guards coses que gairebé no ensenyes. A sota veuràs quines.',
+    alineado: 'Avui camines a prop de tu, però hi ha matisos. A sota veuràs quins.',
+  },
 }
 
 export function generarTeaserGancho(inf: InformePaso, locale: string): string {
@@ -152,6 +190,7 @@ export function generarTeaserGancho(inf: InformePaso, locale: string): string {
 const TEASER_TEMIDO: Record<Locale, string> = {
   es: 'Hay un punto donde tu forma de caminar se te vuelve en contra.',
   en: 'There’s a point where your way of walking turns against you.',
+  ca: 'Hi ha un punt on la teva manera de caminar es gira contra tu.',
 }
 
 export function teaserTemido(locale: string): string {
@@ -170,6 +209,11 @@ const TEASER_RAREZA: Record<Locale, Record<'frecuente' | 'habitual' | 'poco', st
     frecuente: 'Many people share your way. You’ll see which at the end.',
     habitual: 'Not the most common way. You’ll see where you land at the end.',
     poco: 'Few people share your way of walking. Which, at the end.',
+  },
+  ca: {
+    frecuente: 'Comparteixes forma amb molta gent. Al final veus amb qui.',
+    habitual: 'No és la forma més comuna. Al final veus entre quines estàs.',
+    poco: "Camines d'una manera que comparteix poca gent. Al final, quina.",
   },
 }
 

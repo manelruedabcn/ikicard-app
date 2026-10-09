@@ -260,18 +260,126 @@ const MASK_REFLECTION_EN: MaskReflection[] = [
   },
 ]
 
+const MASKS_CA: Mask[] = [
+  {
+    code: 'exigente',
+    name: "L'Exigent",
+    description:
+      "Res no està prou bé. S'exigeix a si mateixa (i als altres) un nivell que mai no s'assoleix. No celebra els èxits perquè sempre hi ha alguna cosa a millorar.",
+    statement: "Sento que res del que faig no és prou bo; sempre es pot millorar més.",
+    fear: "por de no estar a l'altura",
+    weave: "t'exigeixes massa per merèixer el teu lloc",
+  },
+  {
+    code: 'controladora',
+    name: 'La Controladora',
+    description:
+      'Necessita tenir-ho tot previst. Delegar és perdre el control. La incertesa li pesa, i prefereix fer-ho ella abans que confiar.',
+    statement: 'Necessito tenir-ho tot sota control; delegar em genera ansietat.',
+    fear: 'por de perdre el control',
+    weave: 'ho subjectes tot perquè res no et sorprengui',
+  },
+  {
+    code: 'manipuladora',
+    name: 'La Manipuladora',
+    description:
+      "Mou els fils amb subtilesa per no mostrar-se tal com és. Aconsegueix que els altres facin el que vol sense demanar-ho obertament.",
+    statement: 'Sovint aconsegueixo que els altres facin el que jo vull sense demanar-ho directament.',
+    fear: 'por de mostrar-se tal com és',
+    weave: "mous els fils per no haver de mostrar-te",
+  },
+  {
+    code: 'jueza',
+    name: 'La Jutgessa',
+    description:
+      "Critica perquè no la critiquin. Assenyala en els altres el que no es permet a si mateixa. La seva duresa per fora amaga una fragilitat que no s'atreveix a mostrar.",
+    statement: 'Tendeixo a assenyalar els errors dels altres abans que vegin els meus.',
+    fear: 'por de ser criticada',
+    weave: 'assenyales fora el que tems que vegin en tu',
+  },
+  {
+    code: 'complaciente',
+    name: 'La Complaguda',
+    description:
+      "Diu sí quan vol dir no. Anteposa les necessitats dels altres a les pròpies. El seu valor depèn de ser acceptada i estimada, encara que sigui a costa d'ella mateixa.",
+    statement: 'Em costa dir que no, fins i tot quan sé que hauria de fer-ho.',
+    fear: 'por al rebuig',
+    weave: "dius que sí per no perdre l'estimació",
+  },
+  {
+    code: 'victima',
+    name: 'La Víctima',
+    description:
+      'Converteix la vida en una cosa que et passa a tu, no en una cosa que tu protagonitzes. Espera que les circumstàncies canviïn per poder canviar ella.',
+    statement: 'Sento que les coses em passen a mi; espero que canviïn les circumstàncies.',
+    fear: 'por de no ser capaç de canviar',
+    weave: 'esperes que canviï el de fora per no exposar-te tu',
+  },
+  {
+    code: 'impostora',
+    name: 'La Impostora',
+    description:
+      "Viu amb la por constant de ser descoberta. Creu que en qualsevol moment algú s'adonarà que no sap, no mereix o no està a l'altura.",
+    statement: 'Visc amb la por que en qualsevol moment algú descobreixi que no sé prou.',
+    fear: 'por de ser descoberta',
+    weave: 'minimitzes el que aconsegueixes per si algú et descobreix',
+  },
+]
+
+// Gancho de entrada (voz de Manel, corrección "construida, no elegida").
+const MASKS_INTRO_CA = {
+  title: 'Quina màscara governa la teva vida?',
+  hook: "No la vas triar: la va construir el que vas viure. Per això ja no la veus. I, sense adonar-te'n, decideix per tu.",
+  instructions:
+    "Puntua de l'1 al 5 com t'identifiques amb cada frase. 1 = gens identificat/ada. 5 = totalment identificat/ada. Llegeix-les ràpid, sense pensar-hi massa.",
+}
+
+const MASKS_CLOSING_CA = {
+  noJudgement:
+    'Les màscares no les vas triar des de la maldat ni des de la mentida. Les vas triar —o te les van posar— des de la necessitat. Vas fer el que vas poder amb el que tenies. I gràcies a aquestes màscares, probablement, has arribat fins aquí.',
+  reframe:
+    "No es tracta d'arrencar-te la màscara. Es tracta de saber que la portes i triar quan fer-la servir i quan no.",
+}
+
+const MASK_REFLECTION_CA: MaskReflection[] = [
+  {
+    id: 'mask_uso',
+    prompt: 'La màscara que més faig servir és…',
+    hint: 'Descriu-la. Posa-li nom. Com es comporta? Què diu? Quina imatge projecta?',
+  },
+  {
+    id: 'mask_sirvio',
+    prompt: "M'ha servit per a…",
+    hint: "Sigues just. Aquesta màscara no és una dolenta. T'ha protegit, t'ha permès aconseguir coses, t'ha ajudat a encaixar. Reconeix-ho.",
+  },
+  {
+    id: 'mask_cuesta',
+    prompt: 'Però avui em costa…',
+    hint: "Quin preu estàs pagant per portar-la? Què t'impedeix? Quin cansament genera?",
+  },
+  {
+    id: 'mask_paso',
+    prompt: 'Si caminés sense separar-me de mi, començaria per…',
+    hint: "No cal que sigui un pla de vida. N'hi ha prou amb un gest. Una cosa petita. Una veritat que fa temps que ajornes.",
+  },
+]
+
 // Getters por idioma del contenido.
 export function getMasks(locale: string): Mask[] {
-  return contentLang(locale) === 'en' ? MASKS_EN : MASKS_ES
+  const l = contentLang(locale)
+  return l === 'en' ? MASKS_EN : l === 'ca' ? MASKS_CA : MASKS_ES
 }
 export function getMasksIntro(locale: string) {
-  return contentLang(locale) === 'en' ? MASKS_INTRO_EN : MASKS_INTRO_ES
+  const l = contentLang(locale)
+  return l === 'en' ? MASKS_INTRO_EN : l === 'ca' ? MASKS_INTRO_CA : MASKS_INTRO_ES
 }
 export function getMasksClosing(locale: string) {
-  return contentLang(locale) === 'en' ? MASKS_CLOSING_EN : MASKS_CLOSING_ES
+  const l = contentLang(locale)
+  return l === 'en' ? MASKS_CLOSING_EN : l === 'ca' ? MASKS_CLOSING_CA : MASKS_CLOSING_ES
 }
 export function getMaskReflection(locale: string): MaskReflection[] {
-  return contentLang(locale) === 'en' ? MASK_REFLECTION_EN : MASK_REFLECTION_ES
+  const l = contentLang(locale)
+  return l === 'en' ? MASK_REFLECTION_EN : l === 'ca' ? MASK_REFLECTION_CA : MASK_REFLECTION_ES
 }
 
 // ------------------------------------------------------------
@@ -310,6 +418,27 @@ export function maskCombinationReading(activeCodes: MaskCode[], locale = 'es'): 
       active.length === 2
         ? 'They’re not two problems: they’re two ways of caring for one same wound.'
         : 'They’re not separate problems: they’re different ways of caring for one same wound.'
+    return [intro, fears, story, close]
+  }
+
+  if (contentLang(locale) === 'ca') {
+    const intro =
+      'Aquestes màscares no actuen per separat: es tornen per protegir el mateix.'
+    const fears =
+      `Sota ${dominant.name} hi ha la ${dominant.fear}` +
+      (rest.length === 1
+        ? `; i ${rest[0].name} afegeix la ${rest[0].fear}.`
+        : rest.length === 2
+          ? `; ${rest[0].name} afegeix la ${rest[0].fear}, i ${rest[1].name}, la ${rest[1].fear}.`
+          : '; ' + rest.map(m => `${m.name} afegeix la ${m.fear}`).join('; ') + '.')
+    const story =
+      'Vistes juntes expliquen una història coherent: ' +
+      active.map(m => m.weave).join('; ') +
+      '.'
+    const close =
+      active.length === 2
+        ? 'No són dos problemes: són dues maneres de cuidar una mateixa ferida.'
+        : 'No són problemes separats: són maneres diferents de cuidar una mateixa ferida.'
     return [intro, fears, story, close]
   }
 

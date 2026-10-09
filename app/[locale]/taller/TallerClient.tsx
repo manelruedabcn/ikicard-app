@@ -5,7 +5,8 @@ import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { trackEvent } from '@/lib/analytics'
-import { TALLER_CONTENT, ANSWERABLE_IDS, type Block } from '@/lib/taller-content'
+import { ANSWERABLE_IDS, type Block } from '@/lib/taller-content'
+import { getTallerContent } from '@/lib/taller-l10n'
 
 // Enlace del directo del taller (Zoom / YouTube / Meet). Vacío = sin directo.
 // En septiembre, pega aquí la URL "embed" del directo.
@@ -21,6 +22,7 @@ export default function TallerClient({ userId, locale, answers }: Props) {
   const supabase = createClient()
   const t = useTranslations('taller')
   const tn = useTranslations('nav')
+  const content = getTallerContent(locale)
 
   const [section, setSection] = useState(0)
   // Estado local de todas las respuestas (para el contador de progreso)
@@ -46,7 +48,7 @@ export default function TallerClient({ userId, locale, answers }: Props) {
   )
 
   const answered = ANSWERABLE_IDS.filter(id => (values[id] ?? '').trim() !== '').length
-  const current = TALLER_CONTENT[section]
+  const current = content[section]
 
   return (
     <Shell locale={locale} tn={tn}>
@@ -74,7 +76,7 @@ export default function TallerClient({ userId, locale, answers }: Props) {
 
         {/* Navegación de secciones */}
         <div className="flex gap-2 overflow-x-auto pb-2 mb-8 -mx-1 px-1">
-          {TALLER_CONTENT.map((s, i) => (
+          {content.map((s, i) => (
             <button
               key={s.id}
               onClick={() => {
@@ -87,7 +89,7 @@ export default function TallerClient({ userId, locale, answers }: Props) {
                   : 'border-[#272727]/20 text-[#272727]/50 hover:border-[#c2866b]'
               }`}
             >
-              {s.label ? s.label.replace('SECCIÓN ', '') : t('intro_short')}
+              {s.label ? s.label.replace('SECCIÓN ', '').replace('SECCIÓ ', '') : t('intro_short')}
             </button>
           ))}
         </div>
@@ -123,10 +125,10 @@ export default function TallerClient({ userId, locale, answers }: Props) {
           </button>
           <button
             onClick={() => {
-              setSection(s => Math.min(TALLER_CONTENT.length - 1, s + 1))
+              setSection(s => Math.min(content.length - 1, s + 1))
               window.scrollTo({ top: 0 })
             }}
-            disabled={section === TALLER_CONTENT.length - 1}
+            disabled={section === content.length - 1}
             className="text-xs tracking-widest uppercase text-[#272727]/50 hover:text-[#c2866b] transition-colors disabled:opacity-0"
           >
             {t('next')} →
