@@ -186,11 +186,12 @@ export default function HeridasClient({ userId, locale, volver, maskDominant, in
 
 function Intro({ onStart, locale }: { onStart: () => void; locale: string }) {
   const en = contentLang(locale) === 'en'
+  const ca = contentLang(locale) === 'ca'
   const intro = getHeridasIntro(locale)
   return (
     <div className="text-center">
       <p className="text-xs tracking-[0.3em] uppercase text-[#c2866b] mb-4">
-        {en ? 'What weighs' : 'De qué te proteges'}
+        {en ? 'What weighs' : ca ? 'De què et protegeixes' : 'De qué te proteges'}
       </p>
       <h1 className="font-[family-name:var(--font-cormorant)] text-4xl leading-tight text-[#272727] mb-6">
         {intro.title}
@@ -203,7 +204,7 @@ function Intro({ onStart, locale }: { onStart: () => void; locale: string }) {
         onClick={onStart}
         className="rounded-full bg-[#c2866b] px-8 py-3 text-sm tracking-widest uppercase text-[#FDFBF7] transition-opacity hover:opacity-90"
       >
-        {en ? 'Start' : 'Empezar'}
+        {en ? 'Start' : ca ? 'Començar' : 'Empezar'}
       </button>
     </div>
   )
@@ -229,6 +230,7 @@ function Test({
   locale: string
 }) {
   const en = contentLang(locale) === 'en'
+  const ca = contentLang(locale) === 'ca'
   return (
     <div>
       <p className="text-center text-xs tracking-widest uppercase text-[#272727]/40 mb-3">
@@ -261,8 +263,8 @@ function Test({
         ))}
       </div>
       <div className="flex justify-between text-[10px] tracking-widest uppercase text-[#272727]/40 px-1 mb-12">
-        <span>{en ? 'Almost never' : 'Casi nunca'}</span>
-        <span>{en ? 'Almost always' : 'Casi siempre'}</span>
+        <span>{en ? 'Almost never' : ca ? 'Gairebé mai' : 'Casi nunca'}</span>
+        <span>{en ? 'Almost always' : ca ? 'Gairebé sempre' : 'Casi siempre'}</span>
       </div>
 
       <div className="text-center">
@@ -271,7 +273,7 @@ function Test({
           disabled={step === 0}
           className="text-xs tracking-widest uppercase text-[#272727]/50 hover:text-[#c2866b] transition-colors disabled:opacity-0"
         >
-          {en ? '← Previous' : '← Anterior'}
+          {en ? '← Previous' : ca ? '← Anterior' : '← Anterior'}
         </button>
       </div>
     </div>
@@ -300,6 +302,7 @@ function Result({
   const [generandoPdf, setGenerandoPdf] = useState(false)
   const informeRef = useRef<HTMLDivElement>(null)
   const en = contentLang(locale) === 'en'
+  const ca = contentLang(locale) === 'ca'
 
   const wounds = getWounds(locale)
   const meta = (code: WoundCode) => wounds.find(w => w.code === code)!
@@ -325,18 +328,18 @@ function Result({
     scenario === 'allLow'
       ? en
         ? 'A moment with no clear weight'
-        : 'Un momento sin peso claro'
+        : ca ? 'Un moment sense un pes clar' : 'Un momento sin peso claro'
       : scenario === 'tie'
         ? en
           ? 'Two wounds at once'
-          : 'Dos heridas a la vez'
+          : ca ? 'Dues ferides alhora' : 'Dos heridas a la vez'
         : scenario === 'allHigh'
           ? en
             ? 'All three at once'
-            : 'Las tres a la vez'
+            : ca ? 'Totes tres alhora' : 'Las tres a la vez'
           : en
             ? 'The wound that weighs most'
-            : 'La herida que más pesa'
+            : ca ? 'La ferida que més pesa' : 'La herida que más pesa'
   const title =
     scenario === 'allLow'
       ? null
@@ -362,14 +365,14 @@ function Result({
     try {
       await generarHeridasPdf(
         informeRef.current,
-        en ? 'My Wounds Report - IKIGAIER.pdf' : 'Mi informe de Heridas - IKIGAIER.pdf',
+        en ? 'My Wounds Report - IKIGAIER.pdf' : ca ? 'El meu informe de Ferides - IKIGAIER.pdf' : 'Mi informe de Heridas - IKIGAIER.pdf',
         'share',
         locale
       )
     } catch {
       await generarHeridasPdf(
         informeRef.current,
-        en ? 'My Wounds Report - IKIGAIER.pdf' : 'Mi informe de Heridas - IKIGAIER.pdf',
+        en ? 'My Wounds Report - IKIGAIER.pdf' : ca ? 'El meu informe de Ferides - IKIGAIER.pdf' : 'Mi informe de Heridas - IKIGAIER.pdf',
         'download',
         locale
       )
@@ -385,7 +388,7 @@ function Result({
     try {
       await generarHeridasPdf(
         informeRef.current,
-        en ? 'My Wounds Report - IKIGAIER.pdf' : 'Mi informe de Heridas - IKIGAIER.pdf',
+        en ? 'My Wounds Report - IKIGAIER.pdf' : ca ? 'El meu informe de Ferides - IKIGAIER.pdf' : 'Mi informe de Heridas - IKIGAIER.pdf',
         'download',
         locale
       )
@@ -438,7 +441,7 @@ function Result({
             de valor; sitúa cuál pesa más hoy. */}
         <div className="mb-10 rounded-xl bg-[#272727]/[0.03] px-5 py-5">
           <p className="text-xs tracking-widest uppercase text-[#272727]/40 mb-4">
-            {en ? 'The three wounds' : 'Las tres heridas'}
+            {en ? 'The three wounds' : ca ? 'Les tres ferides' : 'Las tres heridas'}
           </p>
           <ul className="flex flex-col gap-4">
             {ordered.map(code => {
@@ -480,7 +483,7 @@ function Result({
                 href={`/${locale}/mascaras`}
                 className="heridas-no-export inline-block text-xs tracking-widest uppercase text-[#c2866b] underline-offset-4 hover:underline"
               >
-                {en ? 'Take the masks test →' : 'Hacer el test de las máscaras →'}
+                {en ? 'Take the masks test →' : ca ? 'Fer el test de les màscares →' : 'Hacer el test de las máscaras →'}
               </Link>
             </>
           )}
@@ -498,7 +501,7 @@ function Result({
             onClick={compartir}
             className="w-full py-3 bg-[#c2866b] text-[#FDFBF7] text-xs tracking-widest uppercase hover:bg-[#272727] transition-colors"
           >
-            {generandoPdf ? (en ? 'Generating…' : 'Generando…') : (en ? 'Share my report' : 'Compartir mi informe')}
+            {generandoPdf ? (en ? 'Generating…' : ca ? 'Generant…' : 'Generando…') : (en ? 'Share my report' : ca ? 'Compartir el meu informe' : 'Compartir mi informe')}
           </button>
           <button
             onClick={guardarPdf}
@@ -508,15 +511,15 @@ function Result({
             {generandoPdf
               ? en
                 ? 'Generating…'
-                : 'Generando…'
+                : ca ? 'Generant…' : 'Generando…'
               : en
                 ? 'Download my report as PDF'
-                : 'Descargar mi informe en PDF'}
+                : ca ? 'Descarregar el meu informe en PDF' : 'Descargar mi informe en PDF'}
           </button>
           <p className="text-xs text-[#272727]/40 mt-2">
             {en
               ? 'Your result, to take with you or return to.'
-              : 'Tu resultado, para llevártelo o volver a él.'}
+              : ca ? 'El teu resultat, per endur-te’l o tornar-hi.' : 'Tu resultado, para llevártelo o volver a él.'}
           </p>
         </div>
 
@@ -534,12 +537,12 @@ function Result({
             />
             <div className="text-left">
               <p className="text-xs tracking-[0.3em] uppercase text-[#c2866b] mb-1">
-                {en ? 'What weighs' : 'De qué te proteges'}
+                {en ? 'What weighs' : ca ? 'De què et protegeixes' : 'De qué te proteges'}
               </p>
               <p className="font-[family-name:var(--font-cormorant)] text-lg leading-snug text-[#272727]">
                 {en
                   ? 'Discover which wound weighs most at ikigaier.com'
-                  : 'Descubre qué herida te pesa más en ikigaier.com'}
+                  : ca ? 'Descobreix quina ferida et pesa més a ikigaier.com' : 'Descubre qué herida te pesa más en ikigaier.com'}
               </p>
             </div>
           </div>
@@ -552,10 +555,10 @@ function Result({
       {volver || showExercise ? (
         <div className="border-t border-[#272727]/10 pt-10">
           <p className="text-center text-xs tracking-[0.3em] uppercase text-[#c2866b] mb-2">
-            {en ? 'Exercise' : 'Ejercicio'}
+            {en ? 'Exercise' : ca ? 'Exercici' : 'Ejercicio'}
           </p>
           <h3 className="text-center font-[family-name:var(--font-cormorant)] text-2xl text-[#272727] mb-8">
-            {en ? 'My dominant wound' : 'Mi herida dominante'}
+            {en ? 'My dominant wound' : ca ? 'La meva ferida dominant' : 'Mi herida dominante'}
           </h3>
           <div className="flex flex-col gap-8">
             {reflectionFields.map(r => (
@@ -577,13 +580,13 @@ function Result({
           <p className="text-sm leading-relaxed text-[#272727]/60 mb-5">
             {en
               ? 'Want to take a step? Write about your wound and one small gesture you could start this week.'
-              : '¿Quieres dar un paso? Escribe sobre tu herida y qué gesto pequeño podrías empezar esta semana.'}
+              : ca ? 'Vols fer un pas? Escriu sobre la teva ferida i quin gest petit podries començar aquesta setmana.' : '¿Quieres dar un paso? Escribe sobre tu herida y qué gesto pequeño podrías empezar esta semana.'}
           </p>
           <button
             onClick={() => setShowExercise(true)}
             className="text-xs tracking-widest uppercase text-[#c2866b] underline-offset-4 hover:underline"
           >
-            {en ? 'Do the exercise' : 'Hacer el ejercicio'}
+            {en ? 'Do the exercise' : ca ? 'Fer l’exercici' : 'Hacer el ejercicio'}
           </button>
         </div>
       )}
@@ -595,7 +598,7 @@ function Result({
             href={`/${locale}${volver}`}
             className="rounded-full bg-[#c2866b] px-8 py-3 text-sm tracking-widest uppercase text-[#FDFBF7] transition-opacity hover:opacity-90"
           >
-            {en ? 'Back and continue' : 'Volver y seguir'}
+            {en ? 'Back and continue' : ca ? 'Tornar i continuar' : 'Volver y seguir'}
           </Link>
         </div>
       )}
@@ -622,6 +625,7 @@ function ReflectionField({
 }) {
   const [local, setLocal] = useState(value)
   const en = contentLang(locale) === 'en'
+  const ca = contentLang(locale) === 'ca'
 
   return (
     <div>
@@ -637,7 +641,7 @@ function ReflectionField({
           all[id] = e.target.value
           onSave(id, e.target.value, all)
         }}
-        placeholder={en ? 'Write here…' : 'Escribe aquí…'}
+        placeholder={en ? 'Write here…' : ca ? 'Escriu aquí…' : 'Escribe aquí…'}
         className={`w-full resize-y rounded-lg border border-[#272727]/20 bg-white/50 p-3 text-sm leading-relaxed text-[#272727] outline-none placeholder:text-[#272727]/30 focus:border-[#c2866b] transition-colors ${
           hint ? '' : 'mt-3'
         }`}

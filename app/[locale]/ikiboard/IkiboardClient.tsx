@@ -16,7 +16,7 @@ import {
   type IkiAmbitoId,
   type IkiEstado,
 } from '@/lib/ikiboard-content'
-import { IKIBOARD_ICONS, iconById, type IkiIcon } from '@/lib/ikiboard-icons'
+import { IKIBOARD_ICONS, iconById, iconLabel, type IkiIcon } from '@/lib/ikiboard-icons'
 import { generarBorrador } from '@/lib/ikiboard-borrador'
 import { DIMS, getLocalizedPatron, type Dim, type InformePaso } from '@/lib/paso-content'
 import { generarNarrativa } from '@/lib/paso-narrativa'
@@ -1384,7 +1384,7 @@ function AddItem({
           <button
             key={ic.id}
             onClick={() => setRef(ic.id)}
-            title={ic.label}
+            title={iconLabel(ic, locale)}
             className={`flex aspect-square items-center justify-center rounded-lg border transition-colors ${
               ref === ic.id
                 ? 'border-[#c2866b] bg-[#c2866b] text-[#FDFBF7]'

@@ -21,3 +21,9 @@ export const ALL_CARDS: string[] = [
   'F1', 'F2', 'F3', 'F4',
   'I1',
 ]
+
+// Imágenes de las cartas: solo existen en español y en inglés (public/cards/es|en).
+// El catalán usa el mazo en español, que es el del mazo físico.
+export function cardLocale(locale: string): 'es' | 'en' {
+  return locale === 'en' ? 'en' : 'es'
+}

@@ -8,7 +8,7 @@ import { unsubUrl } from '@/lib/notify'
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}))
   // Solo idiomas soportados; cualquier otra cosa cae a 'es'.
-  const locale = body?.locale === 'en' ? 'en' : 'es'
+  const locale = body?.locale === 'en' ? 'en' : body?.locale === 'ca' ? 'ca' : 'es'
 
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()

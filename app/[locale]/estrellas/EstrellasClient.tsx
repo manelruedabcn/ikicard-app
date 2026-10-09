@@ -119,10 +119,11 @@ export default function EstrellasClient({ userId, locale, volver, initial }: Pro
 
 function Intro({ locale, onStart }: { locale: string; onStart: () => void }) {
   const en = contentLang(locale) === 'en'
+  const ca = contentLang(locale) === 'ca'
   const intro = getEstrellasIntro(locale)
   return (
     <div className="text-center">
-      <p className="text-xs tracking-[0.3em] uppercase text-[#c2866b] mb-4">{en ? 'Your style' : 'Tu estilo'}</p>
+      <p className="text-xs tracking-[0.3em] uppercase text-[#c2866b] mb-4">{en ? 'Your style' : ca ? 'El teu estil' : 'Tu estilo'}</p>
       <h1 className="font-[family-name:var(--font-cormorant)] text-4xl leading-tight text-[#272727] mb-6">
         {intro.title}
       </h1>
@@ -136,7 +137,7 @@ function Intro({ locale, onStart }: { locale: string; onStart: () => void }) {
         onClick={onStart}
         className="rounded-full bg-[#c2866b] px-8 py-3 text-sm tracking-widest uppercase text-[#FDFBF7] transition-opacity hover:opacity-90"
       >
-        {en ? 'Start' : 'Empezar'}
+        {en ? 'Start' : ca ? 'Començar' : 'Empezar'}
       </button>
     </div>
   )
@@ -162,6 +163,7 @@ function Test({
   onBack: () => void
 }) {
   const en = contentLang(locale) === 'en'
+  const ca = contentLang(locale) === 'ca'
   return (
     <div>
       <p className="text-center text-xs tracking-widest uppercase text-[#272727]/40 mb-3">
@@ -194,8 +196,8 @@ function Test({
         ))}
       </div>
       <div className="flex justify-between text-[10px] tracking-widest uppercase text-[#272727]/40 px-1 mb-12">
-        <span>{en ? 'Not at all' : 'Nada'}</span>
-        <span>{en ? 'Completely' : 'Completamente'}</span>
+        <span>{en ? 'Not at all' : ca ? 'Gens' : 'Nada'}</span>
+        <span>{en ? 'Completely' : ca ? 'Completament' : 'Completamente'}</span>
       </div>
 
       <div className="text-center">
@@ -204,7 +206,7 @@ function Test({
           disabled={step === 0}
           className="text-xs tracking-widest uppercase text-[#272727]/50 hover:text-[#c2866b] transition-colors disabled:opacity-0"
         >
-          {en ? '← Previous' : '← Anterior'}
+          {en ? '← Previous' : ca ? '← Anterior' : '← Anterior'}
         </button>
       </div>
     </div>
@@ -225,6 +227,7 @@ function Result({
   locale: string
 }) {
   const en = contentLang(locale) === 'en'
+  const ca = contentLang(locale) === 'ca'
   const estrellas = getEstrellas(locale)
   const closing = getEstrellasClosing(locale)
   const estrella = estrellas.find(e => e.code === dominant)!
@@ -235,10 +238,10 @@ function Result({
     trackEvent('share', { tool: 'estrellas' })
     const url = 'https://www.ikigaier.com'
     const data = {
-      title: en ? 'The four stars' : 'Las cuatro estrellas',
+      title: en ? 'The four stars' : ca ? 'Les quatre estrelles' : 'Las cuatro estrellas',
       text: en
         ? `I discovered my dominant style is ${estrella.name}. Find yours at ${url}`
-        : `Descubrí que mi estilo dominante es ${estrella.name}. Mira el tuyo en ${url}`,
+        : ca ? `He descobert que el meu estil dominant és ${estrella.name}. Mira el teu a ${url}` : `Descubrí que mi estilo dominante es ${estrella.name}. Mira el tuyo en ${url}`,
       url,
     }
     try {
@@ -246,7 +249,7 @@ function Result({
         await navigator.share(data)
       } else {
         await navigator.clipboard.writeText(data.text)
-        alert(en ? 'Link copied' : 'Enlace copiado')
+        alert(en ? 'Link copied' : ca ? 'Enllaç copiat' : 'Enlace copiado')
       }
     } catch {
       // La persona cerró el diálogo de compartir: no hacemos nada.
@@ -257,7 +260,7 @@ function Result({
     <div>
       {/* Dominante */}
       <div className="text-center mb-10">
-        <p className="text-xs tracking-[0.3em] uppercase text-[#c2866b] mb-3">{en ? 'Your dominant style' : 'Tu estilo dominante'}</p>
+        <p className="text-xs tracking-[0.3em] uppercase text-[#c2866b] mb-3">{en ? 'Your dominant style' : ca ? 'El teu estil dominant' : 'Tu estilo dominante'}</p>
         <h2 className="font-[family-name:var(--font-cormorant)] text-4xl text-[#272727] mb-4">
           {estrella.name}
         </h2>
@@ -268,15 +271,15 @@ function Result({
 
       {/* Detalle del estilo */}
       <div className="flex flex-col gap-5 mb-10">
-        <Trait label={en ? 'Traits' : 'Características'} value={estrella.caracteristicas} />
-        <Trait label={en ? 'Strengths' : 'Fortalezas'} value={estrella.fortalezas} />
-        <Trait label={en ? 'Challenges' : 'Desafíos'} value={estrella.desafios} />
-        <Trait label={en ? 'Careers' : 'Profesiones'} value={estrella.profesiones} />
+        <Trait label={en ? 'Traits' : ca ? 'Característiques' : 'Características'} value={estrella.caracteristicas} />
+        <Trait label={en ? 'Strengths' : ca ? 'Fortaleses' : 'Fortalezas'} value={estrella.fortalezas} />
+        <Trait label={en ? 'Challenges' : ca ? 'Reptes' : 'Desafíos'} value={estrella.desafios} />
+        <Trait label={en ? 'Careers' : ca ? 'Professions' : 'Profesiones'} value={estrella.profesiones} />
       </div>
 
       {/* Referente */}
       <div className="rounded-xl border border-[#c2866b]/30 bg-[#c2866b]/5 px-5 py-5 mb-10">
-        <p className="text-xs tracking-widest uppercase text-[#c2866b] mb-2">{en ? 'A role model' : 'Un referente'}</p>
+        <p className="text-xs tracking-widest uppercase text-[#c2866b] mb-2">{en ? 'A role model' : ca ? 'Un referent' : 'Un referente'}</p>
         <p className="font-[family-name:var(--font-cormorant)] text-lg leading-snug text-[#272727]">
           {estrella.referente}
         </p>
@@ -285,7 +288,7 @@ function Result({
       {/* Las 4 estrellas ordenadas por tu puntuación. Sitúa la tuya entre
           todas: puedes ser una combinación, y aquí lo ves. */}
       <div className="mb-10 rounded-xl bg-[#272727]/[0.03] px-5 py-5">
-        <p className="text-xs tracking-widest uppercase text-[#272727]/40 mb-4">{en ? 'The four stars' : 'Las cuatro estrellas'}</p>
+        <p className="text-xs tracking-widest uppercase text-[#272727]/40 mb-4">{en ? 'The four stars' : ca ? 'Les quatre estrelles' : 'Las cuatro estrellas'}</p>
         <ul className="flex flex-col gap-3">
           {totals.map(t => {
             const e = estrellas.find(x => x.code === t.code)!
@@ -328,9 +331,9 @@ function Result({
           onClick={compartir}
           className="w-full py-3 bg-[#c2866b] text-[#FDFBF7] text-xs tracking-widest uppercase hover:bg-[#272727] transition-colors"
         >
-          {en ? 'Share' : 'Compartir'}
+          {en ? 'Share' : ca ? 'Compartir' : 'Compartir'}
         </button>
-        <p className="text-xs text-[#272727]/40 mt-2">{en ? 'Your style, to take with you or return to.' : 'Tu estilo, para llevártelo o volver a él.'}</p>
+        <p className="text-xs text-[#272727]/40 mt-2">{en ? 'Your style, to take with you or return to.' : ca ? 'El teu estil, per endur-te’l o tornar-hi.' : 'Tu estilo, para llevártelo o volver a él.'}</p>
       </div>
 
       {/* Retorno al itinerario IKIBOARD (si vino de ahí). */}
@@ -340,7 +343,7 @@ function Result({
             href={`/${locale}${volver}`}
             className="rounded-full bg-[#c2866b] px-8 py-3 text-sm tracking-widest uppercase text-[#FDFBF7] transition-opacity hover:opacity-90"
           >
-            {en ? 'Back and continue' : 'Volver y seguir'}
+            {en ? 'Back and continue' : ca ? 'Tornar i continuar' : 'Volver y seguir'}
           </Link>
         </div>
       )}

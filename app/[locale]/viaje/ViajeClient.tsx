@@ -1,5 +1,6 @@
 'use client'
 
+import { cardLocale } from '@/lib/cards'
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -407,7 +408,7 @@ function SlotCard({
               <div className="absolute inset-0 rounded-xl overflow-hidden shadow-md [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:rotateY(180deg)]">
                 {card && (
                   <Image
-                    src={`/cards/${locale}/${card.card_code}.png`}
+                    src={`/cards/${cardLocale(locale)}/${card.card_code}.png`}
                     alt={card.card_code}
                     fill
                     className="object-cover"

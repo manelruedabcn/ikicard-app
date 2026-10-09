@@ -35,7 +35,7 @@ export async function POST(req: Request) {
   const body = await req.json().catch(() => null)
   const emailRaw = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : ''
   const codigo = typeof body?.codigo === 'string' ? body.codigo : null
-  const locale = body?.locale === 'en' ? 'en' : 'es'
+  const locale = body?.locale === 'en' ? 'en' : body?.locale === 'ca' ? 'ca' : 'es'
   const consent = body?.consent === true
   const mascara = readDims(body?.resultado?.mascara)
   const natural = readDims(body?.resultado?.natural)

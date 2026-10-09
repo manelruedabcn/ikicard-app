@@ -51,3 +51,32 @@ export const ALL_ICONS: IkiIcon[] = Object.values(IKIBOARD_ICONS).flat()
 export function iconById(id: string): IkiIcon | undefined {
   return ALL_ICONS.find(i => i.id === id)
 }
+
+// Etiquetas traducidas (el `label` de arriba es la canónica en español).
+// Solo se usan para el texto visible (tooltip); el id es lo que se guarda.
+const ICON_LABELS: Record<string, { ca: string; en: string }> = {
+  corazon: { ca: 'Cor', en: 'Heart' },
+  hoja: { ca: 'Fulla', en: 'Leaf' },
+  sol: { ca: 'Sol', en: 'Sun' },
+  luna: { ca: 'Descans', en: 'Rest' },
+  personas: { ca: 'Persones', en: 'People' },
+  chat: { ca: 'Conversa', en: 'Conversation' },
+  regalo: { ca: 'Regal', en: 'Gift' },
+  manos: { ca: 'Cura', en: 'Care' },
+  casa: { ca: 'Llar', en: 'Home' },
+  coche: { ca: 'Cotxe', en: 'Car' },
+  lugar: { ca: 'Lloc', en: 'Place' },
+  montana: { ca: 'Viatge', en: 'Travel' },
+  llave: { ca: 'Mitjans', en: 'Means' },
+  maletin: { ca: 'Feina', en: 'Work' },
+  pluma: { ca: 'Crear', en: 'Create' },
+  idea: { ca: 'Idea', en: 'Idea' },
+  diana: { ca: 'Meta', en: 'Goal' },
+}
+
+export function iconLabel(icon: IkiIcon, locale: string): string {
+  const t = ICON_LABELS[icon.id]
+  if (locale === 'ca') return t?.ca ?? icon.label
+  if (locale === 'en') return t?.en ?? icon.label
+  return icon.label
+}

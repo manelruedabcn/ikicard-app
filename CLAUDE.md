@@ -82,7 +82,7 @@ tratarla como confidencial de diseño, no como contenido a mostrar.
 ## Stack
 
 - **Next.js 14 (App Router)** + React 18 + TypeScript.
-- **next-intl** para el chrome (nav/UI). Locales `['en','es']`, `defaultLocale: 'en'`.
+- **next-intl** para el chrome (nav/UI). Locales `['es','ca','en']`, `defaultLocale: 'es'`.
   Ruta con segmento dinámico `[locale]`.
 - **Supabase** (`@supabase/ssr`): auth, Postgres con RLS, Storage (bucket privado
   `ikiboard`). Clientes en `lib/supabase/` (client/server).
@@ -121,7 +121,9 @@ Decisión: el contenido vive en **`.ts`**, no en `messages/*.json`. Cada
 `lib/<tool>-content.ts` tiene datasets `_ES`/`_EN` + **getters por locale**
 (p. ej. `getEstrellas(locale)`, `getMasks(locale)`, `getIkiboardCopy(locale)`).
 
-- `lib/content-locale.ts` → `contentLang(locale): 'es'|'en'` es el selector base.
+- `lib/content-locale.ts` → `contentLang(locale): 'es'|'ca'|'en'` es el selector base.
+- Datasets `_ES`/`_CA`/`_EN`. En componentes: `const en = …==='en'` + `const ca = …==='ca'`
+  y ternarios `en ? 'EN' : ca ? 'CA' : 'ES'`. Imágenes de cartas: `cardLocale()` (CA usa ES).
 - La **lógica/cálculo** (scoring, `computeDominant`, umbrales, ids de pasos) va
   sobre **códigos independientes del idioma**; solo cambia el texto visible.
 - En componentes cliente: los que reciben `locale` llaman al getter; el chrome

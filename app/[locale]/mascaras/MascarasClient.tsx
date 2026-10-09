@@ -197,10 +197,11 @@ export default function MascarasClient({ userId, locale, volver, initial }: Prop
 
 function Intro({ onStart, locale }: { onStart: () => void; locale: string }) {
   const en = contentLang(locale) === 'en'
+  const ca = contentLang(locale) === 'ca'
   const intro = getMasksIntro(locale)
   return (
     <div className="text-center">
-      <p className="text-xs tracking-[0.3em] uppercase text-[#c2866b] mb-4">{en ? 'The mirror' : 'El espejo'}</p>
+      <p className="text-xs tracking-[0.3em] uppercase text-[#c2866b] mb-4">{en ? 'The mirror' : ca ? 'El mirall' : 'El espejo'}</p>
       <h1 className="font-[family-name:var(--font-cormorant)] text-4xl leading-tight text-[#272727] mb-6">
         {intro.title}
       </h1>
@@ -212,7 +213,7 @@ function Intro({ onStart, locale }: { onStart: () => void; locale: string }) {
         onClick={onStart}
         className="rounded-full bg-[#c2866b] px-8 py-3 text-sm tracking-widest uppercase text-[#FDFBF7] transition-opacity hover:opacity-90"
       >
-        {en ? 'Start' : 'Empezar'}
+        {en ? 'Start' : ca ? 'Començar' : 'Empezar'}
       </button>
     </div>
   )
@@ -238,6 +239,7 @@ function Test({
   locale: string
 }) {
   const en = contentLang(locale) === 'en'
+  const ca = contentLang(locale) === 'ca'
   return (
     <div>
       <p className="text-center text-xs tracking-widest uppercase text-[#272727]/40 mb-3">
@@ -270,8 +272,8 @@ function Test({
         ))}
       </div>
       <div className="flex justify-between text-[10px] tracking-widest uppercase text-[#272727]/40 px-1 mb-12">
-        <span>{en ? 'Not at all' : 'Nada'}</span>
-        <span>{en ? 'Completely' : 'Totalmente'}</span>
+        <span>{en ? 'Not at all' : ca ? 'Gens' : 'Nada'}</span>
+        <span>{en ? 'Completely' : ca ? 'Totalment' : 'Totalmente'}</span>
       </div>
 
       <div className="text-center">
@@ -280,7 +282,7 @@ function Test({
           disabled={step === 0}
           className="text-xs tracking-widest uppercase text-[#272727]/50 hover:text-[#c2866b] transition-colors disabled:opacity-0"
         >
-          {en ? '← Previous' : '← Anterior'}
+          {en ? '← Previous' : ca ? '← Anterior' : '← Anterior'}
         </button>
       </div>
     </div>
@@ -311,6 +313,7 @@ function Result({
   const [generandoPdf, setGenerandoPdf] = useState(false)
   const informeRef = useRef<HTMLDivElement>(null)
   const en = contentLang(locale) === 'en'
+  const ca = contentLang(locale) === 'ca'
   const masks = getMasks(locale)
   const closing = getMasksClosing(locale)
   const reflectionFields = getMaskReflection(locale)
@@ -321,9 +324,9 @@ function Result({
     setGenerandoPdf(true)
     trackEvent('share', { tool: 'mascaras', content: 'personal_pdf' })
     try {
-      await generarMascarasPdf(informeRef.current, en ? 'My Masks Report - IKIGAIER.pdf' : 'Mi informe de Mascaras - IKIGAIER.pdf', 'share', locale)
+      await generarMascarasPdf(informeRef.current, en ? 'My Masks Report - IKIGAIER.pdf' : ca ? 'El meu informe de Mascares - IKIGAIER.pdf' : 'Mi informe de Mascaras - IKIGAIER.pdf', 'share', locale)
     } catch {
-      await generarMascarasPdf(informeRef.current, en ? 'My Masks Report - IKIGAIER.pdf' : 'Mi informe de Mascaras - IKIGAIER.pdf', 'download', locale)
+      await generarMascarasPdf(informeRef.current, en ? 'My Masks Report - IKIGAIER.pdf' : ca ? 'El meu informe de Mascares - IKIGAIER.pdf' : 'Mi informe de Mascaras - IKIGAIER.pdf', 'download', locale)
     } finally {
       setGenerandoPdf(false)
     }
@@ -334,7 +337,7 @@ function Result({
     setGenerandoPdf(true)
     trackEvent('pdf_download', { tool: 'mascaras' })
     try {
-      await generarMascarasPdf(informeRef.current, en ? 'My Masks Report - IKIGAIER.pdf' : 'Mi informe de Mascaras - IKIGAIER.pdf', 'download', locale)
+      await generarMascarasPdf(informeRef.current, en ? 'My Masks Report - IKIGAIER.pdf' : ca ? 'El meu informe de Mascares - IKIGAIER.pdf' : 'Mi informe de Mascaras - IKIGAIER.pdf', 'download', locale)
     } catch {
       // Último recurso si la generación falla (navegador muy antiguo).
       window.print()
@@ -393,7 +396,7 @@ function Result({
               />
             </div>
             <p className="mb-7 mt-12 text-[11px] uppercase tracking-[0.38em] text-[#D2A857] sm:mt-14">
-              {en ? 'The mask that governs you most' : 'La máscara que más te gobierna'}
+              {en ? 'The mask that governs you most' : ca ? 'La màscara que més et governa' : 'La máscara que más te gobierna'}
             </p>
             <h1 className="mx-auto max-w-lg font-[family-name:var(--font-cormorant)] text-5xl leading-[1.05] text-[#F8F4ED] sm:text-6xl">
               {mask.name}
@@ -405,26 +408,26 @@ function Result({
             <p className="mx-auto mb-9 max-w-md font-[family-name:var(--font-cormorant)] text-2xl leading-snug text-[#272727] sm:text-3xl">
               {en
                 ? 'Not a label. A mirror of what protects you today.'
-                : 'No es una etiqueta. Es un espejo de lo que hoy te protege.'}
+                : ca ? 'No és una etiqueta. És un mirall del que avui et protegeix.' : 'No es una etiqueta. Es un espejo de lo que hoy te protege.'}
             </p>
             <div className="relative mx-auto max-w-md">
               <p className="font-[family-name:var(--font-cormorant)] text-2xl leading-snug text-[#272727]">
-                {en ? `Underneath lies the ${mask.fear}.` : `Debajo late el ${mask.fear}.`}
+                {en ? `Underneath lies the ${mask.fear}.` : ca ? `A sota hi batega la ${mask.fear}.` : `Debajo late el ${mask.fear}.`}
               </p>
               <p className="mt-2 mb-7 text-sm leading-relaxed text-[#272727]/60">
                 {en
                   ? 'When you name the fear, the mask loses its grip.'
-                  : 'Cuando le pones nombre al miedo, la máscara pierde fuerza.'}
+                  : ca ? 'Quan poses nom a la por, la màscara perd força.' : 'Cuando le pones nombre al miedo, la máscara pierde fuerza.'}
               </p>
               <div className="border-t border-[#C7896D]/35 pt-7">
                 <p className="mb-3 text-[10px] uppercase tracking-[0.3em] text-[#C7896D]">
-                  {en ? 'How it shows' : 'Cómo se manifiesta'}
+                  {en ? 'How it shows' : ca ? 'Com es manifesta' : 'Cómo se manifiesta'}
                 </p>
                 <p className="text-[15px] leading-relaxed text-[#272727]/72">{mask.description}</p>
               </div>
               <div className="mx-auto my-7 h-px w-24 bg-[#C7896D]/70" />
               <p className="text-xs leading-relaxed text-[#272727]/45">
-                {en ? 'There are 7 masks. This is the one leading today.' : 'Existen 7 máscaras. Esta es la que hoy manda.'}
+                {en ? 'There are 7 masks. This is the one leading today.' : ca ? 'Hi ha 7 màscares. Aquesta és la que avui mana.' : 'Existen 7 máscaras. Esta es la que hoy manda.'}
               </p>
             </div>
           </div>
@@ -433,26 +436,26 @@ function Result({
         {/* 01 · Las siete, puntuadas */}
         <MaskSection
           number="01"
-          title={en ? 'Your mask compass' : 'Tu brújula de máscaras'}
+          title={en ? 'Your mask compass' : ca ? 'La teva brúixola de màscares' : 'Tu brújula de máscaras'}
           intro={
             en
               ? 'All seven live in you. The chart shows how strongly each one is acting right now, on the book’s scale: 4–5 governs, 3 surfaces, 1–2 doesn’t define you now.'
-              : 'Las siete conviven en ti. El gráfico muestra con cuánta fuerza actúa cada una ahora mismo, con la escala del libro: 4–5 gobierna, 3 asoma, 1–2 no te define ahora.'
+              : ca ? 'Totes set conviuen en tu. El gràfic mostra amb quanta força actua cadascuna ara mateix, amb l’escala del llibre: 4–5 governa, 3 treu el cap, 1–2 ara no et defineix.' : 'Las siete conviven en ti. El gráfico muestra con cuánta fuerza actúa cada una ahora mismo, con la escala del libro: 4–5 gobierna, 3 asoma, 1–2 no te define ahora.'
           }
         >
           <div data-pdf-block className="rounded-2xl bg-[#272727]/[0.035] px-5 py-6 sm:px-7">
-            <MaskBars ranked={ranked} scores={scores} dominant={dominant} en={en} />
+            <MaskBars ranked={ranked} scores={scores} dominant={dominant} en={en} ca={ca} />
           </div>
           <div data-pdf-block className="mt-8 rounded-xl border border-[#c2866b]/20 bg-[#c2866b]/[0.055] px-5 py-5">
             <p className="text-[10px] font-medium uppercase tracking-[0.28em] text-[#c2866b]">
-              {en ? 'In your case' : 'En tu caso'}
+              {en ? 'In your case' : ca ? 'En el teu cas' : 'En tu caso'}
             </p>
             <div className="mt-3 space-y-3">
               {active.map(m => {
                 const gobierna = (scores[m.code] ?? 0) >= MASKS_THRESHOLDS.dominant
                 return (
                   <p key={m.code} className="text-sm leading-relaxed text-[#272727]/78">
-                    {m.name} {gobierna ? (en ? 'governs you' : 'te gobierna') : (en ? 'surfaces' : 'asoma')}
+                    {m.name} {gobierna ? (en ? 'governs you' : ca ? 'et governa' : 'te gobierna') : (en ? 'surfaces' : ca ? 'treu el cap' : 'asoma')}
                     {': '}
                     {m.weave}.
                   </p>
@@ -460,7 +463,7 @@ function Result({
               })}
               {quiet.length > 0 && (
                 <p className="text-sm leading-relaxed text-[#272727]/55">
-                  {en ? 'Not defining you now: ' : 'No te definen ahora: '}
+                  {en ? 'Not defining you now: ' : ca ? 'Ara no et defineixen: ' : 'No te definen ahora: '}
                   {quiet.map(m => m.name).join(', ')}.
                 </p>
               )}
@@ -472,11 +475,11 @@ function Result({
         {active.length > 1 && (
           <MaskSection
             number="02"
-            title={en ? 'The ones you wear today' : 'Las que hoy llevas puestas'}
+            title={en ? 'The ones you wear today' : ca ? 'Les que avui portes posades' : 'Las que hoy llevas puestas'}
             intro={
               en
                 ? 'You may recognise yourself in more than one. That’s normal: they aren’t sealed compartments. Behind each one, a fear.'
-                : 'Posiblemente te reconozcas en más de una. Es normal: no son compartimentos estancos. Detrás de cada una, un miedo.'
+                : ca ? 'Possiblement et reconeixes en més d’una. És normal: no són compartiments estancs. Darrere de cadascuna, una por.' : 'Posiblemente te reconozcas en más de una. Es normal: no son compartimentos estancos. Detrás de cada una, un miedo.'
             }
           >
             <div data-pdf-block className="grid gap-px overflow-hidden rounded-2xl border border-[#272727]/10 bg-[#272727]/10 sm:grid-cols-2">
@@ -485,7 +488,7 @@ function Result({
                   <p className="font-[family-name:var(--font-cormorant)] text-xl text-[#272727]">{m.name}</p>
                   <p className="mt-2 text-sm leading-relaxed text-[#272727]/75">{m.description}</p>
                   <p className="mt-3 border-l-2 border-[#c2866b]/45 pl-3 text-xs leading-relaxed text-[#272727]/60">
-                    {en ? 'The fear behind: ' : 'El miedo detrás: '}
+                    {en ? 'The fear behind: ' : ca ? 'La por de darrere: ' : 'El miedo detrás: '}
                     {m.fear}
                   </p>
                 </div>
@@ -494,7 +497,7 @@ function Result({
             {combination.length > 0 && (
               <div data-pdf-block className="mt-8 border-t border-[#272727]/10 pt-8 pb-4">
                 <p className="mb-4 text-[10px] font-medium uppercase tracking-[0.28em] text-[#c2866b]">
-                  {en ? 'How they combine in you' : 'Cómo se combinan en ti'}
+                  {en ? 'How they combine in you' : ca ? 'Com es combinen en tu' : 'Cómo se combinan en ti'}
                 </p>
                 <div className="space-y-3">
                   {combination.slice(0, -1).map((linea, i) => (
@@ -517,25 +520,25 @@ function Result({
         {/* 03 · La dominante, de cerca */}
         <MaskSection
           number={active.length > 1 ? '03' : '02'}
-          title={en ? 'Your mask, up close' : 'Tu máscara, de cerca'}
+          title={en ? 'Your mask, up close' : ca ? 'La teva màscara, de prop' : 'Tu máscara, de cerca'}
           intro={
             en
               ? 'What it protects, how it acts and what it asks of you. It isn’t a villain: it got you this far.'
-              : 'Qué protege, cómo actúa y qué te pide. No es una villana: te ha traído hasta aquí.'
+              : ca ? 'Què protegeix, com actua i què et demana. No és una dolenta: t’ha portat fins aquí.' : 'Qué protege, cómo actúa y qué te pide. No es una villana: te ha traído hasta aquí.'
           }
         >
           <div data-pdf-block className="grid gap-px overflow-hidden rounded-2xl border border-[#272727]/10 bg-[#272727]/10 sm:grid-cols-2 mask-avoid-break">
-            <MaskField label={en ? 'What it protects' : 'Qué protege'} text={en ? `From the ${mask.fear}.` : `Del ${mask.fear}.`} />
-            <MaskField label={en ? 'How it acts' : 'Cómo actúa'} text={mask.weave.charAt(0).toUpperCase() + mask.weave.slice(1) + '.'} />
-            <MaskField label={en ? 'Where it comes from' : 'De dónde viene'} text={closing.noJudgement} />
-            <MaskField label={en ? 'What it asks of you' : 'Qué te pide'} text={closing.reframe} />
+            <MaskField label={en ? 'What it protects' : ca ? 'Què protegeix' : 'Qué protege'} text={en ? `From the ${mask.fear}.` : ca ? `De la ${mask.fear}.` : `Del ${mask.fear}.`} />
+            <MaskField label={en ? 'How it acts' : ca ? 'Com actua' : 'Cómo actúa'} text={mask.weave.charAt(0).toUpperCase() + mask.weave.slice(1) + '.'} />
+            <MaskField label={en ? 'Where it comes from' : ca ? 'D’on ve' : 'De dónde viene'} text={closing.noJudgement} />
+            <MaskField label={en ? 'What it asks of you' : ca ? 'Què et demana' : 'Qué te pide'} text={closing.reframe} />
           </div>
         </MaskSection>
 
         {/* Libro de donde sale la brújula */}
         <div data-pdf-block className="mt-10 rounded-2xl border border-[#c2866b]/25 bg-[#c2866b]/[0.06] px-6 py-6 text-center mask-avoid-break">
           <p className="text-xs tracking-widest uppercase text-[#c2866b] mb-2">
-            {en ? 'The notebook this compass comes from' : 'El cuaderno de donde sale esta brújula'}
+            {en ? 'The notebook this compass comes from' : ca ? 'El quadern d’on surt aquesta brúixola' : 'El cuaderno de donde sale esta brújula'}
           </p>
           <a
             href="https://amzn.eu/d/01keLRwF"
@@ -548,7 +551,7 @@ function Result({
               Camina sin separarte de ti
             </span>
             <span className="block text-xs tracking-widest uppercase text-[#c2866b] mt-2">
-              {en ? 'See on Amazon →' : 'Ver en Amazon →'}
+              {en ? 'See on Amazon →' : ca ? 'Veure-ho a Amazon →' : 'Ver en Amazon →'}
             </span>
           </a>
         </div>
@@ -560,16 +563,16 @@ function Result({
             onClick={compartir}
             className="w-full py-3 bg-[#c2866b] text-[#FDFBF7] text-xs tracking-widest uppercase hover:bg-[#272727] transition-colors"
           >
-            {generandoPdf ? (en ? 'Generating…' : 'Generando…') : (en ? 'Share my report' : 'Compartir mi informe')}
+            {generandoPdf ? (en ? 'Generating…' : ca ? 'Generant…' : 'Generando…') : (en ? 'Share my report' : ca ? 'Compartir el meu informe' : 'Compartir mi informe')}
           </button>
           <button
             onClick={guardarPdf}
             disabled={generandoPdf}
             className="w-full py-3 mt-3 border border-[#272727] text-[#272727] text-xs tracking-widest uppercase hover:bg-[#272727] hover:text-[#FDFBF7] transition-colors disabled:opacity-40"
           >
-            {generandoPdf ? (en ? 'Generating…' : 'Generando…') : (en ? 'Download my report as PDF' : 'Descargar mi informe en PDF')}
+            {generandoPdf ? (en ? 'Generating…' : ca ? 'Generant…' : 'Generando…') : (en ? 'Download my report as PDF' : ca ? 'Descarregar el meu informe en PDF' : 'Descargar mi informe en PDF')}
           </button>
-          <p className="text-xs text-[#272727]/40 mt-2">{en ? 'Your result, to take with you or return to.' : 'Tu resultado, para llevártelo o volver a él.'}</p>
+          <p className="text-xs text-[#272727]/40 mt-2">{en ? 'Your result, to take with you or return to.' : ca ? 'El teu resultat, per endur-te’l o tornar-hi.' : 'Tu resultado, para llevártelo o volver a él.'}</p>
         </div>
 
         {/* Pie de marca: solo aparece en el PDF. El QR lleva a ikigaier.com. */}
@@ -581,7 +584,7 @@ function Result({
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/brand/ikigaier-marca-completa.png" alt="IKIGAIER" className="h-auto w-44 max-w-full" />
               <p className="text-xs leading-snug text-[#272727]/60">
-                {en ? 'This compass is done in IKIGAIER workshops · www.ikigaier.com' : 'Esta brújula se hace en los talleres IKIGAIER · www.ikigaier.com'}
+                {en ? 'This compass is done in IKIGAIER workshops · www.ikigaier.com' : ca ? 'Aquesta brúixola es fa als tallers IKIGAIER · www.ikigaier.com' : 'Esta brújula se hace en los talleres IKIGAIER · www.ikigaier.com'}
               </p>
             </div>
           </div>
@@ -591,7 +594,7 @@ function Result({
         <p data-pdf-block className="mt-10 pb-4 text-center text-xs leading-relaxed text-[#272727]/40 px-2">
           {en
             ? 'This is not a scientific test or a diagnosis. It’s a mirror: what your answers draw today. Masks shift with time and personal work — come back to it in a few months.'
-            : 'No es un test científico ni un diagnóstico. Es un espejo: lo que dibujan hoy tus respuestas. Las máscaras se mueven con el tiempo y el trabajo personal; vuelve a ella dentro de unos meses.'}
+            : ca ? 'No és un test científic ni un diagnòstic. És un mirall: el que dibuixen avui les teves respostes. Les màscares es mouen amb el temps i el treball personal; torna-hi d’aquí a uns mesos.' : 'No es un test científico ni un diagnóstico. Es un espejo: lo que dibujan hoy tus respuestas. Las máscaras se mueven con el tiempo y el trabajo personal; vuelve a ella dentro de unos meses.'}
         </p>
       </div>
 
@@ -601,15 +604,15 @@ function Result({
           invitación opcional para no cortar el momento espejo. */}
       {volver || showExercise ? (
         <div className="border-t border-[#272727]/10 pt-10">
-          <p className="text-center text-xs tracking-[0.3em] uppercase text-[#c2866b] mb-2">{en ? 'Exercise' : 'Ejercicio'}</p>
+          <p className="text-center text-xs tracking-[0.3em] uppercase text-[#c2866b] mb-2">{en ? 'Exercise' : ca ? 'Exercici' : 'Ejercicio'}</p>
           <h3 className="text-center font-[family-name:var(--font-cormorant)] text-2xl text-[#272727] mb-3">
-            {en ? 'My dominant mask' : 'Mi máscara dominante'}
+            {en ? 'My dominant mask' : ca ? 'La meva màscara dominant' : 'Mi máscara dominante'}
           </h3>
           {volver && (
             <p className="text-center text-sm text-[#272727]/55 mb-8">
               {en
                 ? 'What you write here is the basis for what you’ll build next.'
-                : 'Lo que escribas aquí es la base de lo que construirás a continuación.'}
+                : ca ? 'El que escriguis aquí és la base del que construiràs a continuació.' : 'Lo que escribas aquí es la base de lo que construirás a continuación.'}
             </p>
           )}
           <div className={`flex flex-col gap-8 ${volver ? '' : 'mt-5'}`}>
@@ -632,13 +635,13 @@ function Result({
           <p className="text-sm leading-relaxed text-[#272727]/60 mb-5">
             {en
               ? 'Want to take a step? Write about your mask and one small gesture you could start today.'
-              : '¿Quieres dar un paso? Escribe sobre tu máscara y qué gesto pequeño podrías empezar hoy.'}
+              : ca ? 'Vols fer un pas? Escriu sobre la teva màscara i quin gest petit podries començar avui.' : '¿Quieres dar un paso? Escribe sobre tu máscara y qué gesto pequeño podrías empezar hoy.'}
           </p>
           <button
             onClick={() => setShowExercise(true)}
             className="text-xs tracking-widest uppercase text-[#c2866b] underline-offset-4 hover:underline"
           >
-            {en ? 'Do the exercise' : 'Hacer el ejercicio'}
+            {en ? 'Do the exercise' : ca ? 'Fer l’exercici' : 'Hacer el ejercicio'}
           </button>
         </div>
       )}
@@ -650,7 +653,7 @@ function Result({
             href={`/${locale}${volver}`}
             className="rounded-full bg-[#c2866b] px-8 py-3 text-sm tracking-widest uppercase text-[#FDFBF7] transition-opacity hover:opacity-90"
           >
-            {en ? 'Back and continue' : 'Volver y seguir'}
+            {en ? 'Back and continue' : ca ? 'Tornar i continuar' : 'Volver y seguir'}
           </Link>
         </div>
       )}
@@ -704,11 +707,13 @@ function MaskBars({
   scores,
   dominant,
   en,
+  ca,
 }: {
   ranked: Mask[]
   scores: Record<string, number>
   dominant: string
   en: boolean
+  ca: boolean
 }) {
   const pct = (v: number) => `${(v / 5) * 100}%`
   return (
@@ -749,9 +754,9 @@ function MaskBars({
         })}
       </ul>
       <div className="mt-5 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-[#272727]/55">
-        <span className="flex items-center gap-1.5"><span className="h-2.5 w-4 rounded-sm bg-[#c2866b]" />{en ? 'Governs (4–5)' : 'Gobierna (4–5)'}</span>
-        <span className="flex items-center gap-1.5"><span className="h-2.5 w-4 rounded-sm bg-[#9cab92]" />{en ? 'Surfaces (3)' : 'Asoma (3)'}</span>
-        <span className="flex items-center gap-1.5"><span className="h-2.5 w-4 rounded-sm bg-[#272727]/15" />{en ? 'Not now (1–2)' : 'No ahora (1–2)'}</span>
+        <span className="flex items-center gap-1.5"><span className="h-2.5 w-4 rounded-sm bg-[#c2866b]" />{en ? 'Governs (4–5)' : ca ? 'Governa (4–5)' : 'Gobierna (4–5)'}</span>
+        <span className="flex items-center gap-1.5"><span className="h-2.5 w-4 rounded-sm bg-[#9cab92]" />{en ? 'Surfaces (3)' : ca ? 'Treu el cap (3)' : 'Asoma (3)'}</span>
+        <span className="flex items-center gap-1.5"><span className="h-2.5 w-4 rounded-sm bg-[#272727]/15" />{en ? 'Not now (1–2)' : ca ? 'Ara no (1–2)' : 'No ahora (1–2)'}</span>
       </div>
     </div>
   )
@@ -776,6 +781,7 @@ function ReflectionField({
 }) {
   const [local, setLocal] = useState(value)
   const en = contentLang(locale) === 'en'
+  const ca = contentLang(locale) === 'ca'
 
   return (
     <div>
@@ -791,7 +797,7 @@ function ReflectionField({
           all[id] = e.target.value
           onSave(id, e.target.value, all)
         }}
-        placeholder={en ? 'Write here…' : 'Escribe aquí…'}
+        placeholder={en ? 'Write here…' : ca ? 'Escriu aquí…' : 'Escribe aquí…'}
         className="w-full resize-y rounded-lg border border-[#272727]/20 bg-white/50 p-3 text-sm leading-relaxed text-[#272727] outline-none placeholder:text-[#272727]/30 focus:border-[#c2866b] transition-colors"
       />
     </div>

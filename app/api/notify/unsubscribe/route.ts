@@ -6,20 +6,25 @@ import { verifyUnsubToken } from '@/lib/notify'
 export async function GET(req: NextRequest) {
   const uid = req.nextUrl.searchParams.get('uid') || ''
   const t = req.nextUrl.searchParams.get('t') || ''
-  const l = req.nextUrl.searchParams.get('l') === 'en' ? 'en' : 'es'
+  const lp = req.nextUrl.searchParams.get('l')
+  const l = lp === 'en' ? 'en' : lp === 'ca' ? 'ca' : 'es'
 
   const isLead = uid.startsWith('lead:')
   const done = isLead
     ? (l === 'en'
         ? "Done. You won't receive more emails from IKIGAIER."
-        : 'Hecho. No recibirás más correos de IKIGAIER.')
+        : l === 'ca'
+          ? "Fet. No rebràs més correus d'IKIGAIER."
+          : 'Hecho. No recibirás más correos de IKIGAIER.')
     : (l === 'en'
         ? 'Reminders turned off. You can re-enable them from the app.'
-        : 'Recordatorios desactivados. Puedes reactivarlos desde la app.')
-  const bad = l === 'en' ? 'Invalid link.' : 'Enlace no válido.'
+        : l === 'ca'
+          ? "Recordatoris desactivats. Els pots tornar a activar des de l'app."
+          : 'Recordatorios desactivados. Puedes reactivarlos desde la app.')
+  const bad = l === 'en' ? 'Invalid link.' : l === 'ca' ? 'Enllaç no vàlid.' : 'Enlace no válido.'
 
   const page = (msg: string) => new NextResponse(
-    `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>IKIGAIER</title></head>
+    `<!doctype html><html lang="${l}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>IKIGAIER</title></head>
     <body style="margin:0;background:#FDFBF7;font-family:Georgia,serif;color:#272727;">
       <div style="max-width:420px;margin:0 auto;padding:80px 24px;text-align:center;">
         <p style="letter-spacing:0.3em;font-size:13px;margin:0 0 32px;">IKIGAIER</p>

@@ -7,11 +7,11 @@ import { createClient } from '@/lib/supabase/client'
 import { trackEvent } from '@/lib/analytics'
 import { generarPasoPdf } from '@/lib/paso-pdf'
 import {
-  PASO_GRUPOS,
   DIMS,
   TOTAL_GRUPOS,
   calcularInformePaso,
   getLocalizedPatron,
+  getPasoGroups,
   type Dim,
   type Answer,
   type InformePaso,
@@ -47,6 +47,7 @@ const LIBRO_LINKS: Record<string, string> = {
 // intervienen aquí: es solo una práctica del gesto, no puntúa nada.
 const EJEMPLO_ES = ['Café', 'Té', 'Refresco', 'Agua']
 const EJEMPLO_EN = ['Coffee', 'Tea', 'Soda', 'Water']
+const EJEMPLO_CA = ['Cafè', 'Te', 'Refresc', 'Aigua']
 
 interface Props {
   locale: string
@@ -57,7 +58,7 @@ interface Props {
 export default function PasoClient({ locale, userId, volver = null }: Props) {
   const t = useTranslations('paso')
   const tn = useTranslations('nav')
-  const grupos = locale === 'en' ? PASO_GRUPOS_EN : PASO_GRUPOS
+  const grupos = locale === 'en' ? PASO_GRUPOS_EN : getPasoGroups(locale)
 
   const [stage, setStage] = useState<Stage>('intro')
   const [step, setStep] = useState(0) // grupo actual (0-27)
@@ -70,7 +71,7 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
   const progressReady = useRef(false)
 
   // Ejemplo interactivo de la intro (práctica del gesto MÁS/MENOS, no puntúa).
-  const ejemplo = locale === 'en' ? EJEMPLO_EN : EJEMPLO_ES
+  const ejemplo = locale === 'en' ? EJEMPLO_EN : locale === 'ca' ? EJEMPLO_CA : EJEMPLO_ES
   const [ej, setEj] = useState<{ mas?: number; menos?: number }>({})
 
   // Un test de 28 decisiones no debería perderse por recargar la página.
@@ -141,7 +142,9 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
     } catch {
       alert(locale === 'en'
         ? 'The PDF could not be created. Please try again.'
-        : 'No se ha podido crear el PDF. Inténtalo de nuevo.')
+        : locale === 'ca'
+          ? "No s'ha pogut crear el PDF. Torna-ho a provar."
+          : 'No se ha podido crear el PDF. Inténtalo de nuevo.')
     } finally {
       setGenerandoPdf(false)
     }
@@ -463,7 +466,9 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
             <p className="mx-auto mb-9 max-w-md font-[family-name:var(--font-cormorant)] text-2xl leading-snug text-[#272727] sm:text-3xl">
               {locale === 'en'
                 ? 'Not a label. A mirror of how you walk today.'
-                : 'No es una etiqueta. Es un espejo de cómo caminas hoy.'}
+                : locale === 'ca'
+                  ? 'No és una etiqueta. És un mirall de com camines avui.'
+                  : 'No es una etiqueta. Es un espejo de cómo caminas hoy.'}
             </p>
             <div className="relative mx-auto max-w-md">
               <TitularesBlock inf={inf} dominante={dominante} locale={locale} />
@@ -570,7 +575,7 @@ export default function PasoClient({ locale, userId, volver = null }: Props) {
               download="PASO.pdf"
               className="mt-3 block w-full border border-[#272727] bg-[#272727] px-4 py-3 text-xs uppercase tracking-widest text-[#FDFBF7] transition-colors hover:bg-[#c2866b] hover:border-[#c2866b]"
             >
-              {locale === 'en' ? 'Save PDF →' : 'Guardar PDF →'}
+              {locale === 'en' ? 'Save PDF →' : locale === 'ca' ? 'Desar el PDF →' : 'Guardar PDF →'}
             </a>
           ) : (
             <button
@@ -690,11 +695,23 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 function LeadCapture({ codigo, locale, informe }: { codigo: string; locale: string; informe: InformePaso }) {
   const es = locale !== 'en'
+  const ca = locale === 'ca'
   const [email, setEmail] = useState('')
   const [consent, setConsent] = useState(false)
   const [status, setStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
 
-  const copy = es
+  const copy = ca
+    ? {
+        title: "T'envio el resultat per correu?",
+        body: "Et arribarà un enllaç a la teva manera de caminar per tornar-hi quan vulguis.",
+        placeholder: 'tu@correu.cat',
+        consent: "Vull rebre més informació de l'univers IKIGAIER (noves eines). Em puc donar de baixa quan vulgui.",
+        button: "Envia'm el resultat",
+        sending: 'Enviant…',
+        done: 'Fet. Revisa el correu: t’envio la teva forma.',
+        error: "No s'ha pogut enviar. Torna-ho a provar.",
+      }
+    : es
     ? {
         title: '¿Te envío tu resultado por correo?',
         body: 'Te llega un enlace a tu forma de caminar para volver a ella cuando quieras.',

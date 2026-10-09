@@ -1,5 +1,6 @@
 'use client'
 
+import { cardLocale } from '@/lib/cards'
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -104,14 +105,14 @@ export default function OraculoClient({ userId, locale, todaySessions, history, 
     trackEvent('share', { tool: 'oraculo' })
     const shareData = {
       title: 'IKICARD',
-      text: locale === 'en' ? 'My card for today — app.ikigaier.com' : 'Mi carta de hoy — app.ikigaier.com',
+      text: locale === 'en' ? 'My card for today — app.ikigaier.com' : locale === 'ca' ? 'La meva carta d’avui — app.ikigaier.com' : 'Mi carta de hoy — app.ikigaier.com',
       url: 'https://app.ikigaier.com',
     }
     if (navigator.share) {
       await navigator.share(shareData)
     } else {
       await navigator.clipboard.writeText('https://app.ikigaier.com')
-      alert(locale === 'en' ? 'Link copied' : 'Enlace copiado')
+      alert(locale === 'en' ? 'Link copied' : locale === 'ca' ? 'Enllaç copiat' : 'Enlace copiado')
     }
   }
 
@@ -203,7 +204,7 @@ export default function OraculoClient({ userId, locale, todaySessions, history, 
             {/* Cara */}
             <div className="absolute inset-0 rounded-xl overflow-hidden shadow-md [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:rotateY(180deg)]">
               <Image
-                src={`/cards/${locale}/${selectedCard}.png`}
+                src={`/cards/${cardLocale(locale)}/${selectedCard}.png`}
                 alt={selectedCard}
                 fill
                 className="object-cover"
@@ -270,7 +271,7 @@ export default function OraculoClient({ userId, locale, todaySessions, history, 
               <div key={i} className="flex items-center gap-4 border-b border-[#272727]/10 pb-3">
                 <div className="relative w-12 h-16 flex-shrink-0 rounded-lg overflow-hidden">
                   <Image
-                    src={`/cards/${locale}/${s.card_code}.png`}
+                    src={`/cards/${cardLocale(locale)}/${s.card_code}.png`}
                     alt={s.card_code}
                     fill
                     className="object-cover"

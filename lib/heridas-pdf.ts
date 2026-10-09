@@ -70,8 +70,8 @@ export async function generarHeridasPdf(
   if (mode === 'share' && nav.share && nav.canShare && nav.canShare({ files: [file] })) {
     try {
       await nav.share({
-        title: locale === 'en' ? 'My Wounds Report · IKIGAIER' : 'Mi informe de Heridas · IKIGAIER',
-        text: locale === 'en' ? 'This is my personal report.' : 'Este es mi informe personal.',
+        title: locale === 'en' ? 'My Wounds Report · IKIGAIER' : locale === 'ca' ? 'El meu informe de Ferides · IKIGAIER' : 'Mi informe de Heridas · IKIGAIER',
+        text: locale === 'en' ? 'This is my personal report.' : locale === 'ca' ? 'Aquest és el meu informe personal.' : 'Este es mi informe personal.',
         files: [file],
       })
       return

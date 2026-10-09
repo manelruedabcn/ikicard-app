@@ -50,7 +50,7 @@ export async function generarMascarasPdf(
   ])
 
   const en = locale === 'en'
-  const folio = en ? 'M  A  S  K  S' : 'M  Á  S  C  A  R  A  S'
+  const folio = en ? 'M  A  S  K  S' : locale === 'ca' ? 'M  À  S  C  A  R  E  S' : 'M  Á  S  C  A  R  A  S'
 
   const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
   const pageW = pdf.internal.pageSize.getWidth()
@@ -163,8 +163,8 @@ export async function generarMascarasPdf(
   if (mode === 'share' && nav.share && nav.canShare && nav.canShare({ files: [file] })) {
     try {
       await nav.share({
-        title: en ? 'My Masks Report · IKIGAIER' : 'Mi informe de Máscaras · IKIGAIER',
-        text: en ? 'This is my personal report.' : 'Este es mi informe personal.',
+        title: en ? 'My Masks Report · IKIGAIER' : locale === 'ca' ? 'El meu informe de Màscares · IKIGAIER' : 'Mi informe de Máscaras · IKIGAIER',
+        text: en ? 'This is my personal report.' : locale === 'ca' ? 'Aquest és el meu informe personal.' : 'Este es mi informe personal.',
         files: [file],
       })
       return

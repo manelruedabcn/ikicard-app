@@ -10,7 +10,7 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM = 'IKIGAIER <hola@ikigaier.com>'
 const APP_URL = 'https://app.ikigaier.com'
 
-type Lang = 'es' | 'en'
+type Lang = 'es' | 'ca' | 'en'
 
 function shell(inner: string): string {
   return `
@@ -62,6 +62,28 @@ const enrollmentCopy: Record<Lang, { subject: string; html: (unsubUrl: string) =
       </p>
     `),
   },
+  ca: {
+    subject: 'Has començat el teu Viatge de 20 dies',
+    html: unsubUrl => shell(`
+      <h1 style="font-size:26px;font-weight:normal;text-align:center;margin:0 0 20px;">Has començat el teu Viatge</h1>
+      <p style="font-size:15px;line-height:1.7;color:rgba(39,39,39,0.8);">
+        Durant els propers 20 dies camines amb tu. Cada dia reps tres cartes —matí, migdia i nit— i de cadascuna te n'emportes una paraula.
+      </p>
+      <p style="font-size:15px;line-height:1.7;color:rgba(39,39,39,0.8);">
+        No hi ha dreceres. Si un dia no hi apareixes, aquell dia es perd: forma part del viatge. Ves al teu ritme, però ves-hi cada dia.
+      </p>
+      <p style="font-size:15px;line-height:1.7;color:rgba(39,39,39,0.8);">
+        Travesses quatre fases: <em>Despertar, Descendir, Travessar i Retornar</em>. Al final tindràs el mapa complet del teu viatge.
+      </p>
+      <p style="font-size:15px;line-height:1.7;color:rgba(39,39,39,0.8);">
+        T'enviaré un recordatori suau cada matí perquè no perdis el dia.
+      </p>
+      ${button(APP_URL, 'OBRIR EL MEU VIATGE')}
+      <p style="font-size:12px;color:rgba(39,39,39,0.4);text-align:center;margin-top:24px;">
+        Si no vols rebre recordatoris, <a href="${unsubUrl}" style="color:rgba(39,39,39,0.5);">desactiva'ls aquí</a>.
+      </p>
+    `),
+  },
   en: {
     subject: 'You have begun your 20-day Journey',
     html: unsubUrl => shell(`
@@ -101,6 +123,19 @@ const reminderCopy: Record<Lang, { subject: (day: number) => string; html: (day:
       </p>
     `),
   },
+  ca: {
+    subject: day => `El teu Viatge · Dia ${day} de 20`,
+    html: (day, unsubUrl) => shell(`
+      <h1 style="font-size:26px;font-weight:normal;text-align:center;margin:0 0 20px;">Dia ${day} de 20</h1>
+      <p style="font-size:15px;line-height:1.7;color:rgba(39,39,39,0.8);text-align:center;">
+        Avui t'esperen tres cartes. Pren-te un moment, llegeix-les amb calma i queda't amb una paraula de cadascuna.
+      </p>
+      ${button(APP_URL, 'ENTRAR AL VIATGE')}
+      <p style="font-size:12px;color:rgba(39,39,39,0.4);text-align:center;margin-top:24px;">
+        <a href="${unsubUrl}" style="color:rgba(39,39,39,0.5);">Desactivar els recordatoris</a>
+      </p>
+    `),
+  },
   en: {
     subject: day => `Your Journey · Day ${day} of 20`,
     html: (day, unsubUrl) => shell(`
@@ -137,6 +172,22 @@ const leadWelcomeCopy: Record<Lang, { subject: string; html: (unsubUrl: string) 
       </p>
     `),
   },
+  ca: {
+    subject: 'Benvingut a IKIGAIER',
+    html: unsubUrl => shell(`
+      <h1 style="font-size:26px;font-weight:normal;text-align:center;margin:0 0 20px;">Gràcies per deixar el teu rastre</h1>
+      <p style="font-size:15px;line-height:1.7;color:rgba(39,39,39,0.8);">
+        Acabes de veure la primera forma de com camines. És només un esbós.
+      </p>
+      <p style="font-size:15px;line-height:1.7;color:rgba(39,39,39,0.8);">
+        IKIGAIER és un univers d'eines per conèixer-te millor, i les vaig obrint a poc a poc. T'avisaré quan arribi la següent —sense soroll, sense pressa.
+      </p>
+      ${button(APP_URL, 'TORNAR A IKIGAIER')}
+      <p style="font-size:12px;color:rgba(39,39,39,0.4);text-align:center;margin-top:24px;">
+        Si prefereixes no rebre res, <a href="${unsubUrl}" style="color:rgba(39,39,39,0.5);">dona't de baixa aquí</a>.
+      </p>
+    `),
+  },
   en: {
     subject: 'Welcome to IKIGAIER',
     html: unsubUrl => shell(`
@@ -156,7 +207,9 @@ const leadWelcomeCopy: Record<Lang, { subject: string; html: (unsubUrl: string) 
 }
 
 function lang(l?: string): Lang {
-  return l === 'en' ? 'en' : 'es'
+  if (l === 'en') return 'en'
+  if (l === 'ca') return 'ca'
+  return 'es'
 }
 
 export async function sendEnrollmentEmail(to: string, locale: string, unsubUrl: string) {
@@ -191,13 +244,17 @@ export async function sendResultEmail(to: string, locale: string, codigo: string
 
   const eje: Record<Lang, Record<Dim, string>> = {
     es: { P: 'Pisar firme', A: 'Acompañar', S: 'Sostener', O: 'Observar' },
+    ca: { P: 'Trepitjar fort', A: 'Acompanyar', S: 'Sostenir', O: 'Observar' },
     en: { P: 'Press on', A: 'Accompany', S: 'Sustain', O: 'Observe' },
   }
   const rarezaTexto: Record<Lang, Record<typeof rareza, string>> = {
     es: { frecuente: 'Una forma frecuente de caminar', habitual: 'Una forma habitual de caminar', poco: 'Una forma poco frecuente de caminar' },
+    ca: { frecuente: 'Una forma freqüent de caminar', habitual: 'Una forma habitual de caminar', poco: 'Una forma poc freqüent de caminar' },
     en: { frecuente: 'A frequent way of walking', habitual: 'A usual way of walking', poco: 'A less frequent way of walking' },
   }
-  const labels = l === 'es'
+  const labels = l === 'ca'
+    ? { reading: 'La teva lectura personal', gap: 'La distància entre la teva màscara i la teva naturalesa', gapIntro: "Cada fila compara com et mostres per adaptar-te amb com ets quan no necessites representar cap paper. Els punts mesuren separació, no capacitat: com més punts, més gran és l'esforç d'adaptació.", gapRepeat: 'Una distància petita parla de coherència entre dins i fora. Una distància gran assenyala una forma que la teva màscara amplifica o conté.', shown: 'Com et mostres', inside: 'Com camines per dins', motivation: "El que et mou", pressure: 'Sota pressió', fear: 'El que tems', effective: 'Series més eficaç si…', book: 'Un llibre per continuar caminant', cta: 'TORNAR A LA MEVA FORMA', note: 'Aquest correu conté la lectura calculada amb les teves respostes.' }
+    : l === 'es'
     ? { reading: 'Tu lectura personal', gap: 'La distancia entre tu máscara y tu naturaleza', gapIntro: 'Cada fila compara cómo te muestras para adaptarte con cómo eres cuando no necesitas representar ningún papel. Los puntos miden separación, no capacidad: cuantos más puntos, mayor es el esfuerzo de adaptación.', gapRepeat: 'Una distancia pequeña habla de coherencia entre dentro y fuera. Una distancia grande señala una forma que tu máscara amplifica o contiene.', shown: 'Cómo te muestras', inside: 'Cómo caminas por dentro', motivation: 'Lo que te mueve', pressure: 'Bajo presión', fear: 'Lo que temes', effective: 'Serías más eficaz si…', book: 'Un libro para seguir caminando', cta: 'VOLVER A MI FORMA', note: 'Este correo contiene la lectura calculada con tus respuestas.' }
     : { reading: 'Your personal reading', gap: 'The distance between your mask and your nature', gapIntro: 'Each row compares how you show up in order to adapt with who you are when you do not need to play a role. Points measure separation, not ability: the more points, the greater the effort of adaptation.', gapRepeat: 'A small distance suggests coherence between inside and outside. A large distance points to a way your mask amplifies or holds back.', shown: 'How you show up', inside: 'How you walk inside', motivation: 'What moves you', pressure: 'Under pressure', fear: 'What you fear', effective: 'You would be more effective if…', book: 'A book to keep walking', cta: 'RETURN TO MY SHAPE', note: 'This email contains the reading calculated from your answers.' }
 
@@ -232,13 +289,22 @@ export async function sendResultEmail(to: string, locale: string, codigo: string
     const abs = Math.abs(b.valor)
     const traits: Record<Lang, Record<Dim, string>> = {
       es: { P: 'la decisión y el impulso para avanzar', A: 'la conexión y la cercanía con los demás', S: 'la calma y la constancia', O: 'la observación y el análisis' },
+      ca: { P: "la decisió i l'impuls per avançar", A: 'la connexió i la proximitat amb els altres', S: 'la calma i la constància', O: "l'observació i l'anàlisi" },
       en: { P: 'decision and the drive to move forward', A: 'connection and closeness with others', S: 'calm and steadiness', O: 'observation and analysis' },
     }
     const degree = l === 'es'
       ? (abs >= 7 ? 'mucho más' : abs >= 3 ? 'algo más' : 'ligeramente más')
+      : l === 'ca'
+      ? (abs >= 7 ? 'molt més' : abs >= 3 ? 'una mica més' : 'lleugerament més')
       : (abs >= 7 ? 'much more' : abs >= 3 ? 'somewhat more' : 'slightly more')
     const trait = traits[l][b.dimension]
-    const direction = l === 'es'
+    const direction = l === 'ca'
+      ? (b.direccion === 'exige_de_mas'
+          ? `La teva màscara amplifica ${trait}: per fora expressa ${degree} del que et neix de manera natural.`
+          : b.direccion === 'esconde'
+            ? `La teva màscara conté ${trait}: per dins n'hi ha ${degree} del que deixes veure.`
+            : `La teva màscara i la teva naturalesa mostren un nivell molt semblant de ${trait}.`)
+      : l === 'es'
       ? (b.direccion === 'exige_de_mas'
           ? `Tu máscara amplifica ${trait}: por fuera expresa ${degree} de lo que te nace naturalmente.`
           : b.direccion === 'esconde'
@@ -249,7 +315,7 @@ export async function sendResultEmail(to: string, locale: string, codigo: string
           : b.direccion === 'esconde'
             ? `Your nature carries ${degree} ${trait} than your mask allows others to see.`
             : `Your mask and your nature show a very similar level of ${trait}.`)
-    return `<li style="margin:0 0 9px;"><strong>${index + 1}. ${eje[l][b.dimension]}</strong>: ${escapeHtml(direction)}${b.valor ? ` (${abs} ${l === 'es' ? 'puntos de separación' : 'points of separation'})` : ''}</li>`
+    return `<li style="margin:0 0 9px;"><strong>${index + 1}. ${eje[l][b.dimension]}</strong>: ${escapeHtml(direction)}${b.valor ? ` (${abs} ${l === 'es' ? 'puntos de separación' : l === 'ca' ? 'punts de separació' : 'points of separation'})` : ''}</li>`
   }).join('')
 
   const patternFields = patron ? [
@@ -258,7 +324,14 @@ export async function sendResultEmail(to: string, locale: string, codigo: string
     [labels.fear, patron.teme],
     [labels.effective, patron.seria_mas_eficaz_si],
   ].map(([label, text]) => `<div style="margin:0 0 18px;"><p style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#c2866b;margin:0 0 5px;">${escapeHtml(label)}</p><p style="font-size:14px;line-height:1.65;margin:0;color:#403b37;">${escapeHtml(text)}</p></div>`).join('') : ''
-  const pasoMeaning = l === 'es'
+  const pasoMeaning = l === 'ca'
+    ? [
+        ['Trepitjar fort', "L'energia per decidir, prendre posició i avançar. En equilibri aporta determinació i valentia; quan domina es pot convertir en pressió, impaciència o necessitat de control."],
+        ['Acompanyar', "L'energia per connectar, expressar-te i crear pertinença. En equilibri aporta proximitat, entusiasme i capacitat d'unir; quan domina pots buscar aprovació o adaptar-te massa."],
+        ['Sostenir', "L'energia per conservar la calma, cuidar el ritme i mantenir els compromisos. En equilibri aporta estabilitat, paciència i confiança; quan domina et pot costar canviar, posar límits o afrontar un conflicte."],
+        ['Observar', "L'energia per llegir el terreny, comprendre els matisos i buscar claredat. En equilibri aporta criteri, precisió i profunditat; quan domina pots sobreanalitzar, dubtar o esperar massa abans d'actuar."],
+      ]
+    : l === 'es'
     ? [
         ['Pisar firme', 'La energía para decidir, tomar posición y avanzar. En equilibrio aporta determinación y valentía; cuando domina puede convertirse en presión, impaciencia o necesidad de control.'],
         ['Acompañar', 'La energía para conectar, expresarte y crear pertenencia. En equilibrio aporta cercanía, entusiasmo y capacidad de unir; cuando domina puedes buscar aprobación o adaptarte demasiado.'],
@@ -279,6 +352,12 @@ export async function sendResultEmail(to: string, locale: string, codigo: string
         heading: 'Your complete result',
         intro: 'This is the personal reading drawn by your answers:',
       }
+    : l === 'ca'
+    ? {
+        subject: `La teva manera de caminar: ${nombre}`,
+        heading: 'El teu resultat complet',
+        intro: 'Aquesta és la lectura personal que dibuixen les teves respostes:',
+      }
     : {
         subject: `Tu forma de caminar: ${nombre}`,
         heading: 'Tu resultado completo',
@@ -296,10 +375,10 @@ export async function sendResultEmail(to: string, locale: string, codigo: string
       <p style="font-size:12px;text-align:center;color:#8b8179;margin:5px 0;">${escapeHtml(rarezaTexto[l][rareza])}</p>
       ${titulares.map((text, i) => `<p style="${i === 0 ? 'font-family:Georgia,serif;font-size:24px;color:#272727;' : 'font-size:14px;color:#766e68;'}line-height:1.5;text-align:center;margin:${i === 0 ? '0 0 10px' : '3px 0'};">${escapeHtml(text)}</p>`).join('')}
       ${patron?.retrato ? `<p style="font-size:15px;line-height:1.7;color:#5c554f;text-align:center;margin:28px 0;">${escapeHtml(patron.retrato)}</p>` : ''}
-      <div style="background:#faf7f2;padding:18px 20px;margin:24px 0;"><p style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 12px;">${l === 'es' ? 'Qué mide PASO' : 'What PASO measures'}</p>${pasoMeaning.map(([name, text]) => `<p style="font-size:13px;line-height:1.55;margin:0 0 10px;color:#5c554f;"><strong>${escapeHtml(name)}</strong><br>${escapeHtml(text)}</p>`).join('')}</div>
+      <div style="background:#faf7f2;padding:18px 20px;margin:24px 0;"><p style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 12px;">${l === 'es' ? 'Qué mide PASO' : l === 'ca' ? 'Què mesura PASO' : 'What PASO measures'}</p>${pasoMeaning.map(([name, text]) => `<p style="font-size:13px;line-height:1.55;margin:0 0 10px;color:#5c554f;"><strong>${escapeHtml(name)}</strong><br>${escapeHtml(text)}</p>`).join('')}</div>
       <div style="background:#f5f1eb;padding:18px 20px;margin:24px 0;">
-        <p style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 8px;">${l === 'es' ? 'Tu firma PASO' : 'Your PASO signature'}</p>
-        <p style="font-size:13px;line-height:1.55;color:#5c554f;margin:0 0 12px;">${l === 'es' ? 'Esta combinación origina el nombre de tu Caminante. Cada barra sitúa una dimensión entre la zona 1 (presencia muy baja) y la zona 7 (presencia muy alta).' : 'This combination gives your Walker its name. Each bar places one dimension between zone 1 (very low presence) and zone 7 (very high presence).'}</p>
+        <p style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 8px;">${l === 'es' ? 'Tu firma PASO' : l === 'ca' ? 'La teva signatura PASO' : 'Your PASO signature'}</p>
+        <p style="font-size:13px;line-height:1.55;color:#5c554f;margin:0 0 12px;">${l === 'es' ? 'Esta combinación origina el nombre de tu Caminante. Cada barra sitúa una dimensión entre la zona 1 (presencia muy baja) y la zona 7 (presencia muy alta).' : l === 'ca' ? 'Aquesta combinació dona nom al teu Caminant. Cada barra situa una dimensió entre la zona 1 (presència molt baixa) i la zona 7 (presència molt alta).' : 'This combination gives your Walker its name. Each bar places one dimension between zone 1 (very low presence) and zone 7 (very high presence).'}</p>
         <table role="presentation" style="width:100%;border-collapse:collapse;">${signatureRows}</table>
       </div>
       ${patternFields}
@@ -312,7 +391,7 @@ export async function sendResultEmail(to: string, locale: string, codigo: string
         ${narrativa.invitacion ? `<p style="font-family:Georgia,serif;font-size:20px;color:#c2866b;">${escapeHtml(narrativa.invitacion)}</p>` : ''}
       </div>
       <div style="background:#f5f1eb;padding:18px 20px;margin:24px 0;"><p style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 8px;">${labels.gap}</p><p style="font-size:13px;line-height:1.55;color:#5c554f;margin:0 0 14px;">${escapeHtml(labels.gapIntro)}</p><ol style="font-size:13px;line-height:1.55;color:#5c554f;margin:0;padding-left:18px;list-style:none;">${gapRows}</ol><p style="font-size:12px;line-height:1.5;color:#8b8179;border-top:1px solid #ded8d1;margin:14px 0 0;padding-top:12px;">${escapeHtml(labels.gapRepeat)}</p></div>
-      <div style="background:#f5f1eb;padding:18px 20px;margin:24px 0;"><p style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 12px;">${l === 'es' ? 'Las 15 formas de caminar' : 'The 15 ways of walking'}</p><ul style="font-size:13px;line-height:1.45;margin:0;padding-left:18px;">${mapHtml}</ul></div>
+      <div style="background:#f5f1eb;padding:18px 20px;margin:24px 0;"><p style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 12px;">${l === 'es' ? 'Las 15 formas de caminar' : l === 'ca' ? 'Les 15 maneres de caminar' : 'The 15 ways of walking'}</p><ul style="font-size:13px;line-height:1.45;margin:0;padding-left:18px;">${mapHtml}</ul></div>
       ${patron?.libro_recomendado ? `<div style="border:1px solid #e1c7ba;background:#fbf4f0;padding:18px;text-align:center;margin:28px 0;"><p style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#c2866b;margin:0 0 8px;">${labels.book}</p><p style="font-family:Georgia,serif;font-size:21px;margin:0;">${escapeHtml(patron.libro_recomendado)}</p></div>` : ''}
       ${button(url, labels.cta)}
       <p style="font-size:12px;color:rgba(39,39,39,0.5);text-align:center;margin-top:8px;">${labels.note}</p>

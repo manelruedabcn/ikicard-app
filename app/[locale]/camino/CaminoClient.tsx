@@ -119,10 +119,11 @@ export default function CaminoClient({ userId, locale, volver, initial }: Props)
 
 function Intro({ onStart, locale }: { onStart: () => void; locale: string }) {
   const en = contentLang(locale) === 'en'
+  const ca = contentLang(locale) === 'ca'
   const intro = getCaminoIntro(locale)
   return (
     <div className="text-center">
-      <p className="text-xs tracking-[0.3em] uppercase text-[#c2866b] mb-4">{en ? 'Your capabilities' : 'Tus capacidades'}</p>
+      <p className="text-xs tracking-[0.3em] uppercase text-[#c2866b] mb-4">{en ? 'Your capabilities' : ca ? 'Les teves capacitats' : 'Tus capacidades'}</p>
       <h1 className="font-[family-name:var(--font-cormorant)] text-4xl leading-tight text-[#272727] mb-6">
         {intro.title}
       </h1>
@@ -134,7 +135,7 @@ function Intro({ onStart, locale }: { onStart: () => void; locale: string }) {
         onClick={onStart}
         className="rounded-full bg-[#c2866b] px-8 py-3 text-sm tracking-widest uppercase text-[#FDFBF7] transition-opacity hover:opacity-90"
       >
-        {en ? 'Start' : 'Empezar'}
+        {en ? 'Start' : ca ? 'Començar' : 'Empezar'}
       </button>
     </div>
   )
@@ -160,6 +161,7 @@ function Test({
   locale: string
 }) {
   const en = contentLang(locale) === 'en'
+  const ca = contentLang(locale) === 'ca'
   return (
     <div>
       <p className="text-center text-xs tracking-widest uppercase text-[#272727]/40 mb-3">
@@ -192,8 +194,8 @@ function Test({
         ))}
       </div>
       <div className="flex justify-between text-[10px] tracking-widest uppercase text-[#272727]/40 px-1 mb-12">
-        <span>{en ? 'Not at all' : 'Nada de acuerdo'}</span>
-        <span>{en ? 'Completely' : 'Totalmente'}</span>
+        <span>{en ? 'Not at all' : ca ? 'Gens d’acord' : 'Nada de acuerdo'}</span>
+        <span>{en ? 'Completely' : ca ? 'Totalment' : 'Totalmente'}</span>
       </div>
 
       <div className="text-center">
@@ -202,7 +204,7 @@ function Test({
           disabled={step === 0}
           className="text-xs tracking-widest uppercase text-[#272727]/50 hover:text-[#c2866b] transition-colors disabled:opacity-0"
         >
-          {en ? '← Previous' : '← Anterior'}
+          {en ? '← Previous' : ca ? '← Anterior' : '← Anterior'}
         </button>
       </div>
     </div>
@@ -223,6 +225,7 @@ function Result({
   locale: string
 }) {
   const en = contentLang(locale) === 'en'
+  const ca = contentLang(locale) === 'ca'
   const caminos = getCaminos(locale)
   const closing = getCaminoClosing(locale)
   const camino = caminos.find(c => c.code === dominant)!
@@ -233,10 +236,10 @@ function Result({
     trackEvent('share', { tool: 'camino' })
     const url = 'https://www.ikigaier.com'
     const data = {
-      title: en ? 'CAMINO test' : 'Test CAMINO',
+      title: en ? 'CAMINO test' : ca ? 'Test CAMINO' : 'Test CAMINO',
       text: en
         ? `I found out my dominant orientation is ${camino.name}. See yours at ${url}`
-        : `Descubrí que mi orientación dominante es ${camino.name}. Mira la tuya en ${url}`,
+        : ca ? `He descobert que la meva orientació dominant és ${camino.name}. Mira la teva a ${url}` : `Descubrí que mi orientación dominante es ${camino.name}. Mira la tuya en ${url}`,
       url,
     }
     try {
@@ -244,7 +247,7 @@ function Result({
         await navigator.share(data)
       } else {
         await navigator.clipboard.writeText(data.text)
-        alert(en ? 'Link copied' : 'Enlace copiado')
+        alert(en ? 'Link copied' : ca ? 'Enllaç copiat' : 'Enlace copiado')
       }
     } catch {
       // La persona cerró el diálogo de compartir: no hacemos nada.
@@ -255,7 +258,7 @@ function Result({
     <div>
       {/* Dominante */}
       <div className="text-center mb-10">
-        <p className="text-xs tracking-[0.3em] uppercase text-[#c2866b] mb-3">{en ? 'Your dominant orientation' : 'Tu orientación dominante'}</p>
+        <p className="text-xs tracking-[0.3em] uppercase text-[#c2866b] mb-3">{en ? 'Your dominant orientation' : ca ? 'La teva orientació dominant' : 'Tu orientación dominante'}</p>
         <h2 className="font-[family-name:var(--font-cormorant)] text-4xl text-[#272727] mb-4">
           {camino.name}
         </h2>
@@ -266,15 +269,15 @@ function Result({
 
       {/* Detalle de la orientación */}
       <div className="flex flex-col gap-5 mb-10">
-        <Trait label={en ? 'Traits' : 'Características'} value={camino.caracteristicas} />
-        <Trait label={en ? 'Strengths' : 'Fortalezas'} value={camino.fortalezas} />
-        <Trait label={en ? 'Challenges' : 'Desafíos'} value={camino.desafios} />
-        <Trait label={en ? 'Careers' : 'Profesiones'} value={camino.profesiones} />
+        <Trait label={en ? 'Traits' : ca ? 'Característiques' : 'Características'} value={camino.caracteristicas} />
+        <Trait label={en ? 'Strengths' : ca ? 'Fortaleses' : 'Fortalezas'} value={camino.fortalezas} />
+        <Trait label={en ? 'Challenges' : ca ? 'Reptes' : 'Desafíos'} value={camino.desafios} />
+        <Trait label={en ? 'Careers' : ca ? 'Professions' : 'Profesiones'} value={camino.profesiones} />
       </div>
 
       {/* Referente */}
       <div className="rounded-xl border border-[#c2866b]/30 bg-[#c2866b]/5 px-5 py-5 mb-10">
-        <p className="text-xs tracking-widest uppercase text-[#c2866b] mb-2">{en ? 'A role model' : 'Un referente'}</p>
+        <p className="text-xs tracking-widest uppercase text-[#c2866b] mb-2">{en ? 'A role model' : ca ? 'Un referent' : 'Un referente'}</p>
         <p className="font-[family-name:var(--font-cormorant)] text-lg leading-snug text-[#272727]">
           {camino.referente}
         </p>
@@ -283,7 +286,7 @@ function Result({
       {/* Las 6 orientaciones ordenadas por tu puntuación. Sitúa la tuya
           entre todas: puedes ser una combinación, y aquí lo ves. */}
       <div className="mb-10 rounded-xl bg-[#272727]/[0.03] px-5 py-5">
-        <p className="text-xs tracking-widest uppercase text-[#272727]/40 mb-4">{en ? 'The six orientations' : 'Las seis orientaciones'}</p>
+        <p className="text-xs tracking-widest uppercase text-[#272727]/40 mb-4">{en ? 'The six orientations' : ca ? 'Les sis orientacions' : 'Las seis orientaciones'}</p>
         <ul className="flex flex-col gap-3">
           {totals.map(t => {
             const c = caminos.find(x => x.code === t.code)!
@@ -326,9 +329,9 @@ function Result({
           onClick={compartir}
           className="w-full py-3 bg-[#c2866b] text-[#FDFBF7] text-xs tracking-widest uppercase hover:bg-[#272727] transition-colors"
         >
-          {en ? 'Share' : 'Compartir'}
+          {en ? 'Share' : ca ? 'Compartir' : 'Compartir'}
         </button>
-        <p className="text-xs text-[#272727]/40 mt-2">{en ? 'Your orientation, to take with you or return to.' : 'Tu orientación, para llevártela o volver a ella.'}</p>
+        <p className="text-xs text-[#272727]/40 mt-2">{en ? 'Your orientation, to take with you or return to.' : ca ? 'La teva orientació, per endur-te-la o tornar-hi.' : 'Tu orientación, para llevártela o volver a ella.'}</p>
       </div>
 
       {/* Retorno al itinerario IKIBOARD (si vino de ahí). */}
@@ -338,7 +341,7 @@ function Result({
             href={`/${locale}${volver}`}
             className="rounded-full bg-[#c2866b] px-8 py-3 text-sm tracking-widest uppercase text-[#FDFBF7] transition-opacity hover:opacity-90"
           >
-            {en ? 'Back and continue' : 'Volver y seguir'}
+            {en ? 'Back and continue' : ca ? 'Tornar i continuar' : 'Volver y seguir'}
           </Link>
         </div>
       )}

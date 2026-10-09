@@ -29,7 +29,7 @@ export default async function DashboardPage({ params: { locale } }: { params: { 
   // Herramientas desbloqueadas (dinámico, según permisos)
   const tools = await getMyTools()
   const isAdmin = await isCurrentUserAdmin()
-  const otherLocale = locale === 'es' ? 'en' : 'es'
+  const locales = ['es', 'ca', 'en'] as const
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-[#FDFBF7] px-4 py-16">
@@ -43,15 +43,22 @@ export default async function DashboardPage({ params: { locale } }: { params: { 
             </p>
             <div className="flex shrink-0 items-center gap-3">
               <div className="flex items-center gap-1 text-xs tracking-[0.12em]" aria-label={t('language')}>
-                <span className="font-medium text-[#c2866b]">{locale.toUpperCase()}</span>
-                <span className="text-[#272727]/25">/</span>
-                <Link
-                  href={`/${otherLocale}/dashboard`}
-                  className="text-[#272727]/45 transition-colors hover:text-[#c2866b]"
-                  hrefLang={otherLocale}
-                >
-                  {otherLocale.toUpperCase()}
-                </Link>
+                {locales.map((l, i) => (
+                  <span key={l} className="flex items-center gap-1">
+                    {i > 0 && <span className="text-[#272727]/25">/</span>}
+                    {l === locale ? (
+                      <span className="font-medium text-[#c2866b]">{l.toUpperCase()}</span>
+                    ) : (
+                      <Link
+                        href={`/${l}/dashboard`}
+                        className="text-[#272727]/45 transition-colors hover:text-[#c2866b]"
+                        hrefLang={l}
+                      >
+                        {l.toUpperCase()}
+                      </Link>
+                    )}
+                  </span>
+                ))}
               </div>
               <SignOutButton locale={locale} />
             </div>

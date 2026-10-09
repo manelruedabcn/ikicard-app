@@ -22,6 +22,6 @@ export function verifyUnsubToken(uid: string, token: string | null | undefined):
 }
 
 export function unsubUrl(uid: string, locale: string): string {
-  const l = locale === 'en' ? 'en' : 'es'
+  const l = locale === 'en' ? 'en' : locale === 'ca' ? 'ca' : 'es'
   return `${APP_URL}/api/notify/unsubscribe?uid=${uid}&t=${unsubToken(uid)}&l=${l}`
 }

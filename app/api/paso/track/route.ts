@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic'
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null)
   const codigo = typeof body?.codigo === 'string' ? body.codigo : null
-  const locale = body?.locale === 'en' ? 'en' : 'es'
+  const locale = body?.locale === 'en' ? 'en' : body?.locale === 'ca' ? 'ca' : 'es'
 
   // Validar el patrón contra la lista real: evita basura en la tabla.
   if (!codigo || !PASO_PATRONES.some(p => p.codigo === codigo)) {
