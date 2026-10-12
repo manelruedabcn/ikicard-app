@@ -1,6 +1,6 @@
 # Inventario honesto — el test de entrada (lead magnet)
 
-Test de ikigai **gratuito y sin cuenta** en `/inventario`. Es la puerta del
+Test de ikigai **gratuito y sin cuenta** en `/inventario`. Nombre visible: «Inventario honesto de tu ikigai» (con «ikigai» por SEO y para el tráfico frío). Es la puerta del
 embudo para quien no conoce a Manel: «No te dice a qué dedicarte. Te dice desde
 dónde empiezas». Convive con PASO (`/paso`), que sigue siendo el test de
 autoconocimiento gratuito; no lo sustituye.

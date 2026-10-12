@@ -484,7 +484,7 @@ export async function sendInventarioEmail(
   const delivery = await resend.emails.send({
     from: FROM,
     to,
-    subject: `${copy.resultEyebrow}: ${copy.resultTitle.toLowerCase()}`,
+    subject: `Tu inventario honesto de ikigai: ${copy.resultTitle.toLowerCase()}`,
     html,
   })
   if (delivery.error) throw new Error(delivery.error.message)

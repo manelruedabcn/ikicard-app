@@ -8,9 +8,9 @@ import InventarioClient from './InventarioClient'
 // El origen (?src=blog, libro, taller…) viaja hasta el lead para saber qué
 // canal trae a quién. utm_source se acepta como alternativa.
 export const metadata: Metadata = {
-  title: 'Inventario honesto · Test de ikigai · IKIGAIER',
+  title: 'Test de ikigai gratuito: Inventario honesto de tu ikigai | IKIGAIER',
   description:
-    'Un test de ikigai que no te dice a qué dedicarte: te dice desde dónde empiezas. Quince preguntas sobre lo que haces y cómo lo vives, basadas en «El Ikigai que no te contaron».',
+    'Test de ikigai gratuito y sin registro: quince preguntas sobre lo que haces y cómo lo vives, con una devolución personal al instante. Basado en «El Ikigai que no te contaron», de Manel Rueda.',
 }
 
 export default async function InventarioPage({

@@ -253,7 +253,7 @@ const EXERCISES_ES: Record<ExerciseKey, InvExercise> = {
 
 const COPY_ES = {
   eyebrow: 'Test de ikigai · IKIGAIER',
-  title: 'Inventario honesto',
+  title: 'Inventario honesto de tu ikigai',
   lead: 'No te dice a qué dedicarte. Te dice desde dónde empiezas.',
   body: [
     'Quince preguntas cerradas y una abierta, opcional. Sobre las dos caras del ikigai: lo que haces y construyes, y cómo lo vives.',
