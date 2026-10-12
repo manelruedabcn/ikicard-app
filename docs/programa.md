@@ -90,8 +90,13 @@ Todos los textos de `lib/programa-content.ts` que no son citas ni ejercicios
 del libro (bienvenida, frases de unión, cierre, aviso de encuentro) y las
 traducciones al catalán y al inglés.
 
-## Cómo dar de alta un encuentro
+## Panel de administración
 
-Supabase → Table Editor → `programa_encuentros` → Insert row:
-`starts_at` (fecha y hora; se muestra en hora de Madrid), `url` (enlace de la
-videollamada), `locale` (`es`, `ca`, `en` o vacío para todas).
+`/es/admin/programa` (botón «Programa · un mes» en Administración):
+
+- El embudo: tests de ikigai hechos, emails dejados, personas en el programa,
+  terminadas, cuántas repitieron el test y bajas.
+- Cada persona: lengua, fecha de inicio, semana en curso, lo que respondió cada
+  jueves y si repitió el test.
+- Los encuentros en grupo: alta (fecha y hora de Madrid, enlace, lengua, nota
+  interna) y borrado, sin entrar en Supabase.

@@ -24,7 +24,7 @@ export default async function AdminPage({ params: { locale } }: { params: { loca
       <div className="max-w-3xl mx-auto">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div><h1 className="font-[family-name:var(--font-cormorant)] text-3xl text-[#272727] mb-2">{t('title')}</h1><p className="text-sm text-[#272727]/60">{t('subtitle', { count: users.length })}</p></div>
-          <Link href={`/${locale}/admin/crm`} className="rounded-full bg-[#272727] px-5 py-2.5 text-xs tracking-wide text-white hover:bg-[#c2866b]">Abrir CRM de contactos</Link>
+          <div className="flex flex-wrap gap-2"><Link href={`/${locale}/admin/programa`} className="rounded-full border border-[#272727]/20 px-5 py-2.5 text-xs tracking-wide text-[#272727] hover:border-[#c2866b] hover:text-[#c2866b]">Programa · un mes</Link><Link href={`/${locale}/admin/crm`} className="rounded-full bg-[#272727] px-5 py-2.5 text-xs tracking-wide text-white hover:bg-[#c2866b]">Abrir CRM de contactos</Link></div>
         </div>
 
         {/* Métricas clave de uso */}
