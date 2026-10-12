@@ -49,7 +49,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS programa_inscripciones_activa_idx
 
 CREATE TABLE IF NOT EXISTS programa_envios (
   inscripcion_id UUID NOT NULL REFERENCES programa_inscripciones ON DELETE CASCADE,
-  -- bienvenida · semana1..semana4 · cierre · encuentro:<id>
+  -- bienvenida · semana1..semana4 · jueves1..jueves4 · cierre · encuentro:<id>
   mensaje TEXT NOT NULL,
   sent_at TIMESTAMPTZ DEFAULT now(),
   PRIMARY KEY (inscripcion_id, mensaje)
@@ -70,7 +70,19 @@ CREATE TABLE IF NOT EXISTS programa_encuentros (
 
 CREATE INDEX IF NOT EXISTS programa_encuentros_starts_idx ON programa_encuentros (starts_at);
 
+-- Respuesta de un clic al «¿Has hecho el ejercicio de esta semana?» del
+-- correo del jueves. No bloquea nada: adapta el tono del lunes siguiente y
+-- dice a Manel quién se está implicando de verdad.
+CREATE TABLE IF NOT EXISTS programa_checkins (
+  inscripcion_id UUID NOT NULL REFERENCES programa_inscripciones ON DELETE CASCADE,
+  semana INT NOT NULL CHECK (semana BETWEEN 1 AND 4),
+  respuesta TEXT NOT NULL CHECK (respuesta IN ('si', 'medias', 'no')),
+  updated_at TIMESTAMPTZ DEFAULT now(),
+  PRIMARY KEY (inscripcion_id, semana)
+);
+
 -- RLS activada y SIN políticas: solo el service_role lee y escribe.
 ALTER TABLE programa_inscripciones ENABLE ROW LEVEL SECURITY;
 ALTER TABLE programa_envios ENABLE ROW LEVEL SECURITY;
 ALTER TABLE programa_encuentros ENABLE ROW LEVEL SECURITY;
+ALTER TABLE programa_checkins ENABLE ROW LEVEL SECURITY;

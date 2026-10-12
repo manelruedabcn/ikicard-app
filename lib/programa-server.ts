@@ -4,7 +4,7 @@ import { unsubUrl } from '@/lib/notify'
 import { sendProgramaEmail } from '@/lib/email'
 import { getInvExercise } from '@/lib/inventario-content'
 import { buildLectura, type ExerciseKey, type InvAnswers } from '@/lib/inventario'
-import { encuentroEnVentana, madridParts, nextMonday } from '@/lib/programa'
+import { encuentroEnVentana, madridParts, nextMonday, PROGRAMA_CHECKINS, semanaDeJueves, type ProgramaCheckin } from '@/lib/programa'
 import {
   formatProgramaDate,
   formatProgramaDateTime,
@@ -39,13 +39,17 @@ function lang(locale: string): 'es' | 'ca' | 'en' {
   return locale === 'en' ? 'en' : locale === 'ca' ? 'ca' : 'es'
 }
 
+// PASO con cuenta solo cuando la verificación de cuentas de Supabase funcione
+// (correo propio configurado). Mientras tanto, PASO sin registro.
+const PASO_CON_CUENTA = process.env.PROGRAMA_PASO_CON_CUENTA === '1'
+
 function links(insc: Inscripcion) {
   const l = lang(insc.locale)
   const libro = { es: '/es/libros/el-ikigai-que-no-te-contaron/', ca: '/ca/llibres/el-ikigai-que-no-te-contaron/', en: '/en/books/el-ikigai-que-no-te-contaron/' }[l]
   const talleres = { es: '/es/talleres/', ca: '/ca/tallers/', en: '/en/workshops/' }[l]
   return {
-    // PASO se hace con cuenta dentro del programa: el registro vuelve a /paso.
-    paso: `${APP_URL}/${l}/login?next=${encodeURIComponent(`/${l}/paso`)}`,
+    // Con cuenta: el registro vuelve a /paso. Sin cuenta: directo a /paso.
+    paso: PASO_CON_CUENTA ? `${APP_URL}/${l}/login?next=${encodeURIComponent(`/${l}/paso`)}` : `${APP_URL}/${l}/paso`,
     repetir: `${APP_URL}/${l}/inventario?prog=${insc.token}`,
     // Mientras el curso online no tenga página propia, lleva a talleres.
     curso: process.env.PROGRAMA_CURSO_URL || `${WEB_URL}${talleres}`,
@@ -67,13 +71,21 @@ async function encuentrosPara(insc: Inscripcion) {
     .map(e => ({ when: formatProgramaDateTime(insc.locale, e.starts_at), url: e.url as string }))
 }
 
-async function contexto(insc: Inscripcion): Promise<ProgramaContext> {
+function checkinLinks(insc: Inscripcion, semana: number): Record<ProgramaCheckin, string> {
+  const l = lang(insc.locale)
+  const url = (r: ProgramaCheckin) => `${APP_URL}/api/programa/checkin?t=${insc.token}&s=${semana}&r=${r}&l=${l}`
+  return Object.fromEntries(PROGRAMA_CHECKINS.map(r => [r, url(r)])) as Record<ProgramaCheckin, string>
+}
+
+async function contexto(insc: Inscripcion, semanaCheckin: number | null = null): Promise<ProgramaContext> {
   const exercise = insc.first_exercise ? getInvExercise(insc.locale, insc.first_exercise as ExerciseKey) : null
   return {
     startDate: insc.start_date,
     exercise,
     links: links(insc),
     encuentros: await encuentrosPara(insc),
+    pasoConCuenta: PASO_CON_CUENTA,
+    checkin: semanaCheckin ? checkinLinks(insc, semanaCheckin) : null,
   }
 }
 
@@ -101,7 +113,22 @@ export async function enviarUnaVez(insc: Inscripcion, mensaje: string, mail: Pro
 
 export async function enviarSemanal(insc: Inscripcion, key: ProgramaSemanal): Promise<boolean> {
   const t = getProgramaTexts(insc.locale)
-  const mail = t.semanal[key](await contexto(insc))
+  const mail = t.semanal[key](await contexto(insc, semanaDeJueves(key)))
+
+  // Lunes de las semanas 2-4: si el jueves anterior respondió «no» o «a
+  // medias», el correo empieza reconociéndolo. Nunca bloquea nada.
+  const m = /^semana(\d)$/.exec(key)
+  if (m && Number(m[1]) > 1) {
+    const admin = createAdminClient()
+    const { data } = await admin
+      .from('programa_checkins')
+      .select('respuesta')
+      .eq('inscripcion_id', insc.id)
+      .eq('semana', Number(m[1]) - 1)
+      .maybeSingle()
+    const linea = data?.respuesta ? t.retomar[data.respuesta as ProgramaCheckin] : undefined
+    if (linea) mail.blocks.unshift({ kind: 'p', text: linea, muted: true })
+  }
   return enviarUnaVez(insc, key, mail)
 }
 

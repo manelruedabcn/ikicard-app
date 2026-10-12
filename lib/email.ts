@@ -521,6 +521,12 @@ export async function sendProgramaEmail(to: string, locale: string, mail: Progra
         </div>`
       case 'sign':
         return `<p style="font-family:Georgia,serif;font-size:18px;color:#272727;margin:22px 0 0;">${escapeHtml(b.text)}</p>`
+      case 'checkin':
+        return `<div style="border-top:1px solid rgba(39,39,39,0.12);margin:24px 0 0;padding-top:18px;text-align:center;">
+          <p style="font-size:15px;color:#272727;margin:0 0 12px;">${escapeHtml(b.question)}</p>
+          <p style="margin:0 0 10px;">${b.options.map(o => `<a href="${o.href}" style="display:inline-block;margin:4px;padding:9px 16px;border:1px solid #c2866b;color:#272727;text-decoration:none;font-size:13px;">${escapeHtml(o.label)}</a>`).join('')}</p>
+          <p style="font-size:12px;color:#8b8179;margin:0;">${escapeHtml(b.note)}</p>
+        </div>`
     }
   }).join('')
 

@@ -9,7 +9,7 @@
 
 import { contentLang, type ContentLang } from './content-locale'
 import type { InvExercise } from './inventario-content'
-import type { ProgramaSemanal } from './programa'
+import type { ProgramaCheckin, ProgramaSemanal } from './programa'
 
 export type ProgramaBlock =
   | { kind: 'p'; text: string; muted?: boolean }
@@ -18,6 +18,7 @@ export type ProgramaBlock =
   | { kind: 'cta'; href: string; label: string }
   | { kind: 'encuentros'; title: string; items: { when: string; url: string }[]; joinLabel: string }
   | { kind: 'sign'; text: string }
+  | { kind: 'checkin'; question: string; note: string; options: { href: string; label: string }[] }
 
 export interface ProgramaMail {
   subject: string
@@ -31,6 +32,10 @@ export interface ProgramaContext {
   links: { paso: string; repetir: string; curso: string; libro: string }
   // Encuentros próximos dentro del mes de la persona (ya formateados).
   encuentros: { when: string; url: string }[]
+  // Semana 3: PASO con cuenta (solo cuando la verificación de cuentas funcione).
+  pasoConCuenta: boolean
+  // Enlaces de un clic «¿lo has hecho?» de esta semana (correos del jueves).
+  checkin: Record<ProgramaCheckin, string> | null
 }
 
 interface ProgramaTexts {
@@ -49,6 +54,9 @@ interface ProgramaTexts {
   bienvenida: (c: ProgramaContext, start: string) => ProgramaMail
   semanal: Record<ProgramaSemanal, (c: ProgramaContext) => ProgramaMail>
   encuentro: (when: string, url: string) => ProgramaMail
+  // Primera línea del lunes según lo que respondió el jueves anterior.
+  retomar: Partial<Record<ProgramaCheckin, string>>
+  checkinPage: Record<ProgramaCheckin | 'invalid', string>
 }
 
 const exerciseBlock = (t: ProgramaTexts, e: InvExercise): ProgramaBlock => ({
@@ -57,6 +65,11 @@ const exerciseBlock = (t: ProgramaTexts, e: InvExercise): ProgramaBlock => ({
   eyebrow: `${t.thisWeek} · ${t.chapter} ${e.cap}`,
   steps: e.steps,
 })
+
+const checkinBlock = (c: ProgramaContext, question: string, note: string, labels: Record<ProgramaCheckin, string>): ProgramaBlock[] =>
+  c.checkin
+    ? [{ kind: 'checkin', question, note, options: (['si', 'medias', 'no'] as const).map(k => ({ href: c.checkin![k], label: labels[k] })) }]
+    : []
 
 const encuentrosBlock = (t: ProgramaTexts, c: ProgramaContext): ProgramaBlock[] =>
   c.encuentros.length ? [{ kind: 'encuentros', title: t.encuentrosTitle, items: c.encuentros, joinLabel: t.join }] : []
@@ -99,6 +112,41 @@ const ES: ProgramaTexts = {
     ],
   }),
   semanal: {
+    jueves1: c => ({
+      subject: 'A mitad de semana',
+      blocks: [
+        { kind: 'p', text: 'A mitad de la primera semana. Si todavía no has empezado el ejercicio, hoy vale igual.' },
+        { kind: 'p', text: 'Una pregunta para esta noche: ¿qué has notado que no esperabas?' },
+        { kind: 'sign', text: 'Manel' },
+        ...checkinBlock(c, '¿Has hecho el ejercicio de esta semana?', 'Un clic basta. No cambia lo que recibes: solo me dice cómo va.', { si: 'Sí', medias: 'A medias', no: 'Esta semana no' }),
+      ],
+    }),
+    jueves2: c => ({
+      subject: 'A mitad de semana: tu mapa',
+      blocks: [
+        { kind: 'p', text: '¿Hay algo que aparezca en más de una sección de tu mapa? Si aún no lo has hecho, diez minutos esta noche bastan.' },
+        { kind: 'sign', text: 'Manel' },
+        ...checkinBlock(c, '¿Has hecho el ejercicio de esta semana?', 'Un clic basta. No cambia lo que recibes: solo me dice cómo va.', { si: 'Sí', medias: 'A medias', no: 'Esta semana no' }),
+      ],
+    }),
+    jueves3: c => ({
+      subject: 'A mitad de semana: lo que se repite',
+      blocks: [
+        { kind: 'p', text: 'Mira lo que has anotado estas noches. ¿Se repite algo: una persona, un gesto, un momento del día?' },
+        { kind: 'p', text: 'Si aún no has hecho PASO, el enlace sigue en el correo del lunes.' },
+        { kind: 'sign', text: 'Manel' },
+        ...checkinBlock(c, '¿Has hecho el ejercicio de esta semana?', 'Un clic basta. No cambia lo que recibes: solo me dice cómo va.', { si: 'Sí', medias: 'A medias', no: 'Esta semana no' }),
+      ],
+    }),
+    jueves4: c => ({
+      subject: 'A mitad de semana: un mes después',
+      blocks: [
+        { kind: 'p', text: '¿Has repetido tu inventario? Antes de hacerlo, relee la frase que escribiste el primer día.' },
+        { kind: 'cta', href: c.links.repetir, label: 'REPETIR MI INVENTARIO' },
+        { kind: 'sign', text: 'Manel' },
+        ...checkinBlock(c, '¿Has hecho el ejercicio de esta semana?', 'Un clic basta. No cambia lo que recibes: solo me dice cómo va.', { si: 'Sí', medias: 'A medias', no: 'Esta semana no' }),
+      ],
+    }),
     semana1: c => ({
       subject: c.exercise ? `Semana 1: ${c.exercise.title.toLowerCase()}` : 'Semana 1: el inventario honesto',
       blocks: [
@@ -130,7 +178,9 @@ const ES: ProgramaTexts = {
       subject: 'Semana 3: cómo caminas',
       blocks: [
         { kind: 'p', text: 'Tercera semana. Ahora la otra cara: no qué haces, sino desde dónde lo haces.' },
-        { kind: 'p', text: 'Te propongo PASO, un test breve que compara cómo te muestras para adaptarte con cómo eres cuando no tienes que representar ningún papel. Para hacerlo, crea tu cuenta en la app: así tu resultado queda guardado junto a tu recorrido.' },
+        { kind: 'p', text: c.pasoConCuenta
+          ? 'Te propongo PASO, un test breve que compara cómo te muestras para adaptarte con cómo eres cuando no tienes que representar ningún papel. Para hacerlo, crea tu cuenta en la app: así tu resultado queda guardado junto a tu recorrido.'
+          : 'Te propongo PASO, un test breve que compara cómo te muestras para adaptarte con cómo eres cuando no tienes que representar ningún papel. No hace falta registrarte. Si creas una cuenta en la app, tu resultado queda guardado junto a tu recorrido.' },
         { kind: 'cta', href: c.links.paso, label: 'HACER PASO' },
         { kind: 'p', text: 'PASO habla de tu «máscara» en ese sentido: tu forma adaptada de actuar. Las siete máscaras del libro, las que aprendimos para protegernos, son otra cosa. De ellas hablamos en el curso.', muted: true },
         { kind: 'p', text: 'Y una pregunta para la semana, del capítulo 8. Elige a alguien con quien convivas a diario y obsérvate. Una frase en tu libreta cada noche:' },
@@ -167,6 +217,8 @@ const ES: ProgramaTexts = {
       ],
     }),
   },
+  retomar: { no: 'No pasa nada si la semana pasada no pudo ser. Aquí va la siguiente; si quieres, retoma también la anterior.', medias: 'A medias también cuenta. Seguimos.' },
+  checkinPage: { si: 'Anotado. Gracias.', medias: 'Anotado. A medias también cuenta.', no: 'Anotado. Si esta semana no ha podido ser, no pasa nada: el lunes llega la siguiente.', invalid: 'Enlace no válido.' },
   encuentro: (when, url) => ({
     subject: 'Mañana: encuentro en grupo',
     blocks: [
@@ -216,6 +268,41 @@ const CA: ProgramaTexts = {
     ],
   }),
   semanal: {
+    jueves1: c => ({
+      subject: 'A mitja setmana',
+      blocks: [
+        { kind: 'p', text: 'A mitja primera setmana. Si encara no has començat l’exercici, avui també val.' },
+        { kind: 'p', text: 'Una pregunta per a aquesta nit: què has notat que no esperaves?' },
+        { kind: 'sign', text: 'Manel' },
+        ...checkinBlock(c, 'Has fet l’exercici d’aquesta setmana?', 'Amb un clic n’hi ha prou. No canvia el que reps: només em diu com va.', { si: 'Sí', medias: 'A mitges', no: 'Aquesta setmana no' }),
+      ],
+    }),
+    jueves2: c => ({
+      subject: 'A mitja setmana: el teu mapa',
+      blocks: [
+        { kind: 'p', text: 'Hi ha alguna cosa que aparegui en més d’una secció del teu mapa? Si encara no ho has fet, deu minuts aquesta nit n’hi ha prou.' },
+        { kind: 'sign', text: 'Manel' },
+        ...checkinBlock(c, 'Has fet l’exercici d’aquesta setmana?', 'Amb un clic n’hi ha prou. No canvia el que reps: només em diu com va.', { si: 'Sí', medias: 'A mitges', no: 'Aquesta setmana no' }),
+      ],
+    }),
+    jueves3: c => ({
+      subject: 'A mitja setmana: el que es repeteix',
+      blocks: [
+        { kind: 'p', text: 'Mira el que has anotat aquestes nits. Es repeteix alguna cosa: una persona, un gest, un moment del dia?' },
+        { kind: 'p', text: 'Si encara no has fet PASO, l’enllaç continua al correu del dilluns.' },
+        { kind: 'sign', text: 'Manel' },
+        ...checkinBlock(c, 'Has fet l’exercici d’aquesta setmana?', 'Amb un clic n’hi ha prou. No canvia el que reps: només em diu com va.', { si: 'Sí', medias: 'A mitges', no: 'Aquesta setmana no' }),
+      ],
+    }),
+    jueves4: c => ({
+      subject: 'A mitja setmana: un mes després',
+      blocks: [
+        { kind: 'p', text: 'Has repetit el teu inventari? Abans de fer-ho, rellegeix la frase que vas escriure el primer dia.' },
+        { kind: 'cta', href: c.links.repetir, label: 'REPETIR EL MEU INVENTARI' },
+        { kind: 'sign', text: 'Manel' },
+        ...checkinBlock(c, 'Has fet l’exercici d’aquesta setmana?', 'Amb un clic n’hi ha prou. No canvia el que reps: només em diu com va.', { si: 'Sí', medias: 'A mitges', no: 'Aquesta setmana no' }),
+      ],
+    }),
     semana1: c => ({
       subject: c.exercise ? `Setmana 1: ${c.exercise.title.toLowerCase()}` : 'Setmana 1: l’inventari honest',
       blocks: [
@@ -247,7 +334,9 @@ const CA: ProgramaTexts = {
       subject: 'Setmana 3: com camines',
       blocks: [
         { kind: 'p', text: 'Tercera setmana. Ara l’altra cara: no què fas, sinó des d’on ho fas.' },
-        { kind: 'p', text: 'Et proposo PASO, un test breu que compara com et mostres per adaptar-te amb com ets quan no has de representar cap paper. Per fer-lo, crea el teu compte a l’app: així el resultat queda desat al costat del teu recorregut.' },
+        { kind: 'p', text: c.pasoConCuenta
+          ? 'Et proposo PASO, un test breu que compara com et mostres per adaptar-te amb com ets quan no has de representar cap paper. Per fer-lo, crea el teu compte a l’app: així el resultat queda desat al costat del teu recorregut.'
+          : 'Et proposo PASO, un test breu que compara com et mostres per adaptar-te amb com ets quan no has de representar cap paper. No cal registrar-te. Si crees un compte a l’app, el resultat queda desat al costat del teu recorregut.' },
         { kind: 'cta', href: c.links.paso, label: 'FER PASO' },
         { kind: 'p', text: 'PASO parla de la teva «màscara» en aquest sentit: la teva manera adaptada d’actuar. Les set màscares del llibre, les que vam aprendre per protegir-nos, són una altra cosa. En parlem al curs.', muted: true },
         { kind: 'p', text: 'I una pregunta per a la setmana, del capítol 8. Tria algú amb qui convisquis cada dia i observa’t. Una frase a la llibreta cada nit:' },
@@ -284,6 +373,8 @@ const CA: ProgramaTexts = {
       ],
     }),
   },
+  retomar: { no: 'No passa res si la setmana passada no va poder ser. Aquí tens la següent; si vols, reprèn també l’anterior.', medias: 'A mitges també compta. Continuem.' },
+  checkinPage: { si: 'Anotat. Gràcies.', medias: 'Anotat. A mitges també compta.', no: 'Anotat. Si aquesta setmana no ha pogut ser, no passa res: dilluns arriba la següent.', invalid: 'Enllaç no vàlid.' },
   encuentro: (when, url) => ({
     subject: 'Demà: trobada en grup',
     blocks: [
@@ -333,6 +424,41 @@ const EN: ProgramaTexts = {
     ],
   }),
   semanal: {
+    jueves1: c => ({
+      subject: 'Midweek',
+      blocks: [
+        { kind: 'p', text: 'Halfway through the first week. If you haven’t started the exercise yet, today works just as well.' },
+        { kind: 'p', text: 'A question for tonight: what have you noticed that you didn’t expect?' },
+        { kind: 'sign', text: 'Manel' },
+        ...checkinBlock(c, 'Have you done this week’s exercise?', 'One click is enough. It doesn’t change what you receive: it just tells me how it’s going.', { si: 'Yes', medias: 'Partly', no: 'Not this week' }),
+      ],
+    }),
+    jueves2: c => ({
+      subject: 'Midweek: your map',
+      blocks: [
+        { kind: 'p', text: 'Is there something that appears in more than one section of your map? If you haven’t done it yet, ten minutes tonight is enough.' },
+        { kind: 'sign', text: 'Manel' },
+        ...checkinBlock(c, 'Have you done this week’s exercise?', 'One click is enough. It doesn’t change what you receive: it just tells me how it’s going.', { si: 'Yes', medias: 'Partly', no: 'Not this week' }),
+      ],
+    }),
+    jueves3: c => ({
+      subject: 'Midweek: what repeats',
+      blocks: [
+        { kind: 'p', text: 'Look at what you have written these nights. Does anything repeat: a person, a gesture, a moment of the day?' },
+        { kind: 'p', text: 'If you haven’t taken PASO yet, the link is still in Monday’s email.' },
+        { kind: 'sign', text: 'Manel' },
+        ...checkinBlock(c, 'Have you done this week’s exercise?', 'One click is enough. It doesn’t change what you receive: it just tells me how it’s going.', { si: 'Yes', medias: 'Partly', no: 'Not this week' }),
+      ],
+    }),
+    jueves4: c => ({
+      subject: 'Midweek: a month later',
+      blocks: [
+        { kind: 'p', text: 'Have you retaken your inventory? Before you do, reread the sentence you wrote on the first day.' },
+        { kind: 'cta', href: c.links.repetir, label: 'RETAKE MY INVENTORY' },
+        { kind: 'sign', text: 'Manel' },
+        ...checkinBlock(c, 'Have you done this week’s exercise?', 'One click is enough. It doesn’t change what you receive: it just tells me how it’s going.', { si: 'Yes', medias: 'Partly', no: 'Not this week' }),
+      ],
+    }),
     semana1: c => ({
       subject: c.exercise ? `Week 1: ${c.exercise.title.toLowerCase()}` : 'Week 1: the honest inventory',
       blocks: [
@@ -364,7 +490,9 @@ const EN: ProgramaTexts = {
       subject: 'Week 3: how you walk',
       blocks: [
         { kind: 'p', text: 'Third week. Now the other side: not what you do, but where you do it from.' },
-        { kind: 'p', text: 'I suggest PASO, a short test that compares how you show up in order to adapt with who you are when you don’t have to play a role. To take it, create your account in the app: that way your result is saved alongside your journey.' },
+        { kind: 'p', text: c.pasoConCuenta
+          ? 'I suggest PASO, a short test that compares how you show up in order to adapt with who you are when you don’t have to play a role. To take it, create your account in the app: that way your result is saved alongside your journey.'
+          : 'I suggest PASO, a short test that compares how you show up in order to adapt with who you are when you don’t have to play a role. You don’t need to sign up. If you create an account in the app, your result is saved alongside your journey.' },
         { kind: 'cta', href: c.links.paso, label: 'TAKE PASO' },
         { kind: 'p', text: 'PASO talks about your “mask” in that sense: your adapted way of acting. The seven masks in the book, the ones we learned to protect ourselves, are something else. We look at them in the course.', muted: true },
         { kind: 'p', text: 'And a question for the week, from chapter 8. Choose someone you live alongside every day and observe yourself. One sentence in your notebook each night:' },
@@ -401,6 +529,8 @@ const EN: ProgramaTexts = {
       ],
     }),
   },
+  retomar: { no: 'It’s fine if last week didn’t happen. Here is the next one; if you like, pick up the previous one too.', medias: 'Partly counts too. We carry on.' },
+  checkinPage: { si: 'Noted. Thank you.', medias: 'Noted. Partly counts too.', no: 'Noted. If this week didn’t happen, that’s fine: the next one arrives on Monday.', invalid: 'Invalid link.' },
   encuentro: (when, url) => ({
     subject: 'Tomorrow: group meeting',
     blocks: [

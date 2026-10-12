@@ -13,11 +13,25 @@ conversión del embudo: quien llega al final ha trabajado un mes y conoce a Mane
 
 | Día | Correo | Contenido | Fuente |
 |---|---|---|---|
-| 0 | Semana 1 | El ejercicio que le salió en el Inventario + la frase ancla en la libreta | Ejercicio de su devolución, cap. 1 |
+| 0 (lunes) | Semana 1 | El ejercicio que le salió en el Inventario + la frase ancla en la libreta | Ejercicio de su devolución, cap. 1 |
+| 3 (jueves) | Jueves 1 | Dos líneas, una pregunta y «¿lo has hecho?» | — |
 | 7 | Semana 2 | Tu mapa del Ikigai Activo | Cap. 4 y Herramientas |
-| 14 | Semana 3 | PASO (con cuenta en la app) + la pregunta del contraste interno | PASO, cap. 8 |
+| 10 | Jueves 2 | Ídem | — |
+| 14 | Semana 3 | PASO + la pregunta del contraste interno | PASO, cap. 8 |
+| 17 | Jueves 3 | Ídem | — |
 | 21 | Semana 4 | Repetir el Inventario (enlace personal) + revisión mensual | Cap. 6 |
+| 24 | Jueves 4 | Ídem, con el enlace para repetir | — |
 | 28 | Cierre | Propuesta: el curso online; el libro; responder al correo | Epílogo |
+
+- **«¿Has hecho el ejercicio de esta semana?»** (correos del jueves): un clic
+  con «Sí · A medias · Esta semana no». **No bloquea nada**: el lunes siguiente
+  llega igual; si respondió «no» o «a medias», empieza reconociéndolo («No
+  pasa nada si la semana pasada no pudo ser…»). Se guarda en
+  `programa_checkins` y sirve para saber quién se implica de verdad. Como
+  algunos gestores de correo abren los enlaces solos para analizarlos, el
+  clic solo se registra cuando el navegador de la persona lo confirma.
+- Si la tarea programada falla varios días, los lunes y el cierre pendientes
+  se recuperan, pero un recordatorio de jueves atrasado se descarta.
 
 - **Encuentros en grupo** (opcionales, online): se dan de alta en la tabla
   `programa_encuentros` (fecha y hora, enlace, lengua; vacía = todas). A cada
@@ -27,8 +41,11 @@ conversión del embudo: quien llega al final ha trabajado un mes y conoce a Mane
 - **Semana 4:** el enlace `…/inventario?prog=<token>` guarda el nuevo intento
   como final y muestra «Hace un mes y hoy»: solo las respuestas que han
   cambiado, una al lado de la otra, sin interpretar.
-- **Semana 3, PASO con cuenta:** el enlace lleva a registrarse/entrar y vuelve
-  a `/paso`; con sesión, el resultado queda guardado (y IKIBOARD lo lee). El
+- **Semana 3, PASO:** por defecto, el enlace lleva directo a `/paso`, sin
+  registro (y se invita a crear cuenta). Con `PROGRAMA_PASO_CON_CUENTA=1`, lleva
+  a registrarse/entrar y vuelve a `/paso`; con sesión, el resultado queda
+  guardado (y IKIBOARD lo lee). Activarlo **solo** cuando el correo de
+  verificación de cuentas de Supabase funcione (servidor de correo propio). El
   correo aclara que la «máscara» de PASO es la forma adaptada de actuar, no
   las siete máscaras del libro (que quedan para el curso).
 - **Cierre:** el botón del curso usa `PROGRAMA_CURSO_URL` (variable de
@@ -50,6 +67,7 @@ el servidor.
   duplicados aunque la tarea se ejecute cada hora; si un envío falla, se
   libera y se reintenta en la siguiente ejecución.
 - `programa_encuentros`: los encuentros, que da de alta Manel.
+- `programa_checkins`: la respuesta de un clic de cada jueves (semana 1-4).
 
 Baja: cada correo lleva un enlace firmado `prog:<id>` que pasa la inscripción
 a `baja` (no toca el consentimiento de marketing, que es aparte). CRM: origen

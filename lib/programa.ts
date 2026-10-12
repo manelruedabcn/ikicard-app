@@ -12,13 +12,22 @@ export const PROGRAMA_SEND_HOUR = 8
 // Ventana en la que una persona recibe avisos de encuentros (días desde su inicio).
 export const PROGRAMA_VENTANA_DIAS = 30
 
-export type ProgramaSemanal = 'semana1' | 'semana2' | 'semana3' | 'semana4' | 'cierre'
+export type ProgramaSemanal =
+  | 'semana1' | 'jueves1' | 'semana2' | 'jueves2' | 'semana3' | 'jueves3' | 'semana4' | 'jueves4' | 'cierre'
+export type ProgramaCheckin = 'si' | 'medias' | 'no'
+export const PROGRAMA_CHECKINS: ProgramaCheckin[] = ['si', 'medias', 'no']
 
+// Lunes: el correo de la semana. Jueves: dos líneas, una pregunta y el clic
+// de «¿lo has hecho?» (no bloquea nada).
 export const PROGRAMA_CALENDARIO: { key: ProgramaSemanal; day: number }[] = [
   { key: 'semana1', day: 0 },
+  { key: 'jueves1', day: 3 },
   { key: 'semana2', day: 7 },
+  { key: 'jueves2', day: 10 },
   { key: 'semana3', day: 14 },
+  { key: 'jueves3', day: 17 },
   { key: 'semana4', day: 21 },
+  { key: 'jueves4', day: 24 },
   { key: 'cierre', day: 28 },
 ]
 
@@ -51,11 +60,23 @@ export function nextMonday(date: string): string {
   return addDays(date, diff)
 }
 
-// Correos semanales que ya tocan y aún no se han enviado, en orden.
+// Correos que ya tocan y aún no se han enviado. Si se acumulan varios (una
+// caída de varios días), solo vale el más reciente de cada tipo: no tiene
+// sentido mandar hoy el recordatorio de un jueves pasado.
 export function semanalesPendientes(start: string, today: string, enviados: Set<string>): ProgramaSemanal[] {
-  return PROGRAMA_CALENDARIO
-    .filter(c => addDays(start, c.day) <= today && !enviados.has(c.key))
+  const vencidos = PROGRAMA_CALENDARIO.filter(c => addDays(start, c.day) <= today)
+  const ultimo = vencidos[vencidos.length - 1]
+  return vencidos
+    .filter(c => !enviados.has(c.key))
+    // Los jueves atrasados se descartan; los lunes y el cierre, no.
+    .filter(c => !c.key.startsWith('jueves') || c === ultimo)
     .map(c => c.key)
+}
+
+// Número de semana (1-4) de un correo de jueves.
+export function semanaDeJueves(key: ProgramaSemanal): number | null {
+  const m = /^jueves(\d)$/.exec(key)
+  return m ? Number(m[1]) : null
 }
 
 // ¿Cae un encuentro (fecha de Madrid) dentro del mes de esta persona?
