@@ -4,6 +4,7 @@ import { calcularSegmentos } from '@/lib/paso-segments'
 import { generarNarrativa } from '@/lib/paso-narrativa'
 import { generarTitulares } from '@/lib/paso-titulares'
 import { getRareza } from '@/lib/paso-rareza'
+import { getInvCopy, type InvDevolucion } from '@/lib/inventario-content'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -429,4 +430,63 @@ export async function sendWorkshopAdminEmail(input: {
       ${button(`${APP_URL}/es/admin`, 'VER INSCRIPCIONES')}
     `),
   })
+}
+
+// ── Inventario honesto · devolución (transaccional) ──────────
+// La pidió la persona al terminar el test. Reproduce la misma devolución que
+// vio en pantalla (mismas reglas, recalculada en el servidor). El enlace de
+// baja solo aparece si dio consentimiento de marketing: sin él no hay más
+// correos que este.
+export async function sendInventarioEmail(
+  to: string,
+  locale: string,
+  d: InvDevolucion,
+  unsubLink: string | null,
+) {
+  const copy = getInvCopy(locale)
+  const p = (text: string, extra = '') =>
+    `<p style="font-size:15px;line-height:1.7;color:rgba(39,39,39,0.8);margin:0 0 12px;${extra}">${escapeHtml(text)}</p>`
+  const h2 = (text: string) =>
+    `<p style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#c2866b;margin:30px 0 10px;">${escapeHtml(text)}</p>`
+  const quote = (q?: string, cite?: string) =>
+    q ? `<p style="font-family:Georgia,serif;font-style:italic;font-size:18px;line-height:1.5;border-left:2px solid #c2866b;padding-left:14px;color:#403b37;margin:0 0 12px;">«${escapeHtml(q)}»<br><span style="font-family:Arial,sans-serif;font-style:normal;font-size:12px;color:#8b8179;">${escapeHtml(cite || '')} · ${escapeHtml(copy.book)}</span></p>` : ''
+  const list = (items: string[]) =>
+    `<ul style="margin:0;padding-left:18px;font-size:14px;line-height:1.6;color:#403b37;">${items.map(i => `<li style="margin:0 0 6px;">${escapeHtml(i)}</li>`).join('')}</ul>`
+
+  const supports = d.supports.length
+    ? d.supports.map(s => p(`${s.dim}. ${s.text}`) + quote(s.quote, s.cite)).join('')
+    : p(d.noSupport)
+  const attention = d.attention.kind === 'route'
+    ? p(d.attention.text) + quote(d.attention.quote, d.attention.cite)
+    : p(d.attention.main.lead) + p(d.attention.main.intro, 'font-size:14px;color:#8b8179;')
+      + quote(d.attention.main.quote, d.attention.main.cite)
+      + (d.attention.main.note ? p(d.attention.main.note) : '')
+      + (d.attention.also ? p(d.attention.also, 'font-size:14px;color:#8b8179;') : '')
+
+  const html = shell(`
+    <h1 style="font-size:26px;font-weight:normal;text-align:center;margin:0 0 12px;">${escapeHtml(copy.resultTitle)}</h1>
+    ${p(copy.resultIntro, 'text-align:center;')}
+    ${h2(`${copy.activoTitle} · ${copy.activoSub}`)}${list(d.activo)}
+    ${h2(`${copy.conscTitle} · ${copy.conscSub}`)}${list(d.consciente)}
+    ${p(`${copy.between} ${d.between}`, 'font-size:14px;margin-top:14px;')}
+    ${h2(copy.supportsTitle)}${supports}
+    ${h2(copy.attentionTitle)}${attention}${d.pair ? p(d.pair, 'font-size:14px;color:#8b8179;') : ''}
+    ${d.texto ? h2(copy.writtenTitle) + `<p style="font-family:Georgia,serif;font-size:20px;line-height:1.4;margin:0 0 8px;">«${escapeHtml(d.texto)}»</p>` + p(copy.writtenNote, 'font-size:14px;color:#8b8179;') : ''}
+    <div style="background:#f5f1eb;padding:18px 20px;margin:28px 0;">
+      <p style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 6px;">${escapeHtml(`${copy.exerciseEyebrow} ${d.exercise.cap}`)}</p>
+      <p style="font-family:Georgia,serif;font-size:22px;margin:0 0 12px;">${escapeHtml(d.exercise.title)}</p>
+      ${d.exercise.steps.map(s => p(s, 'font-size:14px;')).join('')}
+    </div>
+    ${p(d.close, 'font-size:14px;color:#5c554f;')}
+    ${unsubLink ? `<p style="font-size:12px;color:rgba(39,39,39,0.4);text-align:center;margin-top:24px;">Si prefieres no recibir nada más, <a href="${unsubLink}" style="color:rgba(39,39,39,0.5);">date de baja aquí</a>.</p>` : ''}
+  `)
+
+  const delivery = await resend.emails.send({
+    from: FROM,
+    to,
+    subject: `${copy.resultEyebrow}: ${copy.resultTitle.toLowerCase()}`,
+    html,
+  })
+  if (delivery.error) throw new Error(delivery.error.message)
+  return delivery
 }
