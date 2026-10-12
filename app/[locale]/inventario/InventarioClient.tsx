@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { trackEvent } from '@/lib/analytics'
 import { INV_QUESTION_IDS, INV_TEXTO_MAX, type InvAnswers, type InvQuestionId } from '@/lib/inventario'
+import { getProgramaTexts } from '@/lib/programa-content'
 import {
   buildDevolucion,
   devolucionToText,
@@ -21,9 +22,11 @@ interface Props {
   locale: string
   userId: string | null
   source: string | null
+  // Token del programa de un mes: en la semana 4 se repite el test y se compara.
+  prog: string | null
 }
 
-export default function InventarioClient({ locale, userId, source }: Props) {
+export default function InventarioClient({ locale, userId, source, prog }: Props) {
   const copy = getInvCopy(locale)
   const questions = useMemo(() => getInvQuestions(locale), [locale])
   const open = getInvOpen(locale)
@@ -35,6 +38,9 @@ export default function InventarioClient({ locale, userId, source }: Props) {
   const [texto, setTexto] = useState('')
   const [devolucion, setDevolucion] = useState<InvDevolucion | null>(null)
   const [attemptId, setAttemptId] = useState<string | null>(null)
+  // Respuestas del primer Inventario (solo al repetirlo dentro del programa).
+  const [previous, setPrevious] = useState<InvAnswers | null>(null)
+  const [enPrograma, setEnPrograma] = useState(false)
 
   // Recupera el progreso si la persona recarga a mitad del test.
   useEffect(() => {
@@ -104,11 +110,13 @@ export default function InventarioClient({ locale, userId, source }: Props) {
     fetch('/api/inventario/track', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ answers: a, locale, source }),
+      body: JSON.stringify({ answers: a, locale, source, prog }),
     })
       .then(r => (r.ok ? r.json() : null))
       .then(j => {
         if (j?.id) setAttemptId(j.id)
+        if (j?.programa) setEnPrograma(true)
+        if (j?.previous) setPrevious(j.previous as InvAnswers)
       })
       .catch(() => {})
   }
@@ -237,6 +245,8 @@ export default function InventarioClient({ locale, userId, source }: Props) {
           <p className="text-[15px] text-[#272727]/60">{copy.resultIntro}</p>
         </header>
 
+        {previous && <Comparacion locale={locale} before={previous} now={answers as InvAnswers} />}
+
         <div>
           <div className="grid sm:grid-cols-2 border-y border-[#272727]/12">
             <Column title={copy.activoTitle} sub={copy.activoSub} items={d.activo} />
@@ -295,13 +305,15 @@ export default function InventarioClient({ locale, userId, source }: Props) {
 
         <p className="text-sm leading-relaxed text-[#272727]/60 max-w-2xl">{d.close}</p>
 
-        <LeadCapture
-          locale={locale}
-          answers={answers as InvAnswers}
-          texto={d.texto}
-          attemptId={attemptId}
-          source={source}
-        />
+        {!enPrograma && (
+          <LeadCapture
+            locale={locale}
+            answers={answers as InvAnswers}
+            texto={d.texto}
+            attemptId={attemptId}
+            source={source}
+          />
+        )}
 
         <details className="border-t border-[#272727]/12 pt-4">
           <summary className="cursor-pointer text-sm text-[#272727]/55 hover:text-[#272727]">{copy.basis}</summary>
@@ -320,6 +332,36 @@ export default function InventarioClient({ locale, userId, source }: Props) {
         </div>
       </article>
     </Shell>
+  )
+}
+
+// Semana 4 del programa: solo las respuestas que han cambiado, una al lado de
+// la otra. Sin interpretar: mirar qué se ha movido es trabajo de la persona.
+function Comparacion({ locale, before, now }: { locale: string; before: InvAnswers; now: InvAnswers }) {
+  const t = getProgramaTexts(locale).compare
+  const questions = getInvQuestions(locale)
+  const label = (id: InvQuestionId, v: string) => questions.find(q => q.id === id)?.opts.find(o => o[0] === v)?.[1] ?? '—'
+  const cambios = questions.filter(q => before[q.id] !== now[q.id])
+  const iguales = questions.length - cambios.length
+  return (
+    <section className="rounded-xl border border-[#c2866b]/30 bg-[#c2866b]/[0.04] p-6 space-y-4">
+      <h2 className="font-[family-name:var(--font-cormorant)] text-3xl text-[#272727]">{t.title}</h2>
+      <p className="text-sm text-[#272727]/60">{t.intro}</p>
+      {cambios.length === 0 ? (
+        <p className="text-[15px] text-[#272727]/85">{t.none}</p>
+      ) : (
+        <ul className="space-y-4">
+          {cambios.map(q => (
+            <li key={q.id} className="text-sm">
+              <p className="text-[#272727]/55 mb-1">{q.text}</p>
+              <p className="text-[#272727]/60"><span className="text-xs uppercase tracking-[0.15em] mr-2">{t.before}</span>{label(q.id, before[q.id])}</p>
+              <p className="text-[#272727]"><span className="text-xs uppercase tracking-[0.15em] mr-2 text-[#c2866b]">{t.now}</span>{label(q.id, now[q.id])}</p>
+            </li>
+          ))}
+        </ul>
+      )}
+      {cambios.length > 0 && iguales > 0 && <p className="text-sm text-[#272727]/55">{t.same(iguales)}</p>}
+    </section>
   )
 }
 
@@ -392,14 +434,18 @@ function LeadCapture({
   source: string | null
 }) {
   const copy = getInvCopy(locale).mail
+  const programaTexts = getProgramaTexts(locale)
   const [email, setEmail] = useState('')
   const [consent, setConsent] = useState(false)
+  const [programa, setPrograma] = useState(false)
+  const [inscrita, setInscrita] = useState(false)
   const [status, setStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
 
   if (status === 'done') {
     return (
       <div className="rounded-xl bg-[#c2866b]/[0.08] px-5 py-6">
         <p className="text-sm text-[#272727]/75">{copy.done}</p>
+        {inscrita && <p className="text-sm text-[#272727]/75 mt-2">{programaTexts.optInDone}</p>}
       </div>
     )
   }
@@ -413,8 +459,12 @@ function LeadCapture({
       const res = await fetch('/api/inventario/lead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), consent, answers, texto, attemptId, locale, source }),
+        body: JSON.stringify({ email: email.trim(), consent, programa, answers, texto, attemptId, locale, source }),
       })
+      if (res.ok) {
+        const j = await res.json().catch(() => null)
+        if (j?.programa === 'inscrita' || j?.programa === 'ya') setInscrita(true)
+      }
       setStatus(res.ok ? 'done' : 'error')
       if (res.ok) trackEvent('generate_lead', { tool: 'inventario', consent })
     } catch {
@@ -446,6 +496,16 @@ function LeadCapture({
           {status === 'sending' ? copy.sending : copy.button}
         </button>
       </div>
+      <label htmlFor="inv-programa" className="flex items-start gap-2 cursor-pointer">
+        <input
+          id="inv-programa"
+          type="checkbox"
+          checked={programa}
+          onChange={e => setPrograma(e.target.checked)}
+          className="mt-1 accent-[#c2866b]"
+        />
+        <span className="text-xs leading-relaxed text-[#272727]/70">{programaTexts.optIn}</span>
+      </label>
       <label htmlFor="inv-consent" className="flex items-start gap-2 cursor-pointer">
         <input
           id="inv-consent"

@@ -925,3 +925,8 @@ export function devolucionToText(d: InvDevolucion, locale: string, fecha: string
   L.push('', d.close)
   return L.join('\n')
 }
+
+// Un ejercicio concreto por código (lo usa el programa de un mes en la semana 1).
+export function getInvExercise(locale: string, key: ExerciseKey): InvExercise {
+  return texts(locale).exercises[key]
+}

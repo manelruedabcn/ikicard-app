@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { buildLectura, parseInvAnswers } from '@/lib/inventario'
-import { invLocale, invSource, sessionUserId } from '@/lib/inventario-server'
+import { invLocale, invSource, invUuid, sessionUserId } from '@/lib/inventario-server'
+import { inscripcionPorToken } from '@/lib/programa-server'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,5 +36,25 @@ export async function POST(req: Request) {
     console.error('[inventario track] insert error:', error.message)
     return NextResponse.json({ ok: false, error: 'insert failed' }, { status: 500 })
   }
+  // Semana 4 del programa: el enlace lleva el token de la inscripción. Este
+  // intento queda como el final y se devuelven las respuestas del primero
+  // para comparar «hace un mes / hoy». Sin token válido, flujo normal.
+  const token = invUuid(body?.prog)
+  if (token) {
+    const insc = await inscripcionPorToken(token)
+    if (insc) {
+      await admin
+        .from('inventario_attempts')
+        .update({ lead_id: insc.lead_id })
+        .eq('id', data.id)
+        .is('lead_id', null)
+      if (!insc.final_attempt_id) {
+        await admin.from('programa_inscripciones').update({ final_attempt_id: data.id }).eq('id', insc.id)
+      }
+      const previous = parseInvAnswers(insc.first_answers)
+      return NextResponse.json({ ok: true, id: data.id, programa: true, previous })
+    }
+  }
+
   return NextResponse.json({ ok: true, id: data.id })
 }

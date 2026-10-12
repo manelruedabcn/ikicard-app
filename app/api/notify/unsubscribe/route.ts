@@ -10,7 +10,14 @@ export async function GET(req: NextRequest) {
   const l = lp === 'en' ? 'en' : lp === 'ca' ? 'ca' : 'es'
 
   const isLead = uid.startsWith('lead:') || uid.startsWith('inv:')
-  const done = isLead
+  const isPrograma = uid.startsWith('prog:')
+  const done = isPrograma
+    ? (l === 'en'
+        ? "Done. You have left the programme and won't receive more of its emails."
+        : l === 'ca'
+          ? "Fet. Has deixat el programa i no en rebràs més correus."
+          : 'Hecho. Has dejado el programa y no recibirás más correos suyos.')
+    : isLead
     ? (l === 'en'
         ? "Done. You won't receive more emails from IKIGAIER."
         : l === 'ca'
@@ -43,7 +50,10 @@ export async function GET(req: NextRequest) {
   // Sin prefijo → baja de recordatorios del Viaje (perfil logueado).
   const nowIso = new Date().toISOString()
   let error: { message: string } | null = null
-  if (uid.startsWith('inv:')) {
+  if (isPrograma) {
+    const res = await admin.from('programa_inscripciones').update({ status: 'baja' }).eq('id', uid.slice(5))
+    error = res.error
+  } else if (uid.startsWith('inv:')) {
     const { data: lead, error: invError } = await admin
       .from('inventario_leads')
       .update({ unsubscribed_at: nowIso })

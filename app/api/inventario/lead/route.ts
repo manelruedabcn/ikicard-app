@@ -6,6 +6,7 @@ import { invLocale, invSource, invUuid, sessionUserId } from '@/lib/inventario-s
 import { sendInventarioEmail } from '@/lib/email'
 import { unsubUrl } from '@/lib/notify'
 import { syncCrmContact } from '@/lib/crm-sync'
+import { inscribirEnPrograma } from '@/lib/programa-server'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,6 +27,8 @@ export async function POST(req: Request) {
   const source = invSource(body?.source)
   const attemptId = invUuid(body?.attemptId)
   const consent = body?.consent === true
+  // Programa «Un mes conociendo tu ikigai»: casilla aparte, también opcional.
+  const programa = body?.programa === true
 
   if (!EMAIL_RE.test(email) || email.length > 254) {
     return NextResponse.json({ ok: false, error: 'bad email' }, { status: 400 })
@@ -97,5 +100,28 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: 'email failed' }, { status: 502 })
   }
 
-  return NextResponse.json({ ok: true })
+  // El programa es un servicio que la persona pide (casilla propia): la
+  // inscripción no depende del consentimiento de marketing. Si falla, la
+  // devolución ya está enviada; lo indicamos sin romper la respuesta.
+  let programaEstado: 'inscrita' | 'ya' | 'error' | null = null
+  if (programa) {
+    try {
+      const { inscripcion, nueva } = await inscribirEnPrograma({ email, locale, leadId: lead.id, userId, attemptId, answers })
+      programaEstado = nueva ? 'inscrita' : 'ya'
+      await syncCrmContact({
+        userId,
+        email,
+        sourceType: 'programa',
+        sourceId: inscripcion.id,
+        sourceDetail: { start_date: inscripcion.start_date, locale },
+        marketingConsent: consent,
+        unsubscribedAt: lead.unsubscribed_at,
+      }).catch(err => console.error('[inventario lead] crm programa error:', err))
+    } catch (err) {
+      console.error('[inventario lead] programa error:', err)
+      programaEstado = 'error'
+    }
+  }
+
+  return NextResponse.json({ ok: true, programa: programaEstado })
 }

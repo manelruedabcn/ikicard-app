@@ -6,7 +6,7 @@ type SyncInput = {
   firstName?: string | null
   email?: string | null
   phone?: string | null
-  sourceType: 'registro' | 'paso' | 'taller' | 'inventario'
+  sourceType: 'registro' | 'paso' | 'taller' | 'inventario' | 'programa'
   sourceId?: string | null
   sourceDetail?: Record<string, unknown>
   sourceCreatedAt?: string
@@ -19,6 +19,7 @@ const TAGS: Record<SyncInput['sourceType'], { name: string; color: string }> = {
   paso: { name: 'PASO', color: '#7a8b6f' },
   taller: { name: 'Taller 29/9', color: '#c2866b' },
   inventario: { name: 'Inventario honesto', color: '#9a7b5f' },
+  programa: { name: 'Un mes conociendo tu ikigai', color: '#7a8b6f' },
 }
 
 export async function syncCrmContact(input: SyncInput) {

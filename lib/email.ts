@@ -5,6 +5,7 @@ import { generarNarrativa } from '@/lib/paso-narrativa'
 import { generarTitulares } from '@/lib/paso-titulares'
 import { getRareza } from '@/lib/paso-rareza'
 import { getInvCopy, type InvDevolucion } from '@/lib/inventario-content'
+import { getProgramaTexts, type ProgramaMail } from '@/lib/programa-content'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -487,6 +488,51 @@ export async function sendInventarioEmail(
     to,
     subject: copy.mail.subject,
     html,
+  })
+  if (delivery.error) throw new Error(delivery.error.message)
+  return delivery
+}
+
+// ── Programa «Un mes conociendo tu ikigai» ───────────────────
+// Cada correo del programa es una lista de bloques (lib/programa-content.ts):
+// párrafos, citas del libro, el ejercicio de la semana, botones y encuentros.
+// Siempre lleva enlace para dejar el programa.
+export async function sendProgramaEmail(to: string, locale: string, mail: ProgramaMail, unsubLink: string) {
+  const t = getProgramaTexts(locale)
+  const [qo, qc] = t.q
+  const html = mail.blocks.map(b => {
+    switch (b.kind) {
+      case 'p':
+        return `<p style="font-size:15px;line-height:1.7;color:${b.muted ? '#8b8179' : 'rgba(39,39,39,0.82)'};margin:0 0 14px;">${escapeHtml(b.text)}</p>`
+      case 'quote':
+        return `<p style="font-family:Georgia,serif;font-style:italic;font-size:18px;line-height:1.5;border-left:2px solid #c2866b;padding-left:14px;color:#403b37;margin:4px 0 16px;">${qo}${escapeHtml(b.text)}${qc}<br><span style="font-family:Arial,sans-serif;font-style:normal;font-size:12px;color:#8b8179;">${escapeHtml(b.cite)} · ${escapeHtml(t.book)}</span></p>`
+      case 'exercise':
+        return `<div style="background:#f5f1eb;padding:18px 20px;margin:20px 0;">
+          <p style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 6px;">${escapeHtml(b.eyebrow)}</p>
+          <p style="font-family:Georgia,serif;font-size:22px;margin:0 0 12px;">${escapeHtml(b.title)}</p>
+          ${b.steps.map(st => `<p style="font-size:14px;line-height:1.65;color:#403b37;margin:0 0 10px;">${escapeHtml(st)}</p>`).join('')}
+        </div>`
+      case 'cta':
+        return button(b.href, escapeHtml(b.label))
+      case 'encuentros':
+        return `<div style="border:1px solid #e1c7ba;padding:16px 18px;margin:20px 0;">
+          <p style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#c2866b;margin:0 0 10px;">${escapeHtml(b.title)}</p>
+          ${b.items.map(i => `<p style="font-size:14px;line-height:1.6;margin:0 0 8px;color:#403b37;">${escapeHtml(i.when)} · <a href="${i.url}" style="color:#c2866b;">${escapeHtml(b.joinLabel)}</a></p>`).join('')}
+        </div>`
+      case 'sign':
+        return `<p style="font-family:Georgia,serif;font-size:18px;color:#272727;margin:22px 0 0;">${escapeHtml(b.text)}</p>`
+    }
+  }).join('')
+
+  const delivery = await resend.emails.send({
+    from: FROM,
+    to,
+    subject: mail.subject,
+    html: shell(`
+      <p style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;text-align:center;margin:0 0 22px;">${escapeHtml(t.name)}</p>
+      ${html}
+      <p style="font-size:12px;color:rgba(39,39,39,0.4);text-align:center;margin-top:28px;">${t.unsubscribe(unsubLink)}</p>
+    `),
   })
   if (delivery.error) throw new Error(delivery.error.message)
   return delivery

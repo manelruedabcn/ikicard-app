@@ -25,11 +25,14 @@ export default async function InventarioPage({
   searchParams,
 }: {
   params: { locale: string }
-  searchParams?: { src?: string; utm_source?: string }
+  searchParams?: { src?: string; utm_source?: string; prog?: string }
 }) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   const source = searchParams?.src || searchParams?.utm_source || null
 
-  return <InventarioClient locale={locale} userId={user?.id ?? null} source={source} />
+  // prog: token del programa de un mes (semana 4, repetir y comparar).
+  const prog = searchParams?.prog && /^[0-9a-f-]{36}$/i.test(searchParams.prog) ? searchParams.prog : null
+
+  return <InventarioClient locale={locale} userId={user?.id ?? null} source={source} prog={prog} />
 }

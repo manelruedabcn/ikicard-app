@@ -8,9 +8,9 @@ autoconocimiento gratuito; no lo sustituye.
 ## Recorrido previsto (decidido con Manel, oct-2026)
 
 1. **Inventario honesto** (este módulo) → devolución en pantalla + email.
-2. **Un mes conociendo tu ikigai** (gratuito, solo texto): instrucciones por
-   escrito 1–2 veces por semana + 1–2 encuentros en grupo; por grupos con fecha
-   de inicio. Semana 4: repetir el Inventario y comparar. *Pendiente (paso 2).*
+2. **Un mes conociendo tu ikigai** (gratuito, solo texto): un correo cada lunes
+   durante cuatro semanas + encuentros en grupo opcionales. Semana 3: PASO con
+   cuenta. Semana 4: repetir el Inventario y comparar. Ver `docs/programa.md`.
 3. Al final, lo de pago: curso online en vídeo (2 h), taller, 1 a 1; aparte,
    libro y mazo (Viaje). En el mes **no** entran miedo, máscaras ni diálogo
    interno como temas (quedan para el curso), ni cartas del mazo.

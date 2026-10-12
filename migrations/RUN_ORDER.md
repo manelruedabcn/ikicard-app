@@ -32,6 +32,11 @@ veces sin romper nada).
    políticas, solo service_role). **No necesita permiso** en `entitlements`:
    `/inventario` es pública, como PASO. Ejecutarla antes de desplegar el código.
 
+   `programa.sql` («Un mes conociendo tu ikigai») va **después** de
+   `inventario.sql`: crea `programa_inscripciones`, `programa_envios` y
+   `programa_encuentros`. Tampoco necesita permisos. Los encuentros se dan de
+   alta a mano en `programa_encuentros` (ver `docs/programa.md`).
+
 ## Parte B — Conceder acceso a IKIBOARD
 
 Con las tablas creadas, la app sigue redirigiendo al dashboard a quien no tenga la
