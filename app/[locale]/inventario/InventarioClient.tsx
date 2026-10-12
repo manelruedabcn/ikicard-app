@@ -224,7 +224,7 @@ export default function InventarioClient({ locale, userId, source }: Props) {
   // ---------- RESULTADO ----------
   if (!devolucion) return null
   const d = devolucion
-  const fecha = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })
+  const fecha = new Date().toLocaleDateString(copy.dateLocale, { day: 'numeric', month: 'long', year: 'numeric' })
 
   return (
     <Shell userId={userId} locale={locale} wide>
@@ -255,7 +255,7 @@ export default function InventarioClient({ locale, userId, source }: Props) {
                 <span className="text-[11px] tracking-[0.18em] uppercase text-[#272727]/45 mr-2">{s.dim}</span>
                 {s.text}
               </p>
-              {s.quote && <Quote quote={s.quote} cite={s.cite!} book={copy.book} />}
+              {s.quote && <Quote quote={s.quote} cite={s.cite!} book={copy.book} q={copy.q} />}
             </div>
           )) : <p className="text-[15px] leading-relaxed text-[#272727]/85">{d.noSupport}</p>}
         </section>
@@ -265,13 +265,13 @@ export default function InventarioClient({ locale, userId, source }: Props) {
           {d.attention.kind === 'route' ? (
             <>
               <p className="text-[15px] leading-relaxed text-[#272727]/85">{d.attention.text}</p>
-              <Quote quote={d.attention.quote} cite={d.attention.cite} book={copy.book} />
+              <Quote quote={d.attention.quote} cite={d.attention.cite} book={copy.book} q={copy.q} />
             </>
           ) : (
             <>
               <p className="text-[15px] leading-relaxed text-[#272727]/85">{d.attention.main.lead}</p>
               <p className="text-sm text-[#272727]/55">{d.attention.main.intro}</p>
-              <Quote quote={d.attention.main.quote} cite={d.attention.main.cite} book={copy.book} />
+              <Quote quote={d.attention.main.quote} cite={d.attention.main.cite} book={copy.book} q={copy.q} />
               {d.attention.main.note && <p className="text-[15px] leading-relaxed text-[#272727]/85">{d.attention.main.note}</p>}
               {d.attention.also && <p className="text-sm text-[#272727]/55">{d.attention.also}</p>}
             </>
@@ -282,7 +282,7 @@ export default function InventarioClient({ locale, userId, source }: Props) {
         {d.texto && (
           <section className="space-y-2">
             <h2 className="font-[family-name:var(--font-cormorant)] text-3xl text-[#272727]">{copy.writtenTitle}</h2>
-            <p className="font-[family-name:var(--font-cormorant)] text-2xl leading-snug text-[#272727]">«{d.texto}»</p>
+            <p className="font-[family-name:var(--font-cormorant)] text-2xl leading-snug text-[#272727]">{copy.q[0]}{d.texto}{copy.q[1]}</p>
             <p className="text-sm text-[#272727]/55">{copy.writtenNote}</p>
           </section>
         )}
@@ -313,7 +313,7 @@ export default function InventarioClient({ locale, userId, source }: Props) {
         </details>
 
         <div className="flex flex-wrap gap-3 pb-8">
-          <CopyButton text={devolucionToText(d, locale, fecha)} />
+          <CopyButton text={devolucionToText(d, locale, fecha)} label={copy.copyButton} doneLabel={copy.copied} />
           <button onClick={restart} className="px-5 py-2.5 border border-[#272727]/20 text-sm text-[#272727] hover:border-[#272727]">
             {copy.restart}
           </button>
@@ -340,18 +340,18 @@ function Column({ title, sub, items, right = false }: { title: string; sub: stri
   )
 }
 
-function Quote({ quote, cite, book }: InvQuote & { book: string }) {
+function Quote({ quote, cite, book, q }: InvQuote & { book: string; q: [string, string] }) {
   return (
     <blockquote className="border-l-2 border-[#c2866b] pl-4">
-      <p className="font-[family-name:var(--font-cormorant)] italic text-[22px] leading-snug text-[#272727]">«{quote}»</p>
+      <p className="font-[family-name:var(--font-cormorant)] italic text-[22px] leading-snug text-[#272727]">{q[0]}{quote}{q[1]}</p>
       <cite className="block not-italic text-xs text-[#272727]/45 mt-1.5">{cite} · {book}</cite>
     </blockquote>
   )
 }
 
-function CopyButton({ text }: { text: string }) {
+function CopyButton({ text, label: idleLabel, doneLabel }: { text: string; label: string; doneLabel: string }) {
   const [state, setState] = useState<'idle' | 'done' | 'manual'>('idle')
-  const label = state === 'done' ? 'Copiada' : 'Copiar devolución'
+  const label = state === 'done' ? doneLabel : idleLabel
   return (
     <div className="w-full sm:w-auto">
       <button
@@ -476,7 +476,7 @@ function Shell({
     <div className="min-h-screen flex flex-col items-center bg-[#FDFBF7] px-4 py-8">
       <div className={`w-full ${wide ? 'max-w-3xl' : 'max-w-xl'} flex items-center justify-between mb-8`}>
         <Link
-          href={userId ? `/${locale}/dashboard` : 'https://www.ikigaier.com/es/'}
+          href={userId ? `/${locale}/dashboard` : `https://www.ikigaier.com/${locale === 'ca' || locale === 'en' ? locale : 'es'}/`}
           className="text-xs text-[#272727]/40 hover:text-[#c2866b] transition-colors tracking-[0.3em]"
         >
           IKIGAIER

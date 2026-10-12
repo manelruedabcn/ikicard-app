@@ -8,7 +8,8 @@ lo que ves en el código, gana el código — pero avísame para actualizar esto
 **IKIGAIER**: plataforma de autoconocimiento basada en permisos. No es "una app de
 cards": es un ecosistema de herramientas que cada usuario va desbloqueando, con un
 dashboard dinámico por usuario. Producto de **Manuel (Manel)**; se trabaja en
-**español**. La voz de todo el copy es la de Manel (calma, honesta, sin tono
+**castellano** (nunca «español»: la lengua se llama **castellano**, también en la UI,
+menús de idioma y documentación). La voz de todo el copy es la de Manel (calma, honesta, sin tono
 publicitario, muestreada de sus libros/manuscrito).
 
 ## Contexto de marca y producto — Ikigai Consciente / IKIGAIER
@@ -161,4 +162,4 @@ mismas 15 frases), construido en paralelo y ya retirado del repo el
   todos los consumidores usan los getters nuevos (grep de símbolos viejos) para no
   romper el build.
 - Verifica con `npm run build` (exit 0) tras tocar contenido/rutas.
-- Comenta en la voz y densidad del código existente (comentarios en español).
+- Comenta en la voz y densidad del código existente (comentarios en castellano).

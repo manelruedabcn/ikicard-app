@@ -69,7 +69,7 @@ respuesta abierta.
 - Sin empleo remunerado (cuidados, estudios, búsqueda, jubilación): nota fija
   sobre «de qué podría vivir»; el desgaste no se interpreta.
 
-## Textos nuevos (no son del libro) — pendientes de revisión de Manel
+## Textos nuevos (no son del libro) — pendientes de revisión de Manel (en las tres lenguas)
 
 En `lib/inventario-content.ts`: las frases de las columnas (`MIRROR_ES`), los
 textos de «lo que sostiene» (`SUPPORTS_ES.text`), los `lead`/`note`/`intro` de
@@ -90,6 +90,8 @@ los ejercicios son literales del libro.
 
 ## Idiomas
 
-Solo español por ahora. `/ca/inventario` y `/en/inventario` muestran el
-contenido en español hasta que exista la traducción (mismo criterio que la
-primera versión de `heridas`).
+Castellano, catalán e inglés (`lib/inventario-content.ts`, un dataset completo
+por lengua; la lógica es la misma). El libro está publicado en castellano: en
+catalán e inglés, las citas y los ejercicios son **traducción propia, pendiente
+de revisión de Manel**. Las frases de CAMINO salen del módulo CAMINO de cada
+lengua. Regla del proyecto: la lengua se llama **castellano**, nunca «español».
