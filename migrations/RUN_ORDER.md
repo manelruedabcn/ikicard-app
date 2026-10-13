@@ -27,6 +27,16 @@ veces sin romper nada).
    para el cruce herida × máscara (opcional; funciona sin él). Puede correrse en
    cualquier momento después de `platform.sql`.
 
+   `inventario.sql` (Inventario honesto, test de entrada sin cuenta) también es
+   independiente: crea `inventario_leads` e `inventario_attempts` (RLS sin
+   políticas, solo service_role). **No necesita permiso** en `entitlements`:
+   `/inventario` es pública, como PASO. Ejecutarla antes de desplegar el código.
+
+   `programa.sql` («Un mes conociendo tu ikigai») va **después** de
+   `inventario.sql`: crea `programa_inscripciones`, `programa_envios` y
+   `programa_encuentros`. Tampoco necesita permisos. Los encuentros se dan de
+   alta a mano en `programa_encuentros` (ver `docs/programa.md`).
+
 ## Parte B — Conceder acceso a IKIBOARD
 
 Con las tablas creadas, la app sigue redirigiendo al dashboard a quien no tenga la

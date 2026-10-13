@@ -9,8 +9,15 @@ export async function GET(req: NextRequest) {
   const lp = req.nextUrl.searchParams.get('l')
   const l = lp === 'en' ? 'en' : lp === 'ca' ? 'ca' : 'es'
 
-  const isLead = uid.startsWith('lead:')
-  const done = isLead
+  const isLead = uid.startsWith('lead:') || uid.startsWith('inv:')
+  const isPrograma = uid.startsWith('prog:')
+  const done = isPrograma
+    ? (l === 'en'
+        ? "Done. You have left the programme and won't receive more of its emails."
+        : l === 'ca'
+          ? "Fet. Has deixat el programa i no en rebràs més correus."
+          : 'Hecho. Has dejado el programa y no recibirás más correos suyos.')
+    : isLead
     ? (l === 'en'
         ? "Done. You won't receive more emails from IKIGAIER."
         : l === 'ca'
@@ -38,10 +45,35 @@ export async function GET(req: NextRequest) {
 
   const admin = createAdminClient()
   // uid con prefijo "lead:<id>" → baja de email marketing (tabla paso_leads).
+  // uid con prefijo "inv:<id>" → baja del Inventario honesto (inventario_leads),
+  // reflejada también en el CRM para que ninguna campaña vuelva a incluirla.
   // Sin prefijo → baja de recordatorios del Viaje (perfil logueado).
-  const { error } = uid.startsWith('lead:')
-    ? await admin.from('paso_leads').update({ unsubscribed_at: new Date().toISOString() }).eq('id', uid.slice(5))
-    : await admin.from('profiles').update({ notify_opt_out: true }).eq('id', uid)
+  const nowIso = new Date().toISOString()
+  let error: { message: string } | null = null
+  if (isPrograma) {
+    const res = await admin.from('programa_inscripciones').update({ status: 'baja' }).eq('id', uid.slice(5))
+    error = res.error
+  } else if (uid.startsWith('inv:')) {
+    const { data: lead, error: invError } = await admin
+      .from('inventario_leads')
+      .update({ unsubscribed_at: nowIso })
+      .eq('id', uid.slice(4))
+      .select('email')
+      .maybeSingle()
+    error = invError ?? (lead ? null : { message: 'lead not found' })
+    if (lead?.email) {
+      const { error: crmError } = await admin
+        .from('crm_contacts')
+        .update({ unsubscribed_at: nowIso, updated_at: nowIso })
+        .eq('email', lead.email)
+      if (crmError) console.error('[unsubscribe] crm update failed', crmError.message)
+    }
+  } else {
+    const res = uid.startsWith('lead:')
+      ? await admin.from('paso_leads').update({ unsubscribed_at: nowIso }).eq('id', uid.slice(5))
+      : await admin.from('profiles').update({ notify_opt_out: true }).eq('id', uid)
+    error = res.error
+  }
 
   // Si la baja no se pudo registrar, no fingimos éxito: mejor que la persona
   // reintente (o nos escriba) a decirle "hecho" con el opt-out sin guardar.

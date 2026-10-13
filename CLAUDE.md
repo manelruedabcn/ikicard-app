@@ -8,7 +8,8 @@ lo que ves en el código, gana el código — pero avísame para actualizar esto
 **IKIGAIER**: plataforma de autoconocimiento basada en permisos. No es "una app de
 cards": es un ecosistema de herramientas que cada usuario va desbloqueando, con un
 dashboard dinámico por usuario. Producto de **Manuel (Manel)**; se trabaja en
-**español**. La voz de todo el copy es la de Manel (calma, honesta, sin tono
+**castellano** (nunca «español»: la lengua se llama **castellano**, también en la UI,
+menús de idioma y documentación). La voz de todo el copy es la de Manel (calma, honesta, sin tono
 publicitario, muestreada de sus libros/manuscrito).
 
 ## Contexto de marca y producto — Ikigai Consciente / IKIGAIER
@@ -105,6 +106,8 @@ Cada herramienta = una migración `migrations/<tool>.sql` + carpeta
 | **Máscaras** | `/mascaras` | qué te frena hoy (el espejo) | Bilingüe |
 | **IKIBOARD** | `/ikiboard` | **PROYECTO FINAL** — ver abajo | Bilingüe |
 | **La herida dominante** | `/heridas` | de qué te proteges, antes de Máscaras (cruza con su resultado) | Bilingüe (EN = ES por ahora) |
+| **Un mes conociendo tu ikigai** | correos + `/inventario?prog=` | programa gratuito de 4 semanas tras el Inventario; tarea programada `/api/cron/programa`. Ver `docs/programa.md` | ES/CA/EN |
+| **Inventario honesto** | `/inventario` | test de ikigai de entrada, **sin cuenta**: Activo × Consciente, reglas fijas (cero IA). Ver `docs/inventario.md` | ES/CA/EN |
 | Taller, Viaje, Oráculo, IKICARD | varios | módulos previos | En prod / activos |
 
 ### IKIBOARD = el proyecto final ("el libro de fotos de tu futuro")
@@ -141,6 +144,7 @@ Decisión: el contenido vive en **`.ts`**, no en `messages/*.json`. Cada
     copy, colores o cualquier cosa de marketing/producto.
   - `docs/ikiboard.md` — qué es IKIBOARD y su integración en el embudo.
   - `docs/fuentes.md` — mapeo de cada pieza → su libro/ejercicio.
+  - `docs/auth-emails.md` — correos de cuenta (confirmar, nueva contraseña): SMTP con Resend y plantillas de Supabase.
 - **Memoria de Claude** (`~/.claude/projects/.../memory/`) — decisiones de producto,
   perfil de usuario, feedback de trabajo. `MEMORY.md` es el índice.
 
@@ -160,4 +164,4 @@ mismas 15 frases), construido en paralelo y ya retirado del repo el
   todos los consumidores usan los getters nuevos (grep de símbolos viejos) para no
   romper el build.
 - Verifica con `npm run build` (exit 0) tras tocar contenido/rutas.
-- Comenta en la voz y densidad del código existente (comentarios en español).
+- Comenta en la voz y densidad del código existente (comentarios en castellano).

@@ -1228,7 +1228,7 @@ function Shell({
         {showLanguageSelector && (
           <nav aria-label={locale === 'en' ? 'Language' : 'Idioma'} className="flex items-center gap-1">
             {([
-              ['es', 'Español'],
+              ['es', 'Castellano'],
               ['ca', 'Català'],
               ['en', 'English'],
             ] as const).map(([language, label]) => (

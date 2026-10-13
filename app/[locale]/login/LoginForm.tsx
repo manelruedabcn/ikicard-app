@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { trackEvent } from '@/lib/analytics'
 
-export default function LoginForm({ locale, next = null }: { locale: string; next?: string | null }) {
+export default function LoginForm({ locale, next = null, linkError = false }: { locale: string; next?: string | null; linkError?: boolean }) {
   const router = useRouter()
   const pathname = usePathname()
   const supabase = createClient()
@@ -15,7 +15,7 @@ export default function LoginForm({ locale, next = null }: { locale: string; nex
   const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
+  const [error, setError] = useState(linkError ? t('link_error') : '')
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -47,13 +47,16 @@ export default function LoginForm({ locale, next = null }: { locale: string; nex
         router.refresh()
       }
     } else if (mode === 'register') {
-      // Con `next` (QR del taller), el enlace de confirmación vuelve a esa ruta.
+      // El enlace del correo pasa por /auth/confirm y vuelve a `next` (QR del
+      // taller) o al dashboard. `locale` queda en los metadatos para que la
+      // plantilla del correo salga en la lengua de la persona.
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        ...(next
-          ? { options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` } }
-          : {}),
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent(next ?? `/${locale}/dashboard`)}`,
+          data: { locale },
+        },
       })
       if (error) {
         setError(error.message)
@@ -63,7 +66,7 @@ export default function LoginForm({ locale, next = null }: { locale: string; nex
       }
     } else {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/${locale}/reset-password`,
+        redirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent(`/${locale}/reset-password`)}`,
       })
       if (error) {
         setError(error.message)

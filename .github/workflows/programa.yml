@@ -1,0 +1,18 @@
+name: Programa un mes
+
+# Se ejecuta cada hora en punto. El endpoint solo envía a partir de las 8:00
+# de Madrid y nunca repite un correo (programa_envios), así que si una
+# ejecución falla, la siguiente recupera lo pendiente.
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch: {}
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger programa endpoint
+        run: |
+          curl -fsS -X POST "https://app.ikigaier.com/api/cron/programa" \
+            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}"

@@ -32,7 +32,7 @@ export default async function CrmPage({ params: { locale }, searchParams }: { pa
             <option value="">Todos los estados</option><option value="lead">Lead</option><option value="cliente">Cliente</option><option value="inactivo">Inactivo</option>
           </select>
           <select name="source" defaultValue={searchParams.source} className="rounded-lg border border-[#272727]/15 px-3 py-2 text-sm">
-            <option value="">Todos los orígenes</option><option value="taller">Taller</option><option value="paso">PASO</option><option value="registro">Plataforma</option>
+            <option value="">Todos los orígenes</option><option value="taller">Taller</option><option value="paso">PASO</option><option value="inventario">Inventario honesto</option><option value="programa">Programa un mes</option><option value="registro">Plataforma</option>
           </select>
           <select name="consent" defaultValue={searchParams.consent} className="rounded-lg border border-[#272727]/15 px-3 py-2 text-sm">
             <option value="">Cualquier permiso</option><option value="si">Acepta comunicaciones</option><option value="no">Sin permiso comercial</option>

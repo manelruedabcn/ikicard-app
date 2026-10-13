@@ -218,7 +218,8 @@
     "new_password": "Nueva contraseña",
     "reset_button": "Guardar contraseña",
     "reset_done": "Contraseña actualizada. Ya puedes entrar.",
-    "back_to_site": "← Volver a ikigaier.com"
+    "back_to_site": "← Volver a ikigaier.com",
+    "link_error": "El enlace no ha funcionado: puede que haya caducado o que ya lo usaras. Si ya confirmaste tu cuenta, entra con tu correo y contraseña; si no, regístrate de nuevo y te llegará otro."
   },
   "admin": {
     "title": "Panel de administración",

@@ -218,7 +218,8 @@
     "new_password": "Contrasenya nova",
     "reset_button": "Guardar contrasenya",
     "reset_done": "Contrasenya actualitzada. Ja pots entrar.",
-    "back_to_site": "← Tornar a ikigaier.com"
+    "back_to_site": "← Tornar a ikigaier.com",
+    "link_error": "L'enllaç no ha funcionat: potser ha caducat o ja el vas fer servir. Si ja vas confirmar el compte, entra amb el teu correu i contrasenya; si no, torna't a registrar i te n'arribarà un altre."
   },
   "admin": {
     "title": "Tauler d'administració",
