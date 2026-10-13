@@ -7,7 +7,12 @@ import { getRareza } from '@/lib/paso-rareza'
 import { getInvCopy, type InvDevolucion } from '@/lib/inventario-content'
 import { getProgramaTexts, type ProgramaMail } from '@/lib/programa-content'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// El cliente se crea al primer envío, no al cargar el módulo: así la
+// compilación no exige RESEND_API_KEY (los despliegues de prueba no la tienen).
+let client: Resend | null = null
+function resend(): Resend {
+  return (client ??= new Resend(process.env.RESEND_API_KEY))
+}
 
 const FROM = 'IKIGAIER <hola@ikigaier.com>'
 const APP_URL = 'https://app.ikigaier.com'
@@ -216,17 +221,17 @@ function lang(l?: string): Lang {
 
 export async function sendEnrollmentEmail(to: string, locale: string, unsubUrl: string) {
   const c = enrollmentCopy[lang(locale)]
-  return resend.emails.send({ from: FROM, to, subject: c.subject, html: c.html(unsubUrl) })
+  return resend().emails.send({ from: FROM, to, subject: c.subject, html: c.html(unsubUrl) })
 }
 
 export async function sendReminderEmail(to: string, locale: string, day: number, unsubUrl: string) {
   const c = reminderCopy[lang(locale)]
-  return resend.emails.send({ from: FROM, to, subject: c.subject(day), html: c.html(day, unsubUrl) })
+  return resend().emails.send({ from: FROM, to, subject: c.subject(day), html: c.html(day, unsubUrl) })
 }
 
 export async function sendLeadWelcomeEmail(to: string, locale: string, unsubUrl: string) {
   const c = leadWelcomeCopy[lang(locale)]
-  return resend.emails.send({ from: FROM, to, subject: c.subject, html: c.html(unsubUrl) })
+  return resend().emails.send({ from: FROM, to, subject: c.subject, html: c.html(unsubUrl) })
 }
 
 // ── Resultado del test (transaccional) ───────────────────────
@@ -366,7 +371,7 @@ export async function sendResultEmail(to: string, locale: string, codigo: string
         intro: 'Esta es la lectura personal que dibujan tus respuestas:',
       }
 
-  const delivery = await resend.emails.send({
+  const delivery = await resend().emails.send({
     from: FROM,
     to,
     subject: c.subject,
@@ -415,7 +420,7 @@ export async function sendWorkshopAdminEmail(input: {
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;',
   })[c] || c)
 
-  return resend.emails.send({
+  return resend().emails.send({
     from: FROM,
     to: notifyTo,
     subject: `Nueva inscripción al taller · ${input.nombre}`,
@@ -483,7 +488,7 @@ export async function sendInventarioEmail(
     ${unsubLink ? `<p style="font-size:12px;color:rgba(39,39,39,0.4);text-align:center;margin-top:24px;">${copy.mail.unsubscribe(unsubLink)}</p>` : ''}
   `)
 
-  const delivery = await resend.emails.send({
+  const delivery = await resend().emails.send({
     from: FROM,
     to,
     subject: copy.mail.subject,
@@ -530,7 +535,7 @@ export async function sendProgramaEmail(to: string, locale: string, mail: Progra
     }
   }).join('')
 
-  const delivery = await resend.emails.send({
+  const delivery = await resend().emails.send({
     from: FROM,
     to,
     subject: mail.subject,
