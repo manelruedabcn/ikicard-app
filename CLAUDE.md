@@ -144,6 +144,7 @@ Decisión: el contenido vive en **`.ts`**, no en `messages/*.json`. Cada
     copy, colores o cualquier cosa de marketing/producto.
   - `docs/ikiboard.md` — qué es IKIBOARD y su integración en el embudo.
   - `docs/fuentes.md` — mapeo de cada pieza → su libro/ejercicio.
+  - `docs/auth-emails.md` — correos de cuenta (confirmar, nueva contraseña): SMTP con Resend y plantillas de Supabase.
 - **Memoria de Claude** (`~/.claude/projects/.../memory/`) — decisiones de producto,
   perfil de usuario, feedback de trabajo. `MEMORY.md` es el índice.
 
