@@ -107,7 +107,7 @@ Cada herramienta = una migración `migrations/<tool>.sql` + carpeta
 | **IKIBOARD** | `/ikiboard` | **PROYECTO FINAL** — ver abajo | Bilingüe |
 | **La herida dominante** | `/heridas` | de qué te proteges, antes de Máscaras (cruza con su resultado) | Bilingüe (EN = ES por ahora) |
 | **Un mes conociendo tu ikigai** | correos + `/inventario?prog=` | programa gratuito de 4 semanas tras el Inventario; tarea programada `/api/cron/programa`. Ver `docs/programa.md` | ES/CA/EN |
-| **Inventario honesto** | `/inventario` | test de ikigai de entrada, **sin cuenta**: Activo × Consciente, reglas fijas (cero IA). Ver `docs/inventario.md` | Solo ES (CA/EN = ES por ahora) |
+| **Inventario honesto** | `/inventario` | test de ikigai de entrada, **sin cuenta**: Activo × Consciente, reglas fijas (cero IA). Ver `docs/inventario.md` | ES/CA/EN |
 | Taller, Viaje, Oráculo, IKICARD | varios | módulos previos | En prod / activos |
 
 ### IKIBOARD = el proyecto final ("el libro de fotos de tu futuro")
