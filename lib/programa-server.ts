@@ -5,7 +5,7 @@ import { sendInventarioEmail, sendProgramaEmail } from '@/lib/email'
 import { syncCrmContact } from '@/lib/crm-sync'
 import { buildDevolucion, getInvExercise } from '@/lib/inventario-content'
 import { buildLectura, parseInvAnswers, type ExerciseKey, type InvAnswers } from '@/lib/inventario'
-import { addDays, encuentroEnVentana, madridParts, nextMonday, PROGRAMA_CALENDARIO, PROGRAMA_CHECKINS, semanaDeJueves, type ProgramaCheckin } from '@/lib/programa'
+import { addDays, encuentroEnVentana, madridParts, PROGRAMA_CALENDARIO, PROGRAMA_CHECKINS, semanaDeJueves, type ProgramaCheckin } from '@/lib/programa'
 import {
   formatProgramaDate,
   formatProgramaDateTime,
@@ -238,7 +238,7 @@ export async function prepararInscripcion(input: {
     : await admin
         .from('programa_inscripciones')
         // start_date provisional: el definitivo se fija al confirmar.
-        .insert({ ...datos, email: input.email, origen: input.origen, status: 'pendiente', start_date: nextMonday(madridParts().date) })
+        .insert({ ...datos, email: input.email, origen: input.origen, status: 'pendiente', start_date: madridParts().date })
         .select(INSCRIPCION_COLS)
         .single()
   if (res.error || !res.data) throw new Error(res.error?.message || 'inscripción no creada')
@@ -289,7 +289,7 @@ export async function enviarConfirmacion(insc: Inscripcion): Promise<boolean> {
 
 export type ConfirmarEstado = 'confirmada' | 'ya' | 'invalid'
 
-// Pasa una inscripción pendiente a activa: empieza el lunes siguiente a hoy
+// Pasa una inscripción pendiente a activa: su mes empieza hoy (fecha de Madrid)
 // y recibe la bienvenida. Repetir el clic no hace nada (ya está activa).
 export async function confirmarInscripcion(token: string): Promise<{ estado: ConfirmarEstado; inscripcion?: Inscripcion }> {
   const admin = createAdminClient()
@@ -300,7 +300,7 @@ export async function confirmarInscripcion(token: string): Promise<{ estado: Con
 
   const { data, error } = await admin
     .from('programa_inscripciones')
-    .update({ status: 'activa', start_date: nextMonday(madridParts().date), confirmed_at: new Date().toISOString() })
+    .update({ status: 'activa', start_date: madridParts().date, confirmed_at: new Date().toISOString() })
     .eq('id', insc.id)
     .eq('status', 'pendiente')
     .select(INSCRIPCION_COLS)

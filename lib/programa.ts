@@ -1,8 +1,9 @@
 // ============================================================
 // «UN MES CONOCIENDO TU IKIGAI» — calendario del programa (sin texto).
-// Cada persona empieza el lunes siguiente a apuntarse. Los correos salen
-// a las 8:00 de Madrid el día que toca: semana 1 (día 0), semana 2 (7),
-// semana 3 (14), semana 4 (21) y cierre (28). Los encuentros en grupo
+// El mes de cada persona empieza el día en que se apunta (fecha de Madrid).
+// Los correos salen desde las 8:00 de Madrid el día que toca: semana 1 (día
+// 0), semana 2 (7), semana 3 (14), semana 4 (21) y cierre (28); a mitad de
+// cada semana (días 3, 10, 17 y 24), uno más corto. Los encuentros en grupo
 // que caen dentro de su mes se avisan la víspera.
 // Texto visible en lib/programa-content.ts; definición en docs/programa.md.
 // ============================================================
@@ -17,8 +18,8 @@ export type ProgramaSemanal =
 export type ProgramaCheckin = 'si' | 'medias' | 'no'
 export const PROGRAMA_CHECKINS: ProgramaCheckin[] = ['si', 'medias', 'no']
 
-// Lunes: el correo de la semana. Jueves: dos líneas, una pregunta y el clic
-// de «¿lo has hecho?» (no bloquea nada).
+// Inicio de semana: el correo de la semana. A mitad de semana (claves
+// «jueves», por historia): el correo corto y el «¿lo has hecho?» (no bloquea).
 export const PROGRAMA_CALENDARIO: { key: ProgramaSemanal; day: number }[] = [
   { key: 'semana1', day: 0 },
   { key: 'jueves1', day: 3 },
