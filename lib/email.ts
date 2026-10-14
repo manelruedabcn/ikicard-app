@@ -25,10 +25,6 @@ function shell(inner: string): string {
     <div style="max-width:520px;margin:0 auto;padding:0 24px;">
       <p style="letter-spacing:0.3em;font-size:13px;color:#272727;text-align:center;margin:0 0 28px;">IKIGAIER</p>
       ${inner}
-      <hr style="border:none;border-top:1px solid rgba(39,39,39,0.12);margin:32px 0 16px;" />
-      <p style="font-size:12px;color:rgba(39,39,39,0.4);text-align:center;line-height:1.6;margin:0;">
-        app.ikigaier.com
-      </p>
     </div>
   </div>`
 }
