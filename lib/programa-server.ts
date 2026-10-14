@@ -48,6 +48,7 @@ function links(insc: Inscripcion) {
   const l = lang(insc.locale)
   const libro = { es: '/es/libros/el-ikigai-que-no-te-contaron/', ca: '/ca/llibres/el-ikigai-que-no-te-contaron/', en: '/en/books/el-ikigai-que-no-te-contaron/' }[l]
   const talleres = { es: '/es/talleres/', ca: '/ca/tallers/', en: '/en/workshops/' }[l]
+  const taller = { es: '/es/taller/', ca: '/ca/taller/', en: '/en/workshop/' }[l]
   return {
     // Con cuenta: el registro vuelve a /paso. Sin cuenta: directo a /paso.
     paso: PASO_CON_CUENTA ? `${APP_URL}/${l}/login?next=${encodeURIComponent(`/${l}/paso`)}` : `${APP_URL}/${l}/paso`,
@@ -57,6 +58,8 @@ function links(insc: Inscripcion) {
     // Mientras el curso online no tenga página propia, lleva a talleres.
     curso: process.env.PROGRAMA_CURSO_URL || `${WEB_URL}${talleres}`,
     libro: `${WEB_URL}${libro}`,
+    // Taller presencial «Yo soy IKIGAIER» (cierre del programa).
+    taller: `${WEB_URL}${taller}`,
   }
 }
 

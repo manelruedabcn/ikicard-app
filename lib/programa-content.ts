@@ -29,7 +29,7 @@ export interface ProgramaContext {
   startDate: string
   // Ejercicio de la devolución del Inventario (semana 1).
   exercise: InvExercise | null
-  links: { paso: string; repetir: string; curso: string; libro: string }
+  links: { paso: string; repetir: string; curso: string; libro: string; taller: string }
   // Encuentros próximos dentro del mes de la persona (ya formateados).
   encuentros: { when: string; url: string }[]
   // Semana 3: PASO con cuenta (solo cuando la verificación de cuentas funcione).
@@ -321,6 +321,8 @@ const ES: ProgramaTexts = {
         { kind: 'cta', href: c.links.curso, label: 'VER EL CURSO' },
         { kind: 'p', text: 'Si prefieres seguir por tu cuenta, el libro está aquí:', muted: true },
         { kind: 'cta', href: c.links.libro, label: 'EL IKIGAI QUE NO TE CONTARON' },
+        { kind: 'p', text: 'Y si prefieres vivirlo en persona, junto a otras personas que se hacen tus mismas preguntas, está el taller presencial «Yo soy IKIGAIER»: cuatro horas para escucharte.', muted: true },
+        { kind: 'cta', href: c.links.taller, label: 'VER EL TALLER' },
         { kind: 'p', text: 'Y si quieres llevar esto a decisiones concretas, puedes responder a este correo.', muted: true },
         { kind: 'quote', text: 'Sigue caminando. Pero hazlo sin alejarte de ti.', cite: 'Epílogo' },
         { kind: 'sign', text: 'Manel' },
@@ -551,6 +553,8 @@ const CA: ProgramaTexts = {
         { kind: 'cta', href: c.links.curso, label: 'VEURE EL CURS' },
         { kind: 'p', text: 'Si prefereixes continuar pel teu compte, el llibre és aquí:', muted: true },
         { kind: 'cta', href: c.links.libro, label: 'EL IKIGAI QUE NO TE CONTARON' },
+        { kind: 'p', text: 'I si prefereixes viure-ho en persona, amb altres persones que es fan les teves mateixes preguntes, hi ha el taller presencial «Jo soc IKIGAIER»: quatre hores per escoltar-te.', muted: true },
+        { kind: 'cta', href: c.links.taller, label: 'VEURE EL TALLER' },
         { kind: 'p', text: 'I si vols portar tot això a decisions concretes, pots respondre aquest correu.', muted: true },
         { kind: 'quote', text: 'Continua caminant. Però fes-ho sense allunyar-te de tu.', cite: 'Epíleg' },
         { kind: 'sign', text: 'Manel' },
@@ -781,6 +785,8 @@ const EN: ProgramaTexts = {
         { kind: 'cta', href: c.links.curso, label: 'SEE THE COURSE' },
         { kind: 'p', text: 'If you would rather continue on your own, the book is here:', muted: true },
         { kind: 'cta', href: c.links.libro, label: 'EL IKIGAI QUE NO TE CONTARON' },
+        { kind: 'p', text: 'And if you would rather live it in person, with other people asking themselves the same questions, there is the in-person workshop “I am IKIGAIER”: four hours to listen to yourself.', muted: true },
+        { kind: 'cta', href: c.links.taller, label: 'SEE THE WORKSHOP' },
         { kind: 'p', text: 'And if you want to take this into concrete decisions, you can reply to this email.', muted: true },
         { kind: 'quote', text: 'Keep walking. But do it without moving away from yourself.', cite: 'Epilogue' },
         { kind: 'sign', text: 'Manel' },
