@@ -13,7 +13,7 @@ export default function LoginPage({
   searchParams,
 }: {
   params: { locale: string }
-  searchParams: { next?: string; error?: string }
+  searchParams: { next?: string; error?: string; modo?: string }
 }) {
-  return <LoginForm locale={locale} next={safeNext(searchParams.next)} linkError={searchParams.error === 'link'} />
+  return <LoginForm locale={locale} next={safeNext(searchParams.next)} linkError={searchParams.error === 'link'} registro={searchParams.modo === 'registro'} />
 }

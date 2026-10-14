@@ -1,4 +1,7 @@
+export const dynamic = 'force-dynamic'
+
 import type { Metadata } from 'next'
+import { createClient } from '@/lib/supabase/server'
 import { getProgramaTexts } from '@/lib/programa-content'
 import ProgramaClient from './ProgramaClient'
 
@@ -23,7 +26,7 @@ export function generateMetadata({ params: { locale } }: { params: { locale: str
   }
 }
 
-export default function ProgramaPage({
+export default async function ProgramaPage({
   params: { locale },
   searchParams,
 }: {
@@ -31,5 +34,9 @@ export default function ProgramaPage({
   searchParams?: { src?: string; utm_source?: string }
 }) {
   const source = searchParams?.src || searchParams?.utm_source || null
-  return <ProgramaClient locale={locale} source={source} />
+  // Para hacer el programa hace falta cuenta: con sesión, el botón inscribe
+  // directamente; sin ella, pasa por crear cuenta o entrar.
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  return <ProgramaClient locale={locale} source={source} logged={Boolean(user)} />
 }

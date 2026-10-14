@@ -13,7 +13,13 @@
     "welcome_back": "Benvingut de nou.",
     "prepared": "Avui tens això preparat per a tu.",
     "empty": "Encara no hi ha res preparat per a tu. Torna aviat.",
-    "expires": "Disponible fins al {date}"
+    "expires": "Disponible fins al {date}",
+    "tools": {
+      "programa": {
+        "name": "Un mes coneixent el teu ikigai",
+        "description": "El teu programa de quatre setmanes: el calendari, cada setmana i la teva llibreta"
+      }
+    }
   },
   "viaje": {
     "start_title": "El Viatge de 20 dies",

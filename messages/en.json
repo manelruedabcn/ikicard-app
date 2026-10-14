@@ -13,7 +13,13 @@
     "welcome_back": "Welcome back.",
     "prepared": "Here's what's prepared for you today.",
     "empty": "Nothing is prepared for you yet. Check back soon.",
-    "expires": "Available until {date}"
+    "expires": "Available until {date}",
+    "tools": {
+      "programa": {
+        "name": "A month getting to know your ikigai",
+        "description": "Your four-week programme: the calendar, each week and your notebook"
+      }
+    }
   },
   "viaje": {
     "start_title": "The 20-day Journey",

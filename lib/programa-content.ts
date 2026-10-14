@@ -9,7 +9,7 @@
 
 import { contentLang, type ContentLang } from './content-locale'
 import type { InvExercise } from './inventario-content'
-import type { ProgramaCheckin, ProgramaSemanal } from './programa'
+import type { ProgramaCampo, ProgramaCheckin, ProgramaSemanal } from './programa'
 
 export type ProgramaBlock =
   | { kind: 'p'; text: string; muted?: boolean }
@@ -66,6 +66,44 @@ interface ProgramaTexts {
   inicio: { title: string; body: string; sent: string }
   // Una línea en la portada del test.
   testNote: string
+  // Botón «Abrir tu mes» en los correos de quien tiene cuenta.
+  abrirMes: string
+  // El cierre le devuelve sus propias frases, si las escribió en el panel.
+  cierreEco: { ancla: (x: string) => string; ruido: (x: string) => string }
+  // Entrar con cuenta (página del programa y final del test).
+  cuenta: { button: string; logged: string; nota: string }
+  // El panel del programa (/mes).
+  panel: {
+    title: string
+    weekOf: (n: number) => string
+    startsOn: (date: string) => string
+    finished: string
+    testFirst: string
+    testButton: string
+    tabs: Record<ProgramaSemanal, string>
+    libretaTab: string
+    monday: string
+    thursday: string
+    opensOn: (date: string) => string
+    checkinQuestion: string
+    checkinLabels: Record<ProgramaCheckin, string>
+    checkinSaved: string
+    noInscripcion: string
+    noInscripcionButton: string
+  }
+  // Los campos de la libreta y su guardado.
+  libreta: {
+    intro: string
+    campos: Record<ProgramaCampo, string>
+    placeholder: string
+    saving: string
+    saved: string
+    error: string
+    empty: string
+    borrar: string
+    borrarConfirm: string
+    borrado: string
+  }
   // Página del programa.
   landing: {
     metaTitle: string; metaDescription: string
@@ -145,6 +183,66 @@ const ES: ProgramaTexts = {
   optInDone: 'Te has apuntado a «Un mes conociendo tu ikigai». Te he escrito con la fecha de inicio.',
   optInPending: 'Falta un paso: en el correo que te acabo de enviar, arriba del todo, pulsa «Confirmar mi plaza». Sin eso no empieza el programa.',
   optInYa: 'Ya estás dentro de «Un mes conociendo tu ikigai» con este correo.',
+  abrirMes: 'ABRIR TU MES',
+  cierreEco: {
+    ancla: x => `Hace un mes, en la primera página, escribiste: «${x}».`,
+    ruido: x => `Y esta semana terminaste así: «Cuando el ruido baja, yo soy ${x}».`,
+  },
+  cuenta: {
+    button: 'Empezar el mes gratis',
+    logged: 'Empezar mi mes',
+    nota: 'Te pediré que entres o crees tu cuenta gratuita (con Google, un clic). Ahí tendrás tu mes: el calendario, cada semana y lo que escribas.',
+  },
+  panel: {
+    title: 'Un mes conociendo tu ikigai',
+    weekOf: n => `Semana ${n} de 4`,
+    startsOn: d => `Empiezas el lunes ${d}`,
+    finished: 'Has terminado el mes',
+    testFirst: 'Antes de empezar, haz el test de ikigai. Diez minutos. Es tu punto de partida: el ejercicio de la primera semana sale de ahí.',
+    testButton: 'Hacer el test',
+    tabs: { semana1: 'Semana 1', jueves1: 'Semana 1', semana2: 'Semana 2', jueves2: 'Semana 2', semana3: 'Semana 3', jueves3: 'Semana 3', semana4: 'Semana 4', jueves4: 'Semana 4', cierre: 'Cierre' },
+    libretaTab: 'Tu libreta',
+    monday: 'Lunes',
+    thursday: 'Jueves',
+    opensOn: d => `Se abre el ${d}`,
+    checkinQuestion: '¿Has hecho el ejercicio de esta semana?',
+    checkinLabels: { si: 'Sí', medias: 'A medias', no: 'Esta semana no' },
+    checkinSaved: 'Anotado.',
+    noInscripcion: 'Todavía no estás en «Un mes conociendo tu ikigai».',
+    noInscripcionButton: 'Empezar el mes gratis',
+  },
+  libreta: {
+    intro: 'Escribe aquí si quieres; la libreta de papel vale igual. Se guarda solo, y solo lo ves tú.',
+    campos: {
+      ancla: 'La frase del primer día: lo que esperas de este mes',
+      ejercicio1: 'Lo que te deja el ejercicio de esta semana',
+      notado: 'Lo que has notado y no esperabas',
+      temo: 'Lo que más temo encontrar aquí es…',
+      frase_madre: 'Tu frase madre',
+      voz: 'De quién es esa voz',
+      edad: 'Qué edad tenías cuando empezó a sonar',
+      protegia: 'A quién o a qué protegía entonces',
+      cierre_voz: 'Tu frase de cierre para esa voz',
+      activo: 'Lo que haces: lo que te deja el ejercicio de esta tarde',
+      consciente: 'Cómo lo vives: una frase de cada día',
+      excepcion: 'La excepción: la última vez que tu frase madre no se cumplió',
+      conducta: 'Tu conducta mínima',
+      paso_real: 'Qué pasó realmente',
+      excusa: 'La excusa de toda la vida',
+      ruido: 'Cuando el ruido baja, yo soy…',
+      gesto: 'Tu gesto de cada noche',
+      accion: 'Tu acción mínima diaria, y a qué hora',
+      revision: 'Tu revisión del mes',
+    },
+    placeholder: 'Escribe aquí…',
+    saving: 'Guardando…',
+    saved: 'Guardado',
+    error: 'No se ha podido guardar. Vuelve a intentarlo.',
+    empty: 'Aquí irá apareciendo todo lo que escribas durante el mes, en orden.',
+    borrar: 'Borrar todo lo que he escrito',
+    borrarConfirm: '¿Seguro? Se borrará todo lo que has escrito en tu libreta del programa. No se puede deshacer.',
+    borrado: 'Borrado.',
+  },
   sinTest: {
     bienvenida: 'Antes del lunes, una cosa: haz el test de ikigai. Son diez minutos. Es tu punto de partida: el ejercicio de la primera semana sale de ahí, y en la última lo repetirás para ver qué ha cambiado.',
     semana1: 'Primera semana. Todavía no has hecho el test de ikigai, y todo el mes parte de ahí. Empieza por él: diez minutos. Al terminar verás el ejercicio de esta semana.',
@@ -161,7 +259,7 @@ const ES: ProgramaTexts = {
   },
   captura: {
     title: 'Esto es una foto de hoy. ¿Lo trabajamos durante un mes?',
-    body: '«Un mes conociendo tu ikigai» es gratis. Un correo cada lunes durante cuatro semanas, y otro corto el jueves, con ejercicios de mis libros. Sin cuenta. Lo dejas cuando quieras.',
+    body: '«Un mes conociendo tu ikigai» es gratis. Un correo cada lunes durante cuatro semanas, y otro corto el jueves, con ejercicios de mis libros. En tu cuenta tendrás el calendario y tu libreta. Lo dejas cuando quieras.',
     button: 'Empezar el mes gratis',
     solo: 'Solo envíame esta devolución',
     sending: 'Enviando…',
@@ -183,7 +281,7 @@ const ES: ProgramaTexts = {
     needTitle: 'Qué necesitas',
     need: [
       'Una libreta y unos minutos al día.',
-      'No hace falta crear una cuenta ni tener el libro.',
+      'Una cuenta gratuita en IKIGAIER (con Google, un clic). No hace falta tener los libros.',
       'Si durante tu mes hay encuentros en grupo online, te aviso. Son opcionales.',
       'Si una semana no puedes, no pasa nada: el lunes siguiente llega el correo siguiente. Te das de baja con un clic.',
     ],
@@ -428,6 +526,66 @@ const CA: ProgramaTexts = {
   optInDone: 'T’has apuntat a «Un mes coneixent el teu ikigai». T’he escrit amb la data d’inici.',
   optInPending: 'Falta un pas: al correu que t’acabo d’enviar, a dalt de tot, prem «Confirmar la meva plaça». Sense això el programa no comença.',
   optInYa: 'Ja ets dins de «Un mes coneixent el teu ikigai» amb aquest correu.',
+  abrirMes: 'OBRIR EL TEU MES',
+  cierreEco: {
+    ancla: x => `Fa un mes, a la primera pàgina, vas escriure: «${x}».`,
+    ruido: x => `I aquesta setmana vas acabar així: «Quan el soroll baixa, jo soc ${x}».`,
+  },
+  cuenta: {
+    button: 'Començar el mes gratis',
+    logged: 'Començar el meu mes',
+    nota: 'Et demanaré que entris o creïs el teu compte gratuït (amb Google, un clic). Allà tindràs el teu mes: el calendari, cada setmana i el que escriguis.',
+  },
+  panel: {
+    title: 'Un mes coneixent el teu ikigai',
+    weekOf: n => `Setmana ${n} de 4`,
+    startsOn: d => `Comences el dilluns ${d}`,
+    finished: 'Has acabat el mes',
+    testFirst: 'Abans de començar, fes el test d’ikigai. Deu minuts. És el teu punt de partida: l’exercici de la primera setmana surt d’aquí.',
+    testButton: 'Fer el test',
+    tabs: { semana1: 'Setmana 1', jueves1: 'Setmana 1', semana2: 'Setmana 2', jueves2: 'Setmana 2', semana3: 'Setmana 3', jueves3: 'Setmana 3', semana4: 'Setmana 4', jueves4: 'Setmana 4', cierre: 'Tancament' },
+    libretaTab: 'La teva llibreta',
+    monday: 'Dilluns',
+    thursday: 'Dijous',
+    opensOn: d => `S’obre el ${d}`,
+    checkinQuestion: 'Has fet l’exercici d’aquesta setmana?',
+    checkinLabels: { si: 'Sí', medias: 'A mitges', no: 'Aquesta setmana no' },
+    checkinSaved: 'Anotat.',
+    noInscripcion: 'Encara no ets a «Un mes coneixent el teu ikigai».',
+    noInscripcionButton: 'Començar el mes gratis',
+  },
+  libreta: {
+    intro: 'Escriu aquí si vols; la llibreta de paper també val. Es desa sol, i només ho veus tu.',
+    campos: {
+      ancla: 'La frase del primer dia: el que esperes d’aquest mes',
+      ejercicio1: 'El que et deixa l’exercici d’aquesta setmana',
+      notado: 'El que has notat i no esperaves',
+      temo: 'El que més temo trobar aquí és…',
+      frase_madre: 'La teva frase mare',
+      voz: 'De qui és aquesta veu',
+      edad: 'Quina edat tenies quan va començar a sonar',
+      protegia: 'A qui o a què protegia aleshores',
+      cierre_voz: 'La teva frase de tancament per a aquesta veu',
+      activo: 'El que fas: el que et deixa l’exercici d’aquesta tarda',
+      consciente: 'Com ho vius: una frase de cada dia',
+      excepcion: 'L’excepció: l’última vegada que la teva frase mare no es va complir',
+      conducta: 'La teva conducta mínima',
+      paso_real: 'Què va passar realment',
+      excusa: 'L’excusa de tota la vida',
+      ruido: 'Quan el soroll baixa, jo soc…',
+      gesto: 'El teu gest de cada nit',
+      accion: 'La teva acció mínima diària, i a quina hora',
+      revision: 'La teva revisió del mes',
+    },
+    placeholder: 'Escriu aquí…',
+    saving: 'Desant…',
+    saved: 'Desat',
+    error: 'No s’ha pogut desar. Torna-ho a provar.',
+    empty: 'Aquí anirà apareixent tot el que escriguis durant el mes, en ordre.',
+    borrar: 'Esborrar tot el que he escrit',
+    borrarConfirm: 'Segur? S’esborrarà tot el que has escrit a la llibreta del programa. No es pot desfer.',
+    borrado: 'Esborrat.',
+  },
   sinTest: {
     bienvenida: 'Abans de dilluns, una cosa: fes el test d’ikigai. Són deu minuts. És el teu punt de partida: l’exercici de la primera setmana surt d’aquí, i a l’última el repetiràs per veure què ha canviat.',
     semana1: 'Primera setmana. Encara no has fet el test d’ikigai, i tot el mes parteix d’aquí. Comença per ell: deu minuts. En acabar veuràs l’exercici d’aquesta setmana.',
@@ -444,7 +602,7 @@ const CA: ProgramaTexts = {
   },
   captura: {
     title: 'Això és una foto d’avui. Ho treballem durant un mes?',
-    body: '«Un mes coneixent el teu ikigai» és gratuït. Un correu cada dilluns durant quatre setmanes, i un altre de curt el dijous, amb exercicis dels meus llibres. Sense compte. Ho deixes quan vulguis.',
+    body: '«Un mes coneixent el teu ikigai» és gratuït. Un correu cada dilluns durant quatre setmanes, i un altre de curt el dijous, amb exercicis dels meus llibres. Al teu compte tindràs el calendari i la teva llibreta. Ho deixes quan vulguis.',
     button: 'Començar el mes gratis',
     solo: 'Només envia’m aquest retorn',
     sending: 'Enviant…',
@@ -466,7 +624,7 @@ const CA: ProgramaTexts = {
     needTitle: 'Què necessites',
     need: [
       'Una llibreta i uns minuts al dia.',
-      'No cal crear un compte ni tenir el llibre.',
+      'Un compte gratuït a IKIGAIER (amb Google, un clic). No cal tenir els llibres.',
       'Si durant el teu mes hi ha trobades en grup en línia, t’aviso. Són opcionals.',
       'Si una setmana no pots, no passa res: el dilluns següent arriba el correu següent. Et dones de baixa amb un clic.',
     ],
@@ -711,6 +869,66 @@ const EN: ProgramaTexts = {
   optInDone: 'You have signed up for “A month getting to know your ikigai”. I have emailed you the start date.',
   optInPending: 'One more step: in the email I have just sent you, at the very top, press “Confirm my place”. The programme doesn’t start without it.',
   optInYa: 'You are already in “A month getting to know your ikigai” with this email.',
+  abrirMes: 'OPEN YOUR MONTH',
+  cierreEco: {
+    ancla: x => `A month ago, on the first page, you wrote: “${x}”.`,
+    ruido: x => `And this week you ended like this: “When the noise goes down, I am ${x}”.`,
+  },
+  cuenta: {
+    button: 'Start the free month',
+    logged: 'Start my month',
+    nota: 'I’ll ask you to log in or create your free account (with Google, one click). That is where your month lives: the calendar, each week and what you write.',
+  },
+  panel: {
+    title: 'A month getting to know your ikigai',
+    weekOf: n => `Week ${n} of 4`,
+    startsOn: d => `You start on Monday ${d}`,
+    finished: 'You have finished the month',
+    testFirst: 'Before you start, take the ikigai test. Ten minutes. It is your starting point: the first week’s exercise comes from it.',
+    testButton: 'Take the test',
+    tabs: { semana1: 'Week 1', jueves1: 'Week 1', semana2: 'Week 2', jueves2: 'Week 2', semana3: 'Week 3', jueves3: 'Week 3', semana4: 'Week 4', jueves4: 'Week 4', cierre: 'Closing' },
+    libretaTab: 'Your notebook',
+    monday: 'Monday',
+    thursday: 'Thursday',
+    opensOn: d => `Opens on ${d}`,
+    checkinQuestion: 'Have you done this week’s exercise?',
+    checkinLabels: { si: 'Yes', medias: 'Partly', no: 'Not this week' },
+    checkinSaved: 'Noted.',
+    noInscripcion: 'You are not in “A month getting to know your ikigai” yet.',
+    noInscripcionButton: 'Start the free month',
+  },
+  libreta: {
+    intro: 'Write here if you like; the paper notebook works just as well. It saves itself, and only you can see it.',
+    campos: {
+      ancla: 'The sentence from day one: what you expect from this month',
+      ejercicio1: 'What this week’s exercise leaves you with',
+      notado: 'What you noticed that you didn’t expect',
+      temo: 'What I most fear finding here is…',
+      frase_madre: 'Your mother sentence',
+      voz: 'Whose voice it is',
+      edad: 'How old you were when it started sounding',
+      protegia: 'Who or what it was protecting back then',
+      cierre_voz: 'Your closing sentence for that voice',
+      activo: 'What you do: what this afternoon’s exercise leaves you with',
+      consciente: 'How you live it: one sentence each day',
+      excepcion: 'The exception: the last time your mother sentence didn’t come true',
+      conducta: 'Your minimal behaviour',
+      paso_real: 'What really happened',
+      excusa: 'The lifelong excuse',
+      ruido: 'When the noise goes down, I am…',
+      gesto: 'Your gesture every night',
+      accion: 'Your minimum daily action, and at what time',
+      revision: 'Your monthly review',
+    },
+    placeholder: 'Write here…',
+    saving: 'Saving…',
+    saved: 'Saved',
+    error: 'It couldn’t be saved. Please try again.',
+    empty: 'Everything you write during the month will appear here, in order.',
+    borrar: 'Delete everything I have written',
+    borrarConfirm: 'Are you sure? Everything you have written in your programme notebook will be deleted. This cannot be undone.',
+    borrado: 'Deleted.',
+  },
   sinTest: {
     bienvenida: 'Before Monday, one thing: take the ikigai test. It takes ten minutes. It is your starting point: the first week’s exercise comes from it, and in the last week you will repeat it to see what has changed.',
     semana1: 'First week. You haven’t taken the ikigai test yet, and the whole month starts from there. Begin with it: ten minutes. When you finish, you will see this week’s exercise.',
@@ -727,7 +945,7 @@ const EN: ProgramaTexts = {
   },
   captura: {
     title: 'This is a snapshot of today. Shall we work on it for a month?',
-    body: '“A month getting to know your ikigai” is free. One email every Monday for four weeks, and a short one on Thursday, with exercises from my books. No account. You can leave whenever you want.',
+    body: '“A month getting to know your ikigai” is free. One email every Monday for four weeks, and a short one on Thursday, with exercises from my books. Your account holds the calendar and your notebook. You can leave whenever you want.',
     button: 'Start the free month',
     solo: 'Just send me this reading',
     sending: 'Sending…',
@@ -749,7 +967,7 @@ const EN: ProgramaTexts = {
     needTitle: 'What you need',
     need: [
       'A notebook and a few minutes a day.',
-      'No account needed, and you don’t need the book.',
+      'A free IKIGAIER account (with Google, one click). You don’t need the books.',
       'If there are online group meetings during your month, I’ll let you know. They are optional.',
       'If you can’t do a week, that’s fine: the next email arrives the following Monday. You can unsubscribe with one click.',
     ],

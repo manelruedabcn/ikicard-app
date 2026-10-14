@@ -6,6 +6,27 @@ conversión del embudo: quien llega al final ha trabajado un mes y conoce a Mane
 
 ## Cómo funciona
 
+- **Con cuenta.** Para hacer el programa hay que tener cuenta (con Google, un
+  clic). «Empezar el mes gratis» —en la página del programa o al final del
+  test— lleva a `/[locale]/programa/empezar` (con `?intento=<id>` si viene del
+  test). Sin sesión, pasa por el registro (`/login?modo=registro&next=…`) y
+  vuelve. Con sesión, `inscribirConCuenta()` crea la inscripción **activa**
+  directamente (la cuenta ya verifica el correo: no hace falta «Confirmar mi
+  plaza»), da la herramienta **«programa»** en el panel (`entitlements`) y
+  envía la bienvenida. Si viene del test, ese intento es su punto de partida y
+  su devolución se le envía al correo.
+- **El panel del programa (`/[locale]/mes`)**: calendario de las cuatro
+  semanas (cada correo se abre el día que sale), el mismo contenido de los
+  correos, los campos de su **libreta** (`programa_respuestas`, RLS por
+  usuario: solo los ve quien los escribe; se guardan solos; «Tu libreta» los
+  junta en orden y se pueden borrar) y el «¿lo has hecho?» del jueves con
+  botones. Campos por correo: `PROGRAMA_LIBRETA` en `lib/programa.ts`.
+- **Correos** de quien tiene cuenta: llevan «Abrir tu mes» tras el primer
+  párrafo; el cierre le cita su frase del primer día y su «Cuando el ruido
+  baja, yo soy…», si las escribió en el panel.
+- El flujo anterior solo por correo (`/api/programa/inscribir`, botón
+  «Confirmar mi plaza») sigue funcionando para quien ya se apuntó así, pero
+  ninguna página lo usa ya.
 - **Dos entradas al mismo programa** (columna `origen`):
   - **Test** (`origen = test`): al acabar el test, el recuadro final presenta
     el programa como siguiente paso. «Empezar el mes gratis» lo pide; «Solo

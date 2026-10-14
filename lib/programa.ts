@@ -84,3 +84,27 @@ export function encuentroEnVentana(start: string, encuentroDate: string): boolea
   const d = daysBetween(start, encuentroDate)
   return d >= 0 && d <= PROGRAMA_VENTANA_DIAS
 }
+
+// La libreta del programa en el panel (/mes): qué campos acompañan a cada
+// correo. Códigos independientes del idioma; las etiquetas, en
+// lib/programa-content.ts (libreta.campos).
+export type ProgramaCampo =
+  | 'ancla' | 'ejercicio1' | 'notado'
+  | 'temo' | 'frase_madre' | 'voz' | 'edad' | 'protegia' | 'cierre_voz'
+  | 'activo' | 'consciente' | 'excepcion' | 'conducta' | 'paso_real'
+  | 'excusa' | 'ruido' | 'gesto' | 'accion' | 'revision'
+
+export const PROGRAMA_LIBRETA: Record<ProgramaSemanal, ProgramaCampo[]> = {
+  semana1: ['ancla', 'ejercicio1'],
+  jueves1: ['notado'],
+  semana2: ['temo', 'frase_madre', 'voz', 'edad'],
+  jueves2: ['protegia', 'cierre_voz'],
+  semana3: ['activo', 'consciente'],
+  jueves3: ['excepcion', 'conducta', 'paso_real'],
+  semana4: ['excusa', 'ruido', 'gesto'],
+  jueves4: ['accion', 'revision'],
+  cierre: [],
+}
+
+export const PROGRAMA_CAMPOS: ProgramaCampo[] = Object.values(PROGRAMA_LIBRETA).flat()
+export const PROGRAMA_TEXTO_MAX = 2000
