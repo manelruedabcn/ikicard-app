@@ -35,7 +35,7 @@ export default async function ProgramaAdminPage({ params: { locale } }: { params
         <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <Stat value={r.inventarios.total} label="Tests de ikigai hechos" sub={`${r.inventarios.semana} en los últimos 7 días`} />
           <Stat value={r.leads} label="Han dejado su email" />
-          <Stat value={r.activas} label="En el programa ahora" highlight />
+          <Stat value={r.activas} label="En el programa ahora" sub={`${r.pendientes} sin confirmar su plaza · ${r.porPagina} entraron por la página`} highlight />
           <Stat value={r.completadas} label="Han terminado" sub={`${r.repitieron} repitieron el test · ${r.bajas} bajas`} />
         </section>
 
@@ -85,11 +85,15 @@ export default async function ProgramaAdminPage({ params: { locale } }: { params
                   <tr><td colSpan={9} className="px-4 py-6 text-center text-[#272727]/45">Todavía no hay nadie en el programa.</td></tr>
                 ) : r.filas.map(f => (
                   <tr key={f.id} className="border-t border-[#272727]/10">
-                    <td className="px-4 py-3">{f.email}</td>
+                    <td className="px-4 py-3">
+                      {f.email}
+                      <span className="block text-[11px] text-[#272727]/45">{f.origen === 'programa' ? 'Página del programa' : 'Test'}</span>
+                    </td>
                     <td className="px-4 py-3 uppercase text-[#272727]/60">{f.locale}</td>
                     <td className="px-4 py-3 text-[#272727]/60">{fecha(f.start_date)}</td>
                     <td className="px-4 py-3">
-                      {f.status === 'baja' ? <span className="text-[#272727]/45">Baja</span>
+                      {f.status === 'pendiente' ? <span className="text-[#272727]/45">Sin confirmar</span>
+                        : f.status === 'baja' ? <span className="text-[#272727]/45">Baja</span>
                         : f.status === 'completada' ? <span className="text-[#4f5d47]">Terminado</span>
                         : f.semana === 0 ? <span className="text-[#272727]/45">Aún no empieza</span>
                         : f.semana >= 5 ? 'Cierre' : `Semana ${f.semana}`}

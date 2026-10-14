@@ -219,7 +219,8 @@
     "reset_button": "Save password",
     "reset_done": "Password updated. You can sign in now.",
     "back_to_site": "← Back to ikigaier.com",
-    "link_error": "That link didn't work: it may have expired or already been used. If you already confirmed your account, log in with your email and password; if not, sign up again and you'll get a new one."
+    "link_error": "That link didn't work: it may have expired or already been used. If you already confirmed your account, log in with your email and password; if not, sign up again and you'll get a new one.",
+    "generic_error": "We couldn't complete that. Please try again in a few minutes; if it still doesn't work, write to us at hola@ikigaier.com."
   },
   "admin": {
     "title": "Admin panel",

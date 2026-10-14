@@ -219,7 +219,8 @@
     "reset_button": "Guardar contrasenya",
     "reset_done": "Contrasenya actualitzada. Ja pots entrar.",
     "back_to_site": "← Tornar a ikigaier.com",
-    "link_error": "L'enllaç no ha funcionat: potser ha caducat o ja el vas fer servir. Si ja vas confirmar el compte, entra amb el teu correu i contrasenya; si no, torna't a registrar i te n'arribarà un altre."
+    "link_error": "L'enllaç no ha funcionat: potser ha caducat o ja el vas fer servir. Si ja vas confirmar el compte, entra amb el teu correu i contrasenya; si no, torna't a registrar i te n'arribarà un altre.",
+    "generic_error": "No ho hem pogut completar. Torna-ho a provar d'aquí a uns minuts; si continua sense funcionar, escriu-nos a hola@ikigaier.com."
   },
   "admin": {
     "title": "Tauler d'administració",

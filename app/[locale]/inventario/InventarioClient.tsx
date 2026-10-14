@@ -41,6 +41,8 @@ export default function InventarioClient({ locale, userId, source, prog }: Props
   // Respuestas del primer Inventario (solo al repetirlo dentro del programa).
   const [previous, setPrevious] = useState<InvAnswers | null>(null)
   const [enPrograma, setEnPrograma] = useState(false)
+  // Primer test hecho con el enlace personal del programa: punto de partida.
+  const [inicio, setInicio] = useState<'no' | 'enviando' | 'enviada'>('no')
 
   // Recupera el progreso si la persona recarga a mitad del test.
   useEffect(() => {
@@ -117,6 +119,18 @@ export default function InventarioClient({ locale, userId, source, prog }: Props
         if (j?.id) setAttemptId(j.id)
         if (j?.programa) setEnPrograma(true)
         if (j?.previous) setPrevious(j.previous as InvAnswers)
+        // Punto de partida del programa: la devolución se le envía sola, al
+        // correo de su inscripción (no hace falta volver a pedírselo).
+        if (j?.inicio) {
+          setInicio('enviando')
+          fetch('/api/inventario/lead', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prog, answers: a, texto: clean, attemptId: j.id, locale, source }),
+          })
+            .then(r => setInicio(r.ok ? 'enviada' : 'no'))
+            .catch(() => setInicio('no'))
+        }
       })
       .catch(() => {})
   }
@@ -152,6 +166,7 @@ export default function InventarioClient({ locale, userId, source, prog }: Props
           >
             {copy.start}
           </button>
+          {!prog && <p className="mt-5 text-sm text-[#272727]/50 max-w-md">{getProgramaTexts(locale).testNote}</p>}
         </div>
       </Shell>
     )
@@ -305,6 +320,14 @@ export default function InventarioClient({ locale, userId, source, prog }: Props
 
         <p className="text-sm leading-relaxed text-[#272727]/60 max-w-2xl">{d.close}</p>
 
+        {inicio !== 'no' && (
+          <section className="rounded-xl border border-[#c2866b]/30 bg-[#c2866b]/[0.05] px-5 py-6 space-y-2">
+            <p className="font-[family-name:var(--font-cormorant)] text-2xl text-[#272727]">{getProgramaTexts(locale).inicio.title}</p>
+            <p className="text-sm leading-relaxed text-[#272727]/70">{getProgramaTexts(locale).inicio.body}</p>
+            {inicio === 'enviada' && <p className="text-sm text-[#272727]/55">{getProgramaTexts(locale).inicio.sent}</p>}
+          </section>
+        )}
+
         {!enPrograma && (
           <LeadCapture
             locale={locale}
@@ -433,27 +456,33 @@ function LeadCapture({
   attemptId: string | null
   source: string | null
 }) {
+  // El programa de un mes es el siguiente paso natural tras el test: es lo
+  // principal del recuadro. Pulsar «Empezar el mes gratis» ya es pedirlo (no
+  // hace falta casilla); quien solo quiera su devolución tiene el enlace de
+  // debajo. Las cartas de Manel (marketing) siempre van aparte.
   const copy = getInvCopy(locale).mail
-  const programaTexts = getProgramaTexts(locale)
+  const t = getProgramaTexts(locale)
   const [email, setEmail] = useState('')
   const [consent, setConsent] = useState(false)
-  const [programa, setPrograma] = useState(false)
-  const [inscrita, setInscrita] = useState(false)
+  const [modo, setModo] = useState<'programa' | 'solo' | null>(null)
+  const [programaEstado, setProgramaEstado] = useState<'pendiente' | 'confirmada' | 'ya' | 'error' | null>(null)
   const [status, setStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
 
   if (status === 'done') {
+    const msg = modo === 'solo' || !programaEstado || programaEstado === 'error'
+      ? t.captura.doneSolo
+      : programaEstado === 'pendiente' ? t.optInPending : programaEstado === 'ya' ? t.optInYa : t.optInDone
     return (
       <div className="rounded-xl bg-[#c2866b]/[0.08] px-5 py-6">
-        <p className="text-sm text-[#272727]/75">{copy.done}</p>
-        {inscrita && <p className="text-sm text-[#272727]/75 mt-2">{programaTexts.optInDone}</p>}
+        <p className="text-sm leading-relaxed text-[#272727]/75">{msg}</p>
       </div>
     )
   }
 
   const valid = EMAIL_RE.test(email.trim())
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const send = async (programa: boolean) => {
     if (!valid || status === 'sending') return
+    setModo(programa ? 'programa' : 'solo')
     setStatus('sending')
     try {
       const res = await fetch('/api/inventario/lead', {
@@ -463,19 +492,28 @@ function LeadCapture({
       })
       if (res.ok) {
         const j = await res.json().catch(() => null)
-        if (j?.programa === 'inscrita' || j?.programa === 'ya') setInscrita(true)
+        setProgramaEstado(j?.programa ?? null)
       }
       setStatus(res.ok ? 'done' : 'error')
-      if (res.ok) trackEvent('generate_lead', { tool: 'inventario', consent })
+      if (res.ok) trackEvent('generate_lead', { tool: 'inventario', consent, programa })
     } catch {
       setStatus('error')
     }
   }
 
   return (
-    <form onSubmit={submit} className="rounded-xl border border-[#c2866b]/30 bg-[#c2866b]/[0.05] px-5 py-6 space-y-3">
-      <p className="font-[family-name:var(--font-cormorant)] text-2xl text-[#272727]">{copy.title}</p>
-      <p className="text-sm leading-relaxed text-[#272727]/65">{copy.body}</p>
+    <form
+      onSubmit={e => { e.preventDefault(); send(true) }}
+      className="rounded-xl border border-[#c2866b]/40 bg-[#c2866b]/[0.06] px-5 py-7 sm:px-7 space-y-5"
+    >
+      <div className="space-y-3">
+        <p className="text-[11px] tracking-[0.2em] uppercase text-[#c2866b]">{t.landing.eyebrow}</p>
+        <p className="font-[family-name:var(--font-cormorant)] text-3xl leading-tight text-[#272727]">{t.captura.title}</p>
+        <p className="text-[15px] leading-relaxed text-[#272727]/75">{t.captura.body}</p>
+      </div>
+      <ol className="space-y-1.5 text-sm leading-relaxed text-[#272727]/70">
+        {t.semanas.lista.map(w => <li key={w}>{w}</li>)}
+      </ol>
       <div className="flex flex-col sm:flex-row gap-2">
         <input
           id="inv-email"
@@ -493,20 +531,18 @@ function LeadCapture({
           disabled={!valid || status === 'sending'}
           className="px-6 py-3 bg-[#272727] text-[#FDFBF7] text-xs tracking-widest hover:bg-[#c2866b] transition-colors disabled:opacity-40"
         >
-          {status === 'sending' ? copy.sending : copy.button}
+          {status === 'sending' && modo === 'programa' ? t.captura.sending : t.captura.button}
         </button>
       </div>
-      <label htmlFor="inv-programa" className="flex items-start gap-2 cursor-pointer">
-        <input
-          id="inv-programa"
-          type="checkbox"
-          checked={programa}
-          onChange={e => setPrograma(e.target.checked)}
-          className="mt-1 accent-[#c2866b]"
-        />
-        <span className="text-xs leading-relaxed text-[#272727]/70">{programaTexts.optIn}</span>
-      </label>
-      <label htmlFor="inv-consent" className="flex items-start gap-2 cursor-pointer">
+      <button
+        type="button"
+        onClick={() => send(false)}
+        disabled={!valid || status === 'sending'}
+        className="text-sm text-[#272727]/60 underline underline-offset-4 hover:text-[#c2866b] disabled:no-underline disabled:opacity-50"
+      >
+        {status === 'sending' && modo === 'solo' ? t.captura.sending : t.captura.solo}
+      </button>
+      <label htmlFor="inv-consent" className="flex items-start gap-2 cursor-pointer border-t border-[#272727]/10 pt-4">
         <input
           id="inv-consent"
           type="checkbox"
@@ -514,12 +550,13 @@ function LeadCapture({
           onChange={e => setConsent(e.target.checked)}
           className="mt-1 accent-[#c2866b]"
         />
-        <span className="text-xs leading-relaxed text-[#272727]/60">{copy.consent}</span>
+        <span className="text-xs leading-relaxed text-[#272727]/55">{copy.consent}</span>
       </label>
       {status === 'error' && <p className="text-xs text-red-700/70">{copy.error}</p>}
     </form>
   )
 }
+
 
 function Shell({
   userId,

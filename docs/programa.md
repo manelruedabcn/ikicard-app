@@ -6,8 +6,28 @@ conversión del embudo: quien llega al final ha trabajado un mes y conoce a Mane
 
 ## Cómo funciona
 
-- **Inicio:** cada persona empieza el **lunes siguiente** a apuntarse (fecha de
-  Madrid). Recibe al momento un correo de bienvenida con esa fecha.
+- **Dos entradas al mismo programa** (columna `origen`):
+  - **Test** (`origen = test`): al acabar el test, el recuadro final presenta
+    el programa como siguiente paso. «Empezar el mes gratis» lo pide; «Solo
+    envíame esta devolución», no.
+  - **Página del programa** (`/[locale]/programa`, `origen = programa`): para
+    redes, talleres, newsletter o QR. Solo pide el correo; llega «Confirma tu
+    plaza» por separado (reenvío limitado a uno cada 10 minutos). Al confirmar,
+    la bienvenida le pide **hacer el test primero** con su enlace personal
+    (`/inventario?prog=token`): ese test es su punto de partida, se guarda como
+    `first_answers` y la devolución se le envía sola a su correo. Si llega al
+    primer lunes sin test, la semana 1 se lo vuelve a pedir.
+  - El mismo enlace personal repite el test en la semana 4. Antes de la
+    semana 4, repetirlo no compara nada.
+- **Doble confirmación:** pedir el programa crea la inscripción **pendiente**.
+  El correo de la devolución abre con un recuadro «Confirma tu plaza» y un
+  botón; solo al pulsarlo entra en el programa (`/api/programa/confirmar`).
+  Quien no lo pulsa recibe su devolución y nada más. Si tiene sesión en la
+  app con ese mismo correo ya verificado, entra directamente. Repetir el test
+  antes de confirmar actualiza la misma pendiente (mismo enlace).
+- **Inicio:** cada persona empieza el **lunes siguiente** a confirmar (fecha de
+  Madrid). Recibe al momento un correo de bienvenida con esa fecha; si ese
+  envío falla, la tarea programada lo reintenta cada hora hasta su primer lunes.
 - **Correos** (a las 8:00 de Madrid, desde `/api/cron/programa`, que GitHub
   Actions llama cada hora: `.github/workflows/programa.yml`):
 

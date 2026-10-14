@@ -34,6 +34,8 @@ export interface ProgramaContext {
   encuentros: { when: string; url: string }[]
   // Semana 3: PASO con cuenta (solo cuando la verificación de cuentas funcione).
   pasoConCuenta: boolean
+  // ¿Ha hecho ya el test? Quien entra por la página del programa empieza sin él.
+  tieneTest: boolean
   // Enlaces de un clic «¿lo has hecho?» de esta semana (correos del jueves).
   checkin: Record<ProgramaCheckin, string> | null
 }
@@ -41,7 +43,37 @@ export interface ProgramaContext {
 interface ProgramaTexts {
   name: string
   optIn: string
+  // Tras pedir el programa: falta confirmar con el botón del correo.
+  optInPending: string
   optInDone: string
+  // Ya tenía una inscripción activa con este correo.
+  optInYa: string
+  // Bloque «Confirma tu plaza» dentro del correo de la devolución.
+  confirmar: { subject: string; title: string; text: string; button: string; note: string }
+  // Quien aún no ha hecho el test: bienvenida y semana 1 se lo piden primero.
+  sinTest: { bienvenida: string; semana1: string; button: string }
+  // Las cuatro semanas en una línea cada una (página del programa y recuadro
+  // del final del test). La primera, «antes de empezar», solo en la página.
+  semanas: { antes: string; lista: [string, string, string, string] }
+  // Recuadro del final del test: el programa como siguiente paso.
+  captura: { title: string; body: string; button: string; solo: string; sending: string; doneSolo: string }
+  // Primer test hecho con el enlace personal (entró por la página del programa).
+  inicio: { title: string; body: string; sent: string }
+  // Una línea en la portada del test.
+  testNote: string
+  // Página del programa.
+  landing: {
+    metaTitle: string; metaDescription: string
+    eyebrow: string; title: string; lead: string
+    howTitle: string
+    needTitle: string; need: string[]
+    whoTitle: string; who: string
+    formTitle: string; placeholder: string; button: string; sending: string; consent: string; error: string
+    sent: string; ya: string
+    testFirst: string; testLink: string
+  }
+  // Página que se abre al pulsar «Confirmar mi plaza».
+  confirmarPage: { checking: string; confirmada: (start: string) => string; ya: string; invalid: string; error: string }
   dateLocale: string
   q: [string, string]
   book: string
@@ -58,6 +90,10 @@ interface ProgramaTexts {
   retomar: Partial<Record<ProgramaCheckin, string>>
   checkinPage: Record<ProgramaCheckin | 'invalid', string>
 }
+
+// Quien aún no ha hecho el test: una línea y el botón a su enlace personal.
+const sinTestBlocks = (t: ProgramaTexts, c: ProgramaContext, text: string): ProgramaBlock[] =>
+  c.tieneTest ? [] : [{ kind: 'p', text }, { kind: 'cta', href: c.links.repetir, label: t.sinTest.button }]
 
 const exerciseBlock = (t: ProgramaTexts, e: InvExercise): ProgramaBlock => ({
   kind: 'exercise',
@@ -82,6 +118,77 @@ const ES: ProgramaTexts = {
   name: 'Un mes conociendo tu ikigai',
   optIn: 'Quiero hacer gratis «Un mes conociendo tu ikigai»: un correo cada lunes durante cuatro semanas, con un ejercicio del libro, encuentros en grupo opcionales y, al final, una propuesta para seguir. Puedo darme de baja cuando quiera.',
   optInDone: 'Te has apuntado a «Un mes conociendo tu ikigai». Te he escrito con la fecha de inicio.',
+  optInPending: 'Falta un paso: en el correo que te acabo de enviar, arriba del todo, pulsa «Confirmar mi plaza». Sin eso no empieza el programa.',
+  optInYa: 'Ya estás dentro de «Un mes conociendo tu ikigai» con este correo.',
+  sinTest: {
+    bienvenida: 'Antes del lunes, una cosa: haz el test de ikigai. Son diez minutos. Es tu punto de partida: el ejercicio de la primera semana sale de ahí, y en la última lo repetirás para ver qué ha cambiado.',
+    semana1: 'Primera semana. Todavía no has hecho el test de ikigai, y todo el mes parte de ahí. Empieza por él: diez minutos. Al terminar verás el ejercicio de esta semana.',
+    button: 'HACER EL TEST',
+  },
+  semanas: {
+    antes: 'Antes de empezar · El test de ikigai: una foto de hoy de lo que haces y desde dónde lo haces.',
+    lista: [
+      'Semana 1 · El ejercicio que te propone tu test, hecho de verdad.',
+      'Semana 2 · Tu mapa del Ikigai Activo: lo que haces, lo que se te da bien, lo que aportas.',
+      'Semana 3 · Desde dónde lo haces: PASO y una pregunta para cada noche.',
+      'Semana 4 · Repites el test y lo comparas con el primero.',
+    ],
+  },
+  captura: {
+    title: 'Esto es una foto de hoy. ¿Lo trabajamos durante un mes?',
+    body: '«Un mes conociendo tu ikigai» es gratis. Un correo cada lunes durante cuatro semanas, con una sola cosa que hacer. Sin cuenta. Lo dejas cuando quieras.',
+    button: 'Empezar el mes gratis',
+    solo: 'Solo envíame esta devolución',
+    sending: 'Enviando…',
+    doneSolo: 'Te la he enviado. Revisa tu correo (y la carpeta de spam, por si acaso).',
+  },
+  inicio: {
+    title: 'Tu punto de partida',
+    body: 'Esta es tu foto de hoy. El ejercicio de la primera semana es el que ves arriba; el lunes te llega el correo para hacerlo con calma. En la última semana repetirás el test y lo compararás con este.',
+    sent: 'Te he enviado esta devolución a tu correo.',
+  },
+  testNote: 'Al final, si quieres, puedes seguir con un mes de ejercicios gratis.',
+  landing: {
+    metaTitle: 'Un mes conociendo tu ikigai · programa gratuito de 4 semanas',
+    metaDescription: 'Programa gratuito de cuatro semanas: un correo cada lunes con un ejercicio de «El Ikigai que no te contaron». Empieza con un test de ikigai y acaba repitiéndolo para ver qué ha cambiado.',
+    eyebrow: 'Programa gratuito · 4 semanas',
+    title: 'Un mes conociendo tu ikigai',
+    lead: 'Un correo cada lunes durante cuatro semanas, con una sola cosa que hacer. Empieza con un test de diez minutos y acaba repitiéndolo, para ver qué se ha movido.',
+    howTitle: 'Cómo es',
+    needTitle: 'Qué necesitas',
+    need: [
+      'Una libreta y un rato cada semana.',
+      'No hace falta crear una cuenta ni tener el libro.',
+      'Encuentros en grupo online, opcionales.',
+      'Si una semana no puedes, no pasa nada: el lunes siguiente llega el correo siguiente. Te das de baja con un clic.',
+    ],
+    whoTitle: 'Quién lo escribe',
+    who: 'Manel Rueda, autor de «El Ikigai que no te contaron». Todo lo que vas a hacer sale de ese libro.',
+    formTitle: 'Empieza el lunes',
+    placeholder: 'tu@correo.com',
+    button: 'Empezar el mes gratis',
+    sending: 'Enviando…',
+    consent: 'Quiero recibir también las cartas de Manel y propuestas para seguir trabajando esto. Es aparte del programa, y puedo darme de baja cuando quiera.',
+    error: 'No se ha podido enviar. Revisa el correo y vuelve a intentarlo.',
+    sent: 'Te he enviado un correo. Pulsa «Confirmar mi plaza» para empezar. Si no lo ves, mira en la carpeta de spam.',
+    ya: 'Ya estás dentro del programa con este correo. El correo de cada lunes te llega a esta dirección.',
+    testFirst: '¿Prefieres empezar por el test?',
+    testLink: 'Hacer el test de ikigai',
+  },
+  confirmar: {
+    subject: 'Confirma tu plaza: un mes conociendo tu ikigai',
+    title: 'Confirma tu plaza',
+    text: 'Has pedido hacer «Un mes conociendo tu ikigai». Para empezar, confirma que este correo es tuyo. El programa arranca el lunes siguiente a confirmar.',
+    button: 'CONFIRMAR MI PLAZA',
+    note: 'Si no lo has pedido tú, ignóralo: sin confirmar no recibirás nada más.',
+  },
+  confirmarPage: {
+    checking: 'Confirmando…',
+    confirmada: start => `Hecho. Empiezas el lunes ${start}. Te acabo de escribir con lo que viene.`,
+    ya: 'Ya estabas dentro del programa. El correo de cada lunes te llega a esta misma dirección.',
+    invalid: 'Este enlace no es válido o ya no está activo.',
+    error: 'No se ha podido confirmar ahora. Vuelve a pulsar el botón del correo en unos minutos.',
+  },
   dateLocale: 'es-ES',
   q: ['«', '»'],
   book: 'El Ikigai que no te contaron',
@@ -107,6 +214,7 @@ const ES: ProgramaTexts = {
       ...encuentrosBlock(ES, c),
       { kind: 'p', text: 'Si una semana no puedes, no pasa nada. El lunes siguiente llega el correo siguiente.' },
       { kind: 'quote', text: 'Si un día fallas, al siguiente vuelves. Sin drama.', cite: 'Capítulo 6' },
+      ...sinTestBlocks(ES, c, ES.sinTest.bienvenida),
       { kind: 'p', text: 'Mientras tanto, solo una cosa: busca una libreta que te dé gusto abrir. La vas a usar.' },
       { kind: 'sign', text: 'Manel' },
     ],
@@ -150,8 +258,10 @@ const ES: ProgramaTexts = {
     semana1: c => ({
       subject: c.exercise ? `Semana 1: ${c.exercise.title.toLowerCase()}` : 'Semana 1: el inventario honesto',
       blocks: [
-        { kind: 'p', text: 'Primera semana. Empezamos por lo que salió en tu inventario.' },
-        { kind: 'p', text: 'Cuando hiciste el test, la devolución te propuso un ejercicio. Esta semana es para hacerlo de verdad, no para leerlo.' },
+        ...(c.tieneTest ? [
+          { kind: 'p', text: 'Primera semana. Empezamos por lo que salió en tu inventario.' },
+          { kind: 'p', text: 'Cuando hiciste el test, la devolución te propuso un ejercicio. Esta semana es para hacerlo de verdad, no para leerlo.' },
+        ] as ProgramaBlock[] : sinTestBlocks(ES, c, ES.sinTest.semana1)),
         ...(c.exercise ? [exerciseBlock(ES, c.exercise)] : []),
         { kind: 'p', text: 'Antes de empezar, en la primera página de tu libreta escribe la fecha de hoy y una sola frase: lo que esperas de este mes. No lo que crees que deberías esperar. Lo que realmente esperas, aunque suene pequeño.' },
         { kind: 'p', text: 'Esa frase es un ancla. Cuando llegues al final del mes y la releas, te dirá más sobre el camino recorrido que cualquier ejercicio.' },
@@ -238,6 +348,77 @@ const CA: ProgramaTexts = {
   name: 'Un mes coneixent el teu ikigai',
   optIn: 'Vull fer gratis «Un mes coneixent el teu ikigai»: un correu cada dilluns durant quatre setmanes, amb un exercici del llibre, trobades en grup opcionals i, al final, una proposta per continuar. Em puc donar de baixa quan vulgui.',
   optInDone: 'T’has apuntat a «Un mes coneixent el teu ikigai». T’he escrit amb la data d’inici.',
+  optInPending: 'Falta un pas: al correu que t’acabo d’enviar, a dalt de tot, prem «Confirmar la meva plaça». Sense això el programa no comença.',
+  optInYa: 'Ja ets dins de «Un mes coneixent el teu ikigai» amb aquest correu.',
+  sinTest: {
+    bienvenida: 'Abans de dilluns, una cosa: fes el test d’ikigai. Són deu minuts. És el teu punt de partida: l’exercici de la primera setmana surt d’aquí, i a l’última el repetiràs per veure què ha canviat.',
+    semana1: 'Primera setmana. Encara no has fet el test d’ikigai, i tot el mes parteix d’aquí. Comença per ell: deu minuts. En acabar veuràs l’exercici d’aquesta setmana.',
+    button: 'FER EL TEST',
+  },
+  semanas: {
+    antes: 'Abans de començar · El test d’ikigai: una foto d’avui del que fas i des d’on ho fas.',
+    lista: [
+      'Setmana 1 · L’exercici que et proposa el teu test, fet de veritat.',
+      'Setmana 2 · El teu mapa de l’Ikigai Actiu: el que fas, el que se’t dona bé, el que aportes.',
+      'Setmana 3 · Des d’on ho fas: PASO i una pregunta per a cada nit.',
+      'Setmana 4 · Repeteixes el test i el compares amb el primer.',
+    ],
+  },
+  captura: {
+    title: 'Això és una foto d’avui. Ho treballem durant un mes?',
+    body: '«Un mes coneixent el teu ikigai» és gratuït. Un correu cada dilluns durant quatre setmanes, amb una sola cosa per fer. Sense compte. Ho deixes quan vulguis.',
+    button: 'Començar el mes gratis',
+    solo: 'Només envia’m aquest retorn',
+    sending: 'Enviant…',
+    doneSolo: 'Te l’he enviat. Revisa el correu (i la carpeta de correu brossa, per si de cas).',
+  },
+  inicio: {
+    title: 'El teu punt de partida',
+    body: 'Aquesta és la teva foto d’avui. L’exercici de la primera setmana és el que veus a dalt; dilluns et arriba el correu per fer-lo amb calma. A l’última setmana repetiràs el test i el compararàs amb aquest.',
+    sent: 'T’he enviat aquest retorn al correu.',
+  },
+  testNote: 'Al final, si vols, pots continuar amb un mes d’exercicis gratuït.',
+  landing: {
+    metaTitle: 'Un mes coneixent el teu ikigai · programa gratuït de 4 setmanes',
+    metaDescription: 'Programa gratuït de quatre setmanes: un correu cada dilluns amb un exercici de «El Ikigai que no te contaron». Comença amb un test d’ikigai i acaba repetint-lo per veure què ha canviat.',
+    eyebrow: 'Programa gratuït · 4 setmanes',
+    title: 'Un mes coneixent el teu ikigai',
+    lead: 'Un correu cada dilluns durant quatre setmanes, amb una sola cosa per fer. Comença amb un test de deu minuts i acaba repetint-lo, per veure què s’ha mogut.',
+    howTitle: 'Com és',
+    needTitle: 'Què necessites',
+    need: [
+      'Una llibreta i una estona cada setmana.',
+      'No cal crear un compte ni tenir el llibre.',
+      'Trobades en grup en línia, opcionals.',
+      'Si una setmana no pots, no passa res: el dilluns següent arriba el correu següent. Et dones de baixa amb un clic.',
+    ],
+    whoTitle: 'Qui l’escriu',
+    who: 'Manel Rueda, autor de «El Ikigai que no te contaron». Tot el que faràs surt d’aquest llibre.',
+    formTitle: 'Comença dilluns',
+    placeholder: 'el.teu@correu.com',
+    button: 'Començar el mes gratis',
+    sending: 'Enviant…',
+    consent: 'Vull rebre també les cartes d’en Manel i propostes per continuar treballant això. És a part del programa, i em puc donar de baixa quan vulgui.',
+    error: 'No s’ha pogut enviar. Revisa el correu i torna-ho a provar.',
+    sent: 'T’he enviat un correu. Prem «Confirmar la meva plaça» per començar. Si no el veus, mira a la carpeta de correu brossa.',
+    ya: 'Ja ets dins del programa amb aquest correu. El correu de cada dilluns t’arriba a aquesta adreça.',
+    testFirst: 'Prefereixes començar pel test?',
+    testLink: 'Fer el test d’ikigai',
+  },
+  confirmar: {
+    subject: 'Confirma la teva plaça: un mes coneixent el teu ikigai',
+    title: 'Confirma la teva plaça',
+    text: 'Has demanat fer «Un mes coneixent el teu ikigai». Per començar, confirma que aquest correu és teu. El programa arrenca el dilluns següent a confirmar.',
+    button: 'CONFIRMAR LA MEVA PLAÇA',
+    note: 'Si no ho has demanat tu, ignora-ho: sense confirmar no rebràs res més.',
+  },
+  confirmarPage: {
+    checking: 'Confirmant…',
+    confirmada: start => `Fet. Comences el dilluns ${start}. T’acabo d’escriure amb el que ve.`,
+    ya: 'Ja eres dins del programa. El correu de cada dilluns t’arriba a aquesta mateixa adreça.',
+    invalid: 'Aquest enllaç no és vàlid o ja no està actiu.',
+    error: 'No s’ha pogut confirmar ara. Torna a prémer el botó del correu d’aquí a uns minuts.',
+  },
   dateLocale: 'ca-ES',
   q: ['«', '»'],
   book: 'El Ikigai que no te contaron',
@@ -263,6 +444,7 @@ const CA: ProgramaTexts = {
       ...encuentrosBlock(CA, c),
       { kind: 'p', text: 'Si una setmana no pots, no passa res. El dilluns següent arriba el correu següent.' },
       { kind: 'quote', text: 'Si un dia falles, l’endemà tornes. Sense drama.', cite: 'Capítol 6' },
+      ...sinTestBlocks(CA, c, CA.sinTest.bienvenida),
       { kind: 'p', text: 'Mentrestant, només una cosa: busca una llibreta que et faci gust obrir. La faràs servir.' },
       { kind: 'sign', text: 'Manel' },
     ],
@@ -306,8 +488,10 @@ const CA: ProgramaTexts = {
     semana1: c => ({
       subject: c.exercise ? `Setmana 1: ${c.exercise.title.toLowerCase()}` : 'Setmana 1: l’inventari honest',
       blocks: [
-        { kind: 'p', text: 'Primera setmana. Comencem pel que va sortir al teu inventari.' },
-        { kind: 'p', text: 'Quan vas fer el test, el retorn et va proposar un exercici. Aquesta setmana és per fer-lo de veritat, no per llegir-lo.' },
+        ...(c.tieneTest ? [
+          { kind: 'p', text: 'Primera setmana. Comencem pel que va sortir al teu inventari.' },
+          { kind: 'p', text: 'Quan vas fer el test, el retorn et va proposar un exercici. Aquesta setmana és per fer-lo de veritat, no per llegir-lo.' },
+        ] as ProgramaBlock[] : sinTestBlocks(CA, c, CA.sinTest.semana1)),
         ...(c.exercise ? [exerciseBlock(CA, c.exercise)] : []),
         { kind: 'p', text: 'Abans de començar, a la primera pàgina de la llibreta escriu la data d’avui i una sola frase: el que esperes d’aquest mes. No el que creus que hauries d’esperar. El que realment esperes, encara que soni petit.' },
         { kind: 'p', text: 'Aquesta frase és una àncora. Quan arribis al final del mes i la rellegeixis, et dirà més sobre el camí fet que qualsevol exercici.' },
@@ -394,6 +578,77 @@ const EN: ProgramaTexts = {
   name: 'A month getting to know your ikigai',
   optIn: 'I want to do “A month getting to know your ikigai” for free: an email every Monday for four weeks, with an exercise from the book, optional group meetings and, at the end, a proposal to keep going. I can unsubscribe at any time.',
   optInDone: 'You have signed up for “A month getting to know your ikigai”. I have emailed you the start date.',
+  optInPending: 'One more step: in the email I have just sent you, at the very top, press “Confirm my place”. The programme doesn’t start without it.',
+  optInYa: 'You are already in “A month getting to know your ikigai” with this email.',
+  sinTest: {
+    bienvenida: 'Before Monday, one thing: take the ikigai test. It takes ten minutes. It is your starting point: the first week’s exercise comes from it, and in the last week you will repeat it to see what has changed.',
+    semana1: 'First week. You haven’t taken the ikigai test yet, and the whole month starts from there. Begin with it: ten minutes. When you finish, you will see this week’s exercise.',
+    button: 'TAKE THE TEST',
+  },
+  semanas: {
+    antes: 'Before you start · The ikigai test: a snapshot of what you do and where you do it from.',
+    lista: [
+      'Week 1 · The exercise your test suggests, actually done.',
+      'Week 2 · Your map of the Active Ikigai: what you do, what you are good at, what you contribute.',
+      'Week 3 · Where you do it from: PASO and one question for each evening.',
+      'Week 4 · You repeat the test and compare it with the first one.',
+    ],
+  },
+  captura: {
+    title: 'This is a snapshot of today. Shall we work on it for a month?',
+    body: '“A month getting to know your ikigai” is free. One email every Monday for four weeks, with one thing to do. No account. You can leave whenever you want.',
+    button: 'Start the free month',
+    solo: 'Just send me this reading',
+    sending: 'Sending…',
+    doneSolo: 'I have sent it. Check your inbox (and your spam folder, just in case).',
+  },
+  inicio: {
+    title: 'Your starting point',
+    body: 'This is your snapshot of today. The first week’s exercise is the one above; on Monday you will get the email to do it calmly. In the last week you will repeat the test and compare it with this one.',
+    sent: 'I have sent this reading to your email.',
+  },
+  testNote: 'At the end, if you like, you can continue with a free month of exercises.',
+  landing: {
+    metaTitle: 'A month getting to know your ikigai · free 4-week programme',
+    metaDescription: 'Free four-week programme: one email every Monday with an exercise from “El Ikigai que no te contaron”. It starts with an ikigai test and ends by repeating it to see what has changed.',
+    eyebrow: 'Free programme · 4 weeks',
+    title: 'A month getting to know your ikigai',
+    lead: 'One email every Monday for four weeks, with one thing to do. It starts with a ten-minute test and ends by repeating it, to see what has moved.',
+    howTitle: 'How it works',
+    needTitle: 'What you need',
+    need: [
+      'A notebook and a little time each week.',
+      'No account needed, and you don’t need the book.',
+      'Optional online group meetings.',
+      'If you can’t do a week, that’s fine: the next email arrives the following Monday. You can unsubscribe with one click.',
+    ],
+    whoTitle: 'Who writes it',
+    who: 'Manel Rueda, author of “El Ikigai que no te contaron”. Everything you will do comes from that book.',
+    formTitle: 'Start on Monday',
+    placeholder: 'you@email.com',
+    button: 'Start the free month',
+    sending: 'Sending…',
+    consent: 'I would also like to receive Manel’s letters and ideas to keep working on this. It is separate from the programme, and I can unsubscribe at any time.',
+    error: 'It couldn’t be sent. Check the email address and try again.',
+    sent: 'I have sent you an email. Press “Confirm my place” to start. If you can’t see it, check your spam folder.',
+    ya: 'You are already in the programme with this email. The Monday email reaches you at this address.',
+    testFirst: 'Would you rather start with the test?',
+    testLink: 'Take the ikigai test',
+  },
+  confirmar: {
+    subject: 'Confirm your place: a month getting to know your ikigai',
+    title: 'Confirm your place',
+    text: 'You asked to do “A month getting to know your ikigai”. To start, confirm that this email is yours. The programme begins on the Monday after you confirm.',
+    button: 'CONFIRM MY PLACE',
+    note: 'If this wasn’t you, ignore it: without confirming you won’t receive anything else.',
+  },
+  confirmarPage: {
+    checking: 'Confirming…',
+    confirmada: start => `Done. You start on Monday ${start}. I have just emailed you what comes next.`,
+    ya: 'You were already in the programme. The Monday email reaches you at this same address.',
+    invalid: 'This link isn’t valid or is no longer active.',
+    error: 'It couldn’t be confirmed right now. Press the button in the email again in a few minutes.',
+  },
   dateLocale: 'en-GB',
   q: ['“', '”'],
   book: 'El Ikigai que no te contaron',
@@ -419,6 +674,7 @@ const EN: ProgramaTexts = {
       ...encuentrosBlock(EN, c),
       { kind: 'p', text: 'If you can’t make it one week, that’s fine. The next Monday brings the next email.' },
       { kind: 'quote', text: 'If you miss a day, you come back the next. No drama.', cite: 'Chapter 6' },
+      ...sinTestBlocks(EN, c, EN.sinTest.bienvenida),
       { kind: 'p', text: 'In the meantime, just one thing: find a notebook you enjoy opening. You will use it.' },
       { kind: 'sign', text: 'Manel' },
     ],
@@ -462,8 +718,10 @@ const EN: ProgramaTexts = {
     semana1: c => ({
       subject: c.exercise ? `Week 1: ${c.exercise.title.toLowerCase()}` : 'Week 1: the honest inventory',
       blocks: [
-        { kind: 'p', text: 'First week. We start with what came up in your inventory.' },
-        { kind: 'p', text: 'When you took the test, your reading suggested an exercise. This week is for actually doing it, not just reading it.' },
+        ...(c.tieneTest ? [
+          { kind: 'p', text: 'First week. We start with what came up in your inventory.' },
+          { kind: 'p', text: 'When you took the test, your reading suggested an exercise. This week is for actually doing it, not just reading it.' },
+        ] as ProgramaBlock[] : sinTestBlocks(EN, c, EN.sinTest.semana1)),
         ...(c.exercise ? [exerciseBlock(EN, c.exercise)] : []),
         { kind: 'p', text: 'Before you start, on the first page of your notebook write today’s date and a single sentence: what you expect from this month. Not what you think you should expect. What you really expect, even if it sounds small.' },
         { kind: 'p', text: 'That sentence is an anchor. When you reach the end of the month and reread it, it will tell you more about the road travelled than any exercise.' },

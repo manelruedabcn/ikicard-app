@@ -2,6 +2,7 @@ import 'server-only'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { unsubUrl } from '@/lib/notify'
 import { sendProgramaEmail } from '@/lib/email'
+import { syncCrmContact } from '@/lib/crm-sync'
 import { getInvExercise } from '@/lib/inventario-content'
 import { buildLectura, type ExerciseKey, type InvAnswers } from '@/lib/inventario'
 import { encuentroEnVentana, madridParts, nextMonday, PROGRAMA_CHECKINS, semanaDeJueves, type ProgramaCheckin } from '@/lib/programa'
@@ -50,6 +51,8 @@ function links(insc: Inscripcion) {
   return {
     // Con cuenta: el registro vuelve a /paso. Sin cuenta: directo a /paso.
     paso: PASO_CON_CUENTA ? `${APP_URL}/${l}/login?next=${encodeURIComponent(`/${l}/paso`)}` : `${APP_URL}/${l}/paso`,
+    // El mismo enlace personal sirve para el primer test (entrada por la
+    // página del programa) y para repetirlo en la semana 4.
     repetir: `${APP_URL}/${l}/inventario?prog=${insc.token}`,
     // Mientras el curso online no tenga página propia, lleva a talleres.
     curso: process.env.PROGRAMA_CURSO_URL || `${WEB_URL}${talleres}`,
@@ -85,6 +88,7 @@ async function contexto(insc: Inscripcion, semanaCheckin: number | null = null):
     links: links(insc),
     encuentros: await encuentrosPara(insc),
     pasoConCuenta: PASO_CON_CUENTA,
+    tieneTest: Boolean(insc.first_answers),
     checkin: semanaCheckin ? checkinLinks(insc, semanaCheckin) : null,
   }
 }
@@ -138,16 +142,21 @@ export async function enviarAvisoEncuentro(insc: Inscripcion, encuentro: { id: s
   return enviarUnaVez(insc, `encuentro:${encuentro.id}`, mail)
 }
 
-// Inscribe a una persona (si no tiene ya una inscripción activa) y le envía
-// la bienvenida con su fecha de inicio: el lunes siguiente.
-export async function inscribirEnPrograma(input: {
+// Doble confirmación. Pedir el programa crea (o reutiliza) una inscripción
+// «pendiente»; la persona entra al pulsar «Confirmar mi plaza» en el correo
+// de su devolución. Así nadie apunta un correo ajeno ni uno con errata.
+export type PreparadaEstado = 'pendiente' | 'ya'
+
+export async function prepararInscripcion(input: {
   email: string
   locale: string
   leadId: string | null
   userId: string | null
   attemptId: string | null
-  answers: InvAnswers
-}): Promise<{ inscripcion: Inscripcion; nueva: boolean }> {
+  // null: entra por la página del programa y aún no ha hecho el test.
+  answers: InvAnswers | null
+  origen: 'test' | 'programa'
+}): Promise<{ inscripcion: Inscripcion; estado: PreparadaEstado }> {
   const admin = createAdminClient()
   const { data: activa } = await admin
     .from('programa_inscripciones')
@@ -155,39 +164,139 @@ export async function inscribirEnPrograma(input: {
     .eq('email', input.email)
     .eq('status', 'activa')
     .maybeSingle()
-  if (activa) return { inscripcion: activa as Inscripcion, nueva: false }
+  if (activa) return { inscripcion: activa as Inscripcion, estado: 'ya' }
+
+  // Los datos con los que entra son los de su último test: si repite el
+  // Inventario antes de confirmar, la pendiente se actualiza (mismo enlace).
+  // Sin test (página del programa) no se pisan unas respuestas anteriores.
+  const datos: Record<string, unknown> = { locale: lang(input.locale) }
+  if (input.leadId) datos.lead_id = input.leadId
+  if (input.userId) datos.user_id = input.userId
+  if (input.answers) {
+    datos.first_attempt_id = input.attemptId
+    datos.first_answers = input.answers
+    datos.first_exercise = buildLectura(input.answers).exercise
+  }
+  const { data: pendiente } = await admin
+    .from('programa_inscripciones')
+    .select('id')
+    .eq('email', input.email)
+    .eq('status', 'pendiente')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  const res = pendiente
+    ? await admin.from('programa_inscripciones').update(datos).eq('id', pendiente.id).select(INSCRIPCION_COLS).single()
+    : await admin
+        .from('programa_inscripciones')
+        // start_date provisional: el definitivo se fija al confirmar.
+        .insert({ ...datos, email: input.email, origen: input.origen, status: 'pendiente', start_date: nextMonday(madridParts().date) })
+        .select(INSCRIPCION_COLS)
+        .single()
+  if (res.error || !res.data) throw new Error(res.error?.message || 'inscripción no creada')
+  return { inscripcion: res.data as Inscripcion, estado: 'pendiente' }
+}
+
+export async function enviarBienvenida(insc: Inscripcion): Promise<boolean> {
+  const t = getProgramaTexts(insc.locale)
+  const mail = t.bienvenida(await contexto(insc), formatProgramaDate(insc.locale, insc.start_date))
+  return enviarUnaVez(insc, 'bienvenida', mail)
+}
+
+export function confirmarUrl(insc: Inscripcion): string {
+  return `${APP_URL}/api/programa/confirmar?t=${insc.token}&l=${lang(insc.locale)}`
+}
+
+// Correo «Confirma tu plaza» para quien se apunta en la página del programa
+// (quien viene del test lo recibe dentro de su devolución). Si lo vuelve a
+// pedir, se reenvía, pero no más de una vez cada 10 minutos: nadie puede
+// usar el formulario para llenar de correos el buzón de otra persona.
+const REENVIO_MIN = 10
+
+export async function enviarConfirmacion(insc: Inscripcion): Promise<boolean> {
+  const admin = createAdminClient()
+  const { data: previo } = await admin
+    .from('programa_envios')
+    .select('sent_at')
+    .eq('inscripcion_id', insc.id)
+    .eq('mensaje', 'confirmacion')
+    .maybeSingle()
+  if (previo?.sent_at && Date.now() - Date.parse(previo.sent_at) < REENVIO_MIN * 60_000) return false
+
+  const t = getProgramaTexts(insc.locale)
+  await sendProgramaEmail(insc.email, insc.locale, {
+    subject: t.confirmar.subject,
+    blocks: [
+      { kind: 'p', text: t.confirmar.text },
+      { kind: 'cta', href: confirmarUrl(insc), label: t.confirmar.button },
+      { kind: 'p', text: t.confirmar.note, muted: true },
+      { kind: 'sign', text: 'Manel' },
+    ],
+  }, null)
+  await admin
+    .from('programa_envios')
+    .upsert({ inscripcion_id: insc.id, mensaje: 'confirmacion', sent_at: new Date().toISOString() }, { onConflict: 'inscripcion_id,mensaje' })
+  return true
+}
+
+export type ConfirmarEstado = 'confirmada' | 'ya' | 'invalid'
+
+// Pasa una inscripción pendiente a activa: empieza el lunes siguiente a hoy
+// y recibe la bienvenida. Repetir el clic no hace nada (ya está activa).
+export async function confirmarInscripcion(token: string): Promise<{ estado: ConfirmarEstado; inscripcion?: Inscripcion }> {
+  const admin = createAdminClient()
+  const insc = await inscripcionPorToken(token)
+  if (!insc) return { estado: 'invalid' }
+  if (insc.status === 'activa' || insc.status === 'completada') return { estado: 'ya', inscripcion: insc }
+  if (insc.status !== 'pendiente') return { estado: 'invalid' }
 
   const { data, error } = await admin
     .from('programa_inscripciones')
-    .insert({
-      email: input.email,
-      locale: lang(input.locale),
-      lead_id: input.leadId,
-      user_id: input.userId,
-      start_date: nextMonday(madridParts().date),
-      first_attempt_id: input.attemptId,
-      first_answers: input.answers,
-      first_exercise: buildLectura(input.answers).exercise,
-    })
+    .update({ status: 'activa', start_date: nextMonday(madridParts().date), confirmed_at: new Date().toISOString() })
+    .eq('id', insc.id)
+    .eq('status', 'pendiente')
     .select(INSCRIPCION_COLS)
-    .single()
-  if (error || !data) throw new Error(error?.message || 'inscripción no creada')
+    .maybeSingle()
+  // 23505: ya tiene otra inscripción activa con este correo (índice único).
+  if (error?.code === '23505') return { estado: 'ya', inscripcion: insc }
+  if (error) throw new Error(error.message)
+  // Otra petición la confirmó a la vez: ya está dentro.
+  if (!data) return { estado: 'ya', inscripcion: insc }
   const inscripcion = data as Inscripcion
 
-  const t = getProgramaTexts(inscripcion.locale)
-  const mail = t.bienvenida(await contexto(inscripcion), formatProgramaDate(inscripcion.locale, inscripcion.start_date))
-  await enviarUnaVez(inscripcion, 'bienvenida', mail)
-  return { inscripcion, nueva: true }
+  // Si la bienvenida falla, la persona ya está dentro: la tarea programada
+  // la reintenta cada hora hasta su primer lunes.
+  await enviarBienvenida(inscripcion).catch(err => console.error('[programa] bienvenida error:', err))
+
+  // El consentimiento de marketing es el que dio (o no) al dejar su correo.
+  let marketingConsent = false
+  if (inscripcion.lead_id) {
+    const { data: lead } = await admin.from('inventario_leads').select('consent').eq('id', inscripcion.lead_id).maybeSingle()
+    marketingConsent = Boolean(lead?.consent)
+  }
+  await syncCrmContact({
+    userId: insc.user_id,
+    email: inscripcion.email,
+    marketingConsent,
+    sourceType: 'programa',
+    sourceId: inscripcion.id,
+    sourceDetail: { start_date: inscripcion.start_date, locale: inscripcion.locale },
+  }).catch(err => console.error('[programa] crm sync error:', err))
+
+  return { estado: 'confirmada', inscripcion }
 }
 
-export async function inscripcionPorToken(token: string): Promise<(Inscripcion & { final_attempt_id: string | null }) | null> {
+type InscripcionToken = Inscripcion & { final_attempt_id: string | null; user_id: string | null }
+
+export async function inscripcionPorToken(token: string): Promise<InscripcionToken | null> {
   const admin = createAdminClient()
   const { data } = await admin
     .from('programa_inscripciones')
-    .select(`${INSCRIPCION_COLS}, final_attempt_id`)
+    .select(`${INSCRIPCION_COLS}, final_attempt_id, user_id`)
     .eq('token', token)
     .maybeSingle()
-  return (data as (Inscripcion & { final_attempt_id: string | null }) | null) ?? null
+  return (data as InscripcionToken | null) ?? null
 }
 
 export { INSCRIPCION_COLS }

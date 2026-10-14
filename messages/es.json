@@ -219,7 +219,8 @@
     "reset_button": "Guardar contraseña",
     "reset_done": "Contraseña actualizada. Ya puedes entrar.",
     "back_to_site": "← Volver a ikigaier.com",
-    "link_error": "El enlace no ha funcionado: puede que haya caducado o que ya lo usaras. Si ya confirmaste tu cuenta, entra con tu correo y contraseña; si no, regístrate de nuevo y te llegará otro."
+    "link_error": "El enlace no ha funcionado: puede que haya caducado o que ya lo usaras. Si ya confirmaste tu cuenta, entra con tu correo y contraseña; si no, regístrate de nuevo y te llegará otro.",
+    "generic_error": "No hemos podido completarlo. Vuelve a intentarlo en unos minutos; si sigue sin funcionar, escríbenos a hola@ikigaier.com."
   },
   "admin": {
     "title": "Panel de administración",
