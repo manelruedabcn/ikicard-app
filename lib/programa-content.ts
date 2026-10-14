@@ -29,6 +29,9 @@ export interface ProgramaContext {
   startDate: string
   // Ejercicio de la devolución del Inventario (semana 1).
   exercise: InvExercise | null
+  // Semana 3: un ejercicio del Ikigai Activo y otro del Consciente, nunca el
+  // mismo que ya le tocó en la semana 1.
+  semana3: { activo: InvExercise; consciente: InvExercise }
   links: { paso: string; repetir: string; curso: string; libro: string; taller: string }
   // Encuentros próximos dentro del mes de la persona (ya formateados).
   encuentros: { when: string; url: string }[]

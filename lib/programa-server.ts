@@ -83,11 +83,22 @@ function checkinLinks(insc: Inscripcion, semana: number): Record<ProgramaCheckin
   return Object.fromEntries(PROGRAMA_CHECKINS.map(r => [r, url(r)])) as Record<ProgramaCheckin, string>
 }
 
+// Semana 3 (Atravesar): el hilo en el tiempo y cinco minutos de presencia al
+// día. Si alguno coincide con el ejercicio que ya le dio su test, su relevo.
+export function ejerciciosSemana3(first: string | null): { activo: ExerciseKey; consciente: ExerciseKey } {
+  return {
+    activo: first === 'tiempo' ? 'dejaste' : 'tiempo',
+    consciente: first === 'cotidiano' ? 'pilares' : 'cotidiano',
+  }
+}
+
 async function contexto(insc: Inscripcion, semanaCheckin: number | null = null): Promise<ProgramaContext> {
   const exercise = insc.first_exercise ? getInvExercise(insc.locale, insc.first_exercise as ExerciseKey) : null
+  const s3 = ejerciciosSemana3(insc.first_exercise)
   return {
     startDate: insc.start_date,
     exercise,
+    semana3: { activo: getInvExercise(insc.locale, s3.activo), consciente: getInvExercise(insc.locale, s3.consciente) },
     links: links(insc),
     encuentros: await encuentrosPara(insc),
     pasoConCuenta: PASO_CON_CUENTA,
