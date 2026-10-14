@@ -522,7 +522,7 @@ export async function sendProgramaEmail(to: string, locale: string, mail: Progra
       case 'p':
         return `<p style="font-size:15px;line-height:1.7;color:${b.muted ? '#8b8179' : 'rgba(39,39,39,0.82)'};margin:0 0 14px;">${escapeHtml(b.text)}</p>`
       case 'quote':
-        return `<p style="font-family:Georgia,serif;font-style:italic;font-size:18px;line-height:1.5;border-left:2px solid #c2866b;padding-left:14px;color:#403b37;margin:4px 0 16px;">${qo}${escapeHtml(b.text)}${qc}<br><span style="font-family:Arial,sans-serif;font-style:normal;font-size:12px;color:#8b8179;">${escapeHtml(b.cite)} · ${escapeHtml(t.book)}</span></p>`
+        return `<p style="font-family:Georgia,serif;font-style:italic;font-size:18px;line-height:1.5;border-left:2px solid #c2866b;padding-left:14px;color:#403b37;margin:4px 0 16px;">${qo}${escapeHtml(b.text)}${qc}<br><span style="font-family:Arial,sans-serif;font-style:normal;font-size:12px;color:#8b8179;">${escapeHtml(b.cite)} · ${escapeHtml(b.book ?? t.book)}</span></p>`
       case 'exercise':
         return `<div style="background:#f5f1eb;padding:18px 20px;margin:20px 0;">
           <p style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;margin:0 0 6px;">${escapeHtml(b.eyebrow)}</p>

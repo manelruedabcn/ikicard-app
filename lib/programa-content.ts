@@ -13,7 +13,8 @@ import type { ProgramaCheckin, ProgramaSemanal } from './programa'
 
 export type ProgramaBlock =
   | { kind: 'p'; text: string; muted?: boolean }
-  | { kind: 'quote'; text: string; cite: string }
+  // book: el libro de la cita; si no se indica, «El Ikigai que no te contaron».
+  | { kind: 'quote'; text: string; cite: string; book?: string }
   | { kind: 'exercise'; title: string; eyebrow: string; steps: string[] }
   | { kind: 'cta'; href: string; label: string }
   | { kind: 'encuentros'; title: string; items: { when: string; url: string }[]; joinLabel: string }
@@ -32,7 +33,8 @@ export interface ProgramaContext {
   // Semana 3: un ejercicio del Ikigai Activo y otro del Consciente, nunca el
   // mismo que ya le tocó en la semana 1.
   semana3: { activo: InvExercise; consciente: InvExercise }
-  links: { paso: string; repetir: string; curso: string; libro: string; taller: string }
+  // curso: null mientras el curso online no tenga página propia (no se ofrece).
+  links: { paso: string; repetir: string; curso: string | null; libro: string; libros: string; taller: string }
   // Encuentros próximos dentro del mes de la persona (ya formateados).
   encuentros: { when: string; url: string }[]
   // Semana 3: PASO con cuenta (solo cuando la verificación de cuentas funcione).
@@ -80,8 +82,13 @@ interface ProgramaTexts {
   dateLocale: string
   q: [string, string]
   book: string
+  // Segundo libro del que salen ejercicios y citas.
+  book2: string
   chapter: string
   thisWeek: string
+  // Pequeño ritual al empezar las semanas 2, 3 y 4.
+  umbral: { eyebrow: string; title: string }
+  allMonth: string
   encuentrosTitle: string
   join: string
   unsubscribe: (link: string) => string
@@ -97,6 +104,21 @@ interface ProgramaTexts {
 // Quien aún no ha hecho el test: una línea y el botón a su enlace personal.
 const sinTestBlocks = (t: ProgramaTexts, c: ProgramaContext, text: string): ProgramaBlock[] =>
   c.tieneTest ? [] : [{ kind: 'p', text }, { kind: 'cta', href: c.links.repetir, label: t.sinTest.button }]
+
+// Ejercicio de cualquiera de los dos libros (book2: «No todo lo que te frena es tuyo»).
+const ej = (t: ProgramaTexts, title: string, cap: number | string, steps: string[], book2 = false, eyebrow?: string): ProgramaBlock => ({
+  kind: 'exercise',
+  title,
+  eyebrow: eyebrow ?? `${t.thisWeek} · ${book2 ? `${t.book2} · ` : ''}${t.chapter} ${cap}`,
+  steps,
+})
+
+const umbral = (t: ProgramaTexts, text: string): ProgramaBlock => ({ kind: 'exercise', title: t.umbral.title, eyebrow: t.umbral.eyebrow, steps: [text] })
+
+const cita = (t: ProgramaTexts, text: string, cite: string, book2 = false): ProgramaBlock => ({ kind: 'quote', text, cite, book: book2 ? t.book2 : undefined })
+
+const cursoBlock = (c: ProgramaContext, label: string): ProgramaBlock[] =>
+  c.links.curso ? [{ kind: 'cta', href: c.links.curso, label }] : []
 
 const exerciseBlock = (t: ProgramaTexts, e: InvExercise): ProgramaBlock => ({
   kind: 'exercise',
@@ -131,15 +153,15 @@ const ES: ProgramaTexts = {
   semanas: {
     antes: 'Antes de empezar · El test de ikigai: una foto de hoy de lo que haces y desde dónde lo haces.',
     lista: [
-      'Semana 1 · El ejercicio que te propone tu test, hecho de verdad.',
-      'Semana 2 · Tu mapa del Ikigai Activo: lo que haces, lo que se te da bien, lo que aportas.',
-      'Semana 3 · Desde dónde lo haces: PASO y una pregunta para cada noche.',
-      'Semana 4 · Repites el test y lo comparas con el primero.',
+      'Semana 1 · Lo que ya hay: el ejercicio que te propone tu test, una frase para todo el mes y veinte segundos de atención, tres veces al día.',
+      'Semana 2 · Lo que hay debajo: la frase que te frena, de quién es esa voz y qué protegía.',
+      'Semana 3 · Hacer distinto: el hilo que atraviesa tu vida, cinco minutos de presencia al día y un paso pequeño en otra dirección.',
+      'Semana 4 · Volver a ti: repites el test, relees tu libreta y te llevas un gesto para cada noche.',
     ],
   },
   captura: {
     title: 'Esto es una foto de hoy. ¿Lo trabajamos durante un mes?',
-    body: '«Un mes conociendo tu ikigai» es gratis. Un correo cada lunes durante cuatro semanas, con una sola cosa que hacer. Sin cuenta. Lo dejas cuando quieras.',
+    body: '«Un mes conociendo tu ikigai» es gratis. Un correo cada lunes durante cuatro semanas, y otro corto el jueves, con ejercicios de mis libros. Sin cuenta. Lo dejas cuando quieras.',
     button: 'Empezar el mes gratis',
     solo: 'Solo envíame esta devolución',
     sending: 'Enviando…',
@@ -156,17 +178,17 @@ const ES: ProgramaTexts = {
     metaDescription: 'Programa gratuito de cuatro semanas: un correo cada lunes con un ejercicio de «El Ikigai que no te contaron». Empieza con un test de ikigai y acaba repitiéndolo para ver qué ha cambiado.',
     eyebrow: 'Programa gratuito · 4 semanas',
     title: 'Un mes conociendo tu ikigai',
-    lead: 'Un correo cada lunes durante cuatro semanas, con una sola cosa que hacer. Empieza con un test de diez minutos y acaba repitiéndolo, para ver qué se ha movido.',
+    lead: 'Cuatro semanas para mirar lo que haces, lo que te frena y cómo vuelves a ti, con ejercicios de mis libros. Empieza con un test de diez minutos y acaba repitiéndolo, para ver qué se ha movido.',
     howTitle: 'Cómo es',
     needTitle: 'Qué necesitas',
     need: [
-      'Una libreta y un rato cada semana.',
+      'Una libreta y unos minutos al día.',
       'No hace falta crear una cuenta ni tener el libro.',
-      'Encuentros en grupo online, opcionales.',
+      'Si durante tu mes hay encuentros en grupo online, te aviso. Son opcionales.',
       'Si una semana no puedes, no pasa nada: el lunes siguiente llega el correo siguiente. Te das de baja con un clic.',
     ],
     whoTitle: 'Quién lo escribe',
-    who: 'Manel Rueda, autor de «El Ikigai que no te contaron». Todo lo que vas a hacer sale de ese libro.',
+    who: 'Manel Rueda, autor de «El Ikigai que no te contaron» y «No todo lo que te frena es tuyo». Todo lo que vas a hacer sale de esos libros.',
     formTitle: 'Empieza el lunes',
     placeholder: 'tu@correo.com',
     button: 'Empezar el mes gratis',
@@ -195,8 +217,11 @@ const ES: ProgramaTexts = {
   dateLocale: 'es-ES',
   q: ['«', '»'],
   book: 'El Ikigai que no te contaron',
+  book2: 'No todo lo que te frena es tuyo',
   chapter: 'Capítulo',
   thisWeek: 'Esta semana',
+  umbral: { eyebrow: 'Antes de empezar la semana', title: 'Un umbral' },
+  allMonth: 'Para todo el mes',
   encuentrosTitle: 'Encuentro en grupo (opcional, online)',
   join: 'Entrar al encuentro',
   unsubscribe: link => `Si quieres dejar el programa, <a href="${link}" style="color:rgba(39,39,39,0.5);">date de baja aquí</a>.`,
@@ -212,122 +237,170 @@ const ES: ProgramaTexts = {
     subject: `Empiezas el lunes ${start}: un mes conociendo tu ikigai`,
     blocks: [
       { kind: 'p', text: `Te has apuntado a «Un mes conociendo tu ikigai». Empiezas el lunes ${start}.` },
-      { kind: 'p', text: 'Durante cuatro semanas te llegará un correo cada lunes por la mañana, con una sola cosa que hacer esa semana. Todo sale de «El Ikigai que no te contaron». No hace falta que tengas el libro.' },
-      { kind: 'p', text: 'Habrá encuentros en grupo, online, para quien quiera venir. Te avisaré la víspera.' },
+      { kind: 'p', text: 'Durante cuatro semanas te llegará un correo cada lunes por la mañana, con lo que toca esa semana, y otro más corto el jueves. Todo sale de mis libros, sobre todo de «El Ikigai que no te contaron». No hace falta que los tengas.' },
+      { kind: 'p', text: 'Son cuatro semanas, en este orden: lo que ya hay, lo que hay debajo, hacer distinto y volver a ti.' },
+      { kind: 'p', text: 'Si durante tu mes hay encuentros en grupo, online, te aviso la víspera. Son opcionales.' },
       ...encuentrosBlock(ES, c),
       { kind: 'p', text: 'Si una semana no puedes, no pasa nada. El lunes siguiente llega el correo siguiente.' },
-      { kind: 'quote', text: 'Si un día fallas, al siguiente vuelves. Sin drama.', cite: 'Capítulo 6' },
+      cita(ES, 'Si un día fallas, al siguiente vuelves. Sin drama.', 'Capítulo 6'),
       ...sinTestBlocks(ES, c, ES.sinTest.bienvenida),
-      { kind: 'p', text: 'Mientras tanto, solo una cosa: busca una libreta que te dé gusto abrir. La vas a usar.' },
+      { kind: 'p', text: 'Mientras tanto, solo una cosa: busca una libreta que te dé gusto abrir. Todo lo que hagas este mes acabará ahí, y el último día la vas a releer entera.' },
       { kind: 'sign', text: 'Manel' },
     ],
   }),
   semanal: {
+    semana1: c => ({
+      subject: c.exercise ? `Semana 1: ${c.exercise.title.toLowerCase()}` : 'Semana 1: lo que ya hay',
+      blocks: [
+        ...(c.tieneTest ? [
+          { kind: 'p', text: 'Primera semana: lo que ya hay. Empezamos por lo que salió en tu test.' },
+          { kind: 'p', text: 'La devolución te propuso un ejercicio. Esta semana es para hacerlo de verdad, no para leerlo.' },
+        ] as ProgramaBlock[] : sinTestBlocks(ES, c, ES.sinTest.semana1)),
+        { kind: 'p', text: 'Antes de empezar, en la primera página de tu libreta escribe la fecha de hoy y una sola frase: lo que esperas de este mes. No lo que crees que deberías esperar. Lo que realmente esperas, aunque suene pequeño. La releerás el último día.' },
+        ...(c.exercise ? [exerciseBlock(ES, c.exercise)] : []),
+        { kind: 'p', text: 'Y una práctica para todo el mes, de veinte segundos. Tres veces al día (antes de una reunión, después de comer, antes de dormir), haz el VOLver:' },
+        ej(ES, 'El método VOLver', 5, [
+          'V. Ver quién está: ¿cómo me siento ahora mismo?',
+          'O. Observar lo que haces: ¿qué estoy haciendo en este momento?',
+          'L. Localizar el lugar: ¿qué veo, oigo, siento físicamente ahora?',
+          'No escribas nada. Solo hazlo. Con el tiempo se vuelve tan automático que lo usarás sin pensarlo, justo cuando más lo necesitas.',
+        ], false, `${ES.allMonth} · Capítulo 5`),
+        cita(ES, 'El vacío no está en tu vida. Está entre tú y tu vida. Es distancia, no ausencia. Y la distancia no se llena: se recorre.', 'Capítulo 1', true),
+        { kind: 'p', text: 'El jueves, un correo corto. El lunes que viene, la segunda semana.', muted: true },
+        { kind: 'sign', text: 'Manel' },
+      ],
+    }),
     jueves1: c => ({
       subject: 'A mitad de semana',
       blocks: [
         { kind: 'p', text: 'A mitad de la primera semana. Si todavía no has empezado el ejercicio, hoy vale igual.' },
-        { kind: 'p', text: 'Una pregunta para esta noche: ¿qué has notado que no esperabas?' },
+        { kind: 'p', text: 'Una pregunta para esta noche, en tu libreta: ¿qué has notado estos días que no esperabas?' },
+        { kind: 'p', text: 'Y si te has acordado del VOLver aunque sea una vez, ya está funcionando.' },
         { kind: 'sign', text: 'Manel' },
         ...checkinBlock(c, '¿Has hecho el ejercicio de esta semana?', 'Un clic basta. No cambia lo que recibes: solo me dice cómo va.', { si: 'Sí', medias: 'A medias', no: 'Esta semana no' }),
-      ],
-    }),
-    jueves2: c => ({
-      subject: 'A mitad de semana: tu mapa',
-      blocks: [
-        { kind: 'p', text: '¿Hay algo que aparezca en más de una sección de tu mapa? Si aún no lo has hecho, diez minutos esta noche bastan.' },
-        { kind: 'sign', text: 'Manel' },
-        ...checkinBlock(c, '¿Has hecho el ejercicio de esta semana?', 'Un clic basta. No cambia lo que recibes: solo me dice cómo va.', { si: 'Sí', medias: 'A medias', no: 'Esta semana no' }),
-      ],
-    }),
-    jueves3: c => ({
-      subject: 'A mitad de semana: lo que se repite',
-      blocks: [
-        { kind: 'p', text: 'Mira lo que has anotado estas noches. ¿Se repite algo: una persona, un gesto, un momento del día?' },
-        { kind: 'p', text: 'Si aún no has hecho PASO, el enlace sigue en el correo del lunes.' },
-        { kind: 'sign', text: 'Manel' },
-        ...checkinBlock(c, '¿Has hecho el ejercicio de esta semana?', 'Un clic basta. No cambia lo que recibes: solo me dice cómo va.', { si: 'Sí', medias: 'A medias', no: 'Esta semana no' }),
-      ],
-    }),
-    jueves4: c => ({
-      subject: 'A mitad de semana: un mes después',
-      blocks: [
-        { kind: 'p', text: '¿Has repetido tu inventario? Antes de hacerlo, relee la frase que escribiste el primer día.' },
-        { kind: 'cta', href: c.links.repetir, label: 'REPETIR MI INVENTARIO' },
-        { kind: 'sign', text: 'Manel' },
-        ...checkinBlock(c, '¿Has hecho el ejercicio de esta semana?', 'Un clic basta. No cambia lo que recibes: solo me dice cómo va.', { si: 'Sí', medias: 'A medias', no: 'Esta semana no' }),
-      ],
-    }),
-    semana1: c => ({
-      subject: c.exercise ? `Semana 1: ${c.exercise.title.toLowerCase()}` : 'Semana 1: el inventario honesto',
-      blocks: [
-        ...(c.tieneTest ? [
-          { kind: 'p', text: 'Primera semana. Empezamos por lo que salió en tu inventario.' },
-          { kind: 'p', text: 'Cuando hiciste el test, la devolución te propuso un ejercicio. Esta semana es para hacerlo de verdad, no para leerlo.' },
-        ] as ProgramaBlock[] : sinTestBlocks(ES, c, ES.sinTest.semana1)),
-        ...(c.exercise ? [exerciseBlock(ES, c.exercise)] : []),
-        { kind: 'p', text: 'Antes de empezar, en la primera página de tu libreta escribe la fecha de hoy y una sola frase: lo que esperas de este mes. No lo que crees que deberías esperar. Lo que realmente esperas, aunque suene pequeño.' },
-        { kind: 'p', text: 'Esa frase es un ancla. Cuando llegues al final del mes y la releas, te dirá más sobre el camino recorrido que cualquier ejercicio.' },
-        { kind: 'p', text: 'El lunes que viene, la segunda semana.', muted: true },
-        { kind: 'sign', text: 'Manel' },
       ],
     }),
     semana2: c => ({
-      subject: 'Semana 2: tu mapa del Ikigai Activo',
+      subject: 'Semana 2: lo que hay debajo',
       blocks: [
-        { kind: 'p', text: 'Segunda semana. Miramos el Ikigai Activo: lo que haces, lo que se te da bien, lo que aportas.' },
-        exerciseBlock(ES, { title: 'Tu mapa del Ikigai Activo', cap: 4, steps: [
-          'En una página nueva de tu libreta, divide el espacio en cuatro secciones y responde una pregunta en cada una:',
-          '¿Qué me apasiona hacer? (aunque no me paguen por ello) · ¿En qué soy bueno? (que los demás también reconocen) · ¿Qué podría aportar al mundo? (aunque sea en pequeño) · ¿De qué podría vivir haciendo algo que tiene sentido para mí?',
-          'Mira si hay algo que aparezca en más de una sección. Eso suele ser la pista más útil.',
-        ] }),
-        { kind: 'quote', text: 'El diagrama no da una respuesta definitiva: abre un espacio de reflexión.', cite: 'Herramientas' },
-        { kind: 'p', text: 'Si quieres ir más allá, al final del libro están el test de las cuatro estrellas y el test CAMINO.', muted: true },
+        { kind: 'p', text: 'Segunda semana: lo que hay debajo. Hasta ahora has mirado lo que haces. Esta semana miramos lo que te frena cuando quieres hacerlo. No para arreglarlo. Para verlo.' },
+        umbral(ES, 'Abre tu libreta y termina esta frase, sin pensarla demasiado: «Lo que más temo encontrar aquí es…».'),
+        ej(ES, 'La autopsia amable', 2, [
+          'Anota tus tres últimos intentos de cambio, los que sean: ejercicio, un proyecto, un hábito, dejar algo. Para cada uno: ¿qué fue la chispa? ¿Cuánto duró el subidón? ¿Dónde apareció la fricción?',
+          'Ahora la pregunta importante: ¿qué sentencia te dijiste al abandonar cada uno? Escríbela literal, con las palabras exactas que usaste contra ti.',
+          'Mira las tres sentencias juntas. ¿Se parecen? ¿Cuál es la frase madre, la que se repite debajo de todas?',
+        ], true),
+        ej(ES, 'Encontrar la voz', 7, [
+          'Si esa frase madre tuviera una voz, ¿de quién sería? No busques culpar; busca solo reconocer. A veces es una persona concreta. A veces es «el ambiente» de una época de tu vida.',
+          'Escribe cuántos años tenías, más o menos, cuando esa frase empezó a sonar dentro de ti. Ese número es importante: es la edad de quien sigue tomando, en parte, tus decisiones de hoy.',
+        ], true),
+        { kind: 'p', text: 'Guarda esa página. El jueves te escribo con lo que se hace con ella.' },
+        { kind: 'p', text: 'Esta semana mira hacia dentro. Si en algún momento remueve más de lo que te apetece, para. No hace falta llegar al fondo en siete días.', muted: true },
+        cita(ES, 'Ese “yo soy así” que repites no es una descripción. Es una instalación.', 'Prólogo', true),
         ...encuentrosBlock(ES, c),
         { kind: 'sign', text: 'Manel' },
+      ],
+    }),
+    jueves2: c => ({
+      subject: 'A mitad de semana: de quién es esa voz',
+      blocks: [
+        { kind: 'p', text: 'Vuelve a tu frase madre y a la edad que le pusiste. Imagina a alguien de esa edad exacta, delante de ti, contándote por qué cree eso. ¿Le dirías «qué tontería»? Probablemente no. Le dirías algo parecido a: tiene sentido que pensaras eso, con lo que viviste.' },
+        { kind: 'p', text: 'Desde ese tono, no desde el reproche, tres preguntas:' },
+        ej(ES, 'Las tres preguntas', 10, [
+          '¿De quién es esta voz? Descríbela: edad, situación, si puedes hasta el lugar donde estabas.',
+          '¿A quién o a qué protegía entonces? Sé concreto: ¿tu seguridad, el cariño de alguien, la paz en casa, tu lugar en el grupo?',
+          '¿Protege hoy algo que siga realmente en peligro? Responde con honestidad, no con la respuesta que «queda bien».',
+          'Si la respuesta a la tercera es no, escribe una frase de cierre dirigida a esa voz más joven, algo como: «Gracias por protegerme entonces. Ya no hace falta que sigas haciéndolo así». No tiene que sonar perfecta. Tiene que ser sincera.',
+        ], true),
+        cita(ES, 'No le grites al niño que te protegió. Dale las gracias, y dile que ya puede descansar.', 'Capítulo 10', true),
+        { kind: 'sign', text: 'Manel' },
+        ...checkinBlock(c, '¿Has hecho el ejercicio de esta semana?', 'Un clic basta. No cambia lo que recibes: solo me dice cómo va.', { si: 'Sí', medias: 'A medias', no: 'Esta semana no' }),
       ],
     }),
     semana3: c => ({
-      subject: 'Semana 3: cómo caminas',
+      subject: 'Semana 3: hacer distinto',
       blocks: [
-        { kind: 'p', text: 'Tercera semana. Ahora la otra cara: no qué haces, sino desde dónde lo haces.' },
+        { kind: 'p', text: 'Tercera semana: hacer distinto. Con lo que viste la semana pasada, vuelves a lo que haces y a cómo lo vives. Las dos cosas a la vez.' },
+        umbral(ES, 'Lee en voz alta la frase de cierre que escribiste el jueves. Si no llegaste a escribirla, lee la página de la semana pasada que más te removió.'),
+        { kind: 'p', text: 'Para una tarde de esta semana, lo que haces:' },
+        exerciseBlock(ES, c.semana3.activo),
+        { kind: 'p', text: 'Y para cada día, cómo lo vives:' },
+        exerciseBlock(ES, c.semana3.consciente),
+        cita(ES, 'Un ikigaier no elige entre las dos versiones: las necesita juntas.', 'Capítulo 4'),
         { kind: 'p', text: c.pasoConCuenta
-          ? 'Te propongo PASO, un test breve que compara cómo te muestras para adaptarte con cómo eres cuando no tienes que representar ningún papel. Para hacerlo, crea tu cuenta en la app: así tu resultado queda guardado junto a tu recorrido.'
-          : 'Te propongo PASO, un test breve que compara cómo te muestras para adaptarte con cómo eres cuando no tienes que representar ningún papel. No hace falta registrarte. Si creas una cuenta en la app, tu resultado queda guardado junto a tu recorrido.' },
+          ? 'Si te apetece una mirada más esta semana: PASO es un test breve sobre cómo te mueves en el mundo. Crea tu cuenta para que el resultado quede guardado junto a tu recorrido.'
+          : 'Si te apetece una mirada más esta semana: PASO es un test breve y gratuito sobre cómo te mueves en el mundo.', muted: true },
         { kind: 'cta', href: c.links.paso, label: 'HACER PASO' },
-        { kind: 'p', text: 'PASO habla de tu «máscara» en ese sentido: tu forma adaptada de actuar. Las siete máscaras del libro, las que aprendimos para protegernos, son otra cosa. De ellas hablamos en el curso.', muted: true },
-        { kind: 'p', text: 'Y una pregunta para la semana, del capítulo 8. Elige a alguien con quien convivas a diario y obsérvate. Una frase en tu libreta cada noche:' },
-        { kind: 'quote', text: '¿Qué hago yo cuando estoy con esta persona que no hago cuando estoy bien conmigo?', cite: 'Capítulo 8' },
         { kind: 'sign', text: 'Manel' },
       ],
     }),
-    semana4: c => ({
-      subject: 'Semana 4: un mes después',
+    jueves3: c => ({
+      subject: 'A mitad de semana: un paso en otra dirección',
       blocks: [
-        { kind: 'p', text: 'Última semana. Toca volver al principio.' },
-        { kind: 'p', text: 'Haz otra vez el Inventario honesto. Al terminar verás tus respuestas de hace un mes al lado de las de hoy. No esperes un cambio grande: un mes es poco. Mira qué se ha movido y qué no.' },
-        { kind: 'cta', href: c.links.repetir, label: 'REPETIR MI INVENTARIO' },
-        exerciseBlock(ES, { title: 'Revisión mensual', cap: 6, steps: [
-          'Al final de este mes, hazte tres preguntas en tu libreta:',
-          '¿Qué me ha aportado equilibrio este mes? · ¿Qué me ha costado más de lo que valía? · ¿Qué quiero ajustar el mes que viene?',
-          'Y relee la frase que escribiste el primer día.',
-        ] }),
+        { kind: 'p', text: 'Vuelve a tu frase madre. Léela despacio y hazle tres preguntas: ¿siempre?, ¿según quién?, ¿cuándo fue la última vez que no se cumplió? Escribe esa excepción. Aunque sea pequeña, existe.' },
+        ej(ES, 'La conducta mínima', 11, [
+          'Identifica la conducta que tu frase madre te pide siempre: quedarte, callarte, posponer, lo que sea en tu caso.',
+          'Ahora diseña la conducta mínima opuesta: la acción real más pequeña que puedas hacer esta semana en la dirección contraria. No la ideal ni la definitiva. La mínima que de verdad vayas a hacer.',
+          'Hazla, sintiéndote inseguro si hace falta. Y después anota qué pasó realmente, no lo que temías que pasara.',
+        ], true),
+        cita(ES, 'La conducta no es la consecuencia del cambio. Es su punto de entrada.', 'Capítulo 11', true),
+        { kind: 'sign', text: 'Manel' },
+        ...checkinBlock(c, '¿Has hecho el ejercicio de esta semana?', 'Un clic basta. No cambia lo que recibes: solo me dice cómo va.', { si: 'Sí', medias: 'A medias', no: 'Esta semana no' }),
+      ],
+    }),
+    semana4: c => ({
+      subject: 'Semana 4: volver a ti',
+      blocks: [
+        { kind: 'p', text: 'Última semana: volver a ti. Toca volver al principio, con lo que has visto por el camino.' },
+        umbral(ES, 'Escribe una excusa que hayas usado toda la vida. Táchala, sin borrarla: que se siga leyendo.'),
+        { kind: 'p', text: 'Primero, repite el test. Al terminar verás tus respuestas de hace un mes al lado de las de hoy. No esperes un cambio grande: un mes es poco. Mira qué se ha movido y qué no.' },
+        { kind: 'cta', href: c.links.repetir, label: 'REPETIR EL TEST' },
+        { kind: 'p', text: 'Después, una tarde tranquila, relee tu libreta entera desde la primera página, seguida y sin corregir. Y escribe esto:' },
+        ej(ES, 'Los momentos sin ruido', 3, [
+          'Haz una lista de tus momentos sin ruido: esas ocasiones, recientes o antiguas, en que estuviste bien «sin motivo». Sé concreto: dónde, con quién, haciendo qué.',
+          'Míralos juntos y busca qué tienen en común. No en lo que había, sino en lo que no había: ¿qué prisa, qué papel, qué exigencia, qué comparación no estaba sonando?',
+          'Termina con esta frase, a mano: «Cuando el ruido baja, yo soy…», y complétala con lo primero que venga.',
+        ], true),
+        { kind: 'p', text: 'Y un gesto para quedarte con eso. Emiko es maestra; al terminar su jornada apaga las luces del aula y dice en voz baja «arigatou». Nadie la escucha. Elige tu gesto, pequeño y siempre igual, y esta semana hazlo cada noche mientras relees tu frase «Cuando el ruido baja, yo soy…».' },
+        cita(ES, 'No te falta nada. Te sobra lo que no eres.', 'Capítulo 3', true),
         ...encuentrosBlock(ES, c),
         { kind: 'sign', text: 'Manel' },
+      ],
+    }),
+    jueves4: c => ({
+      subject: 'A mitad de semana: lo que te llevas',
+      blocks: [
+        { kind: 'p', text: 'Queda poco. Dos cosas para llevarte cuando esto termine.' },
+        ej(ES, 'Tu acción mínima diaria', 6, [
+          'Elige una sola acción pequeña que puedas repetir cada día. Algo real para tu vida actual, no para tu vida ideal.',
+          'Decide a qué hora del día la harás y registra cada vez que la cumples. Si un día fallas, al siguiente vuelves. Sin drama.',
+        ]),
+        ej(ES, 'Revisión mensual', 6, [
+          '¿Qué me ha aportado equilibrio este mes?',
+          '¿Qué me ha costado más de lo que valía?',
+          '¿Qué quiero ajustar el mes que viene?',
+        ]),
+        { kind: 'p', text: 'Si quieres, responde a este correo con tu frase «Cuando el ruido baja, yo soy…». La leo yo.' },
+        { kind: 'sign', text: 'Manel' },
+        ...checkinBlock(c, '¿Has hecho el ejercicio de esta semana?', 'Un clic basta. No cambia lo que recibes: solo me dice cómo va.', { si: 'Sí', medias: 'A medias', no: 'Esta semana no' }),
       ],
     }),
     cierre: c => ({
       subject: 'Después de este mes',
       blocks: [
         { kind: 'p', text: 'Has terminado «Un mes conociendo tu ikigai». Si has hecho aunque sea una parte, has hecho algo que poca gente hace: mirarte con calma.' },
-        { kind: 'p', text: 'Lo que has trabajado este mes son las dos caras del ikigai. Debajo están el miedo, las máscaras y la forma en que te hablas por dentro. Eso es lo que recorre el curso online: los tres actos del libro, conmigo.' },
-        { kind: 'cta', href: c.links.curso, label: 'VER EL CURSO' },
-        { kind: 'p', text: 'Si prefieres seguir por tu cuenta, el libro está aquí:', muted: true },
-        { kind: 'cta', href: c.links.libro, label: 'EL IKIGAI QUE NO TE CONTARON' },
+        { kind: 'p', text: 'Mira lo que tienes ahora en tu libreta: una frase de hace un mes, una frase madre y de quién era esa voz, una frase de cierre, el hilo que atraviesa tu vida, unos días de presencia, un paso pequeño en otra dirección y una línea que empieza «Cuando el ruido baja, yo soy…». Hace un mes no estaba nada de eso.' },
+        { kind: 'p', text: 'Para los días que vienen tienes dos cosas: tu gesto de cada noche y tu acción mínima. Y relee la libreta dentro de un mes. Te dirá más que este correo.' },
+        ...(c.links.curso ? [
+          { kind: 'p', text: 'Si quieres seguir conmigo: el curso online recorre lo que hay debajo (el miedo, las máscaras, la forma en que te hablas por dentro) en los tres actos del libro.' },
+          ...cursoBlock(c, 'VER EL CURSO'),
+        ] as ProgramaBlock[] : []),
+        { kind: 'p', text: 'Si prefieres seguir por tu cuenta, todo esto está con más calma en los libros.', muted: true },
+        { kind: 'cta', href: c.links.libros, label: 'LOS LIBROS' },
         { kind: 'p', text: 'Y si prefieres vivirlo en persona, junto a otras personas que se hacen tus mismas preguntas, está el taller presencial «Yo soy IKIGAIER»: cuatro horas para escucharte.', muted: true },
         { kind: 'cta', href: c.links.taller, label: 'VER EL TALLER' },
         { kind: 'p', text: 'Y si quieres llevar esto a decisiones concretas, puedes responder a este correo.', muted: true },
-        { kind: 'quote', text: 'Sigue caminando. Pero hazlo sin alejarte de ti.', cite: 'Epílogo' },
+        cita(ES, 'Sigue caminando. Pero hazlo sin alejarte de ti.', 'Epílogo'),
         { kind: 'sign', text: 'Manel' },
       ],
     }),
@@ -363,15 +436,15 @@ const CA: ProgramaTexts = {
   semanas: {
     antes: 'Abans de començar · El test d’ikigai: una foto d’avui del que fas i des d’on ho fas.',
     lista: [
-      'Setmana 1 · L’exercici que et proposa el teu test, fet de veritat.',
-      'Setmana 2 · El teu mapa de l’Ikigai Actiu: el que fas, el que se’t dona bé, el que aportes.',
-      'Setmana 3 · Des d’on ho fas: PASO i una pregunta per a cada nit.',
-      'Setmana 4 · Repeteixes el test i el compares amb el primer.',
+      'Setmana 1 · El que ja hi ha: l’exercici que et proposa el teu test, una frase per a tot el mes i vint segons d’atenció, tres vegades al dia.',
+      'Setmana 2 · El que hi ha a sota: la frase que et frena, de qui és aquesta veu i què protegia.',
+      'Setmana 3 · Fer diferent: el fil que travessa la teva vida, cinc minuts de presència al dia i un pas petit en una altra direcció.',
+      'Setmana 4 · Tornar a tu: repeteixes el test, rellegeixes la llibreta i t’emportes un gest per a cada nit.',
     ],
   },
   captura: {
     title: 'Això és una foto d’avui. Ho treballem durant un mes?',
-    body: '«Un mes coneixent el teu ikigai» és gratuït. Un correu cada dilluns durant quatre setmanes, amb una sola cosa per fer. Sense compte. Ho deixes quan vulguis.',
+    body: '«Un mes coneixent el teu ikigai» és gratuït. Un correu cada dilluns durant quatre setmanes, i un altre de curt el dijous, amb exercicis dels meus llibres. Sense compte. Ho deixes quan vulguis.',
     button: 'Començar el mes gratis',
     solo: 'Només envia’m aquest retorn',
     sending: 'Enviant…',
@@ -388,17 +461,17 @@ const CA: ProgramaTexts = {
     metaDescription: 'Programa gratuït de quatre setmanes: un correu cada dilluns amb un exercici de «El Ikigai que no te contaron». Comença amb un test d’ikigai i acaba repetint-lo per veure què ha canviat.',
     eyebrow: 'Programa gratuït · 4 setmanes',
     title: 'Un mes coneixent el teu ikigai',
-    lead: 'Un correu cada dilluns durant quatre setmanes, amb una sola cosa per fer. Comença amb un test de deu minuts i acaba repetint-lo, per veure què s’ha mogut.',
+    lead: 'Quatre setmanes per mirar el que fas, el que et frena i com tornes a tu, amb exercicis dels meus llibres. Comença amb un test de deu minuts i acaba repetint-lo, per veure què s’ha mogut.',
     howTitle: 'Com és',
     needTitle: 'Què necessites',
     need: [
-      'Una llibreta i una estona cada setmana.',
+      'Una llibreta i uns minuts al dia.',
       'No cal crear un compte ni tenir el llibre.',
-      'Trobades en grup en línia, opcionals.',
+      'Si durant el teu mes hi ha trobades en grup en línia, t’aviso. Són opcionals.',
       'Si una setmana no pots, no passa res: el dilluns següent arriba el correu següent. Et dones de baixa amb un clic.',
     ],
     whoTitle: 'Qui l’escriu',
-    who: 'Manel Rueda, autor de «El Ikigai que no te contaron». Tot el que faràs surt d’aquest llibre.',
+    who: 'Manel Rueda, autor de «El Ikigai que no te contaron» i «No todo lo que te frena es tuyo». Tot el que faràs surt d’aquests llibres.',
     formTitle: 'Comença dilluns',
     placeholder: 'el.teu@correu.com',
     button: 'Començar el mes gratis',
@@ -427,8 +500,11 @@ const CA: ProgramaTexts = {
   dateLocale: 'ca-ES',
   q: ['«', '»'],
   book: 'El Ikigai que no te contaron',
+  book2: 'No todo lo que te frena es tuyo',
   chapter: 'Capítol',
   thisWeek: 'Aquesta setmana',
+  umbral: { eyebrow: 'Abans de començar la setmana', title: 'Un llindar' },
+  allMonth: 'Per a tot el mes',
   encuentrosTitle: 'Trobada en grup (opcional, en línia)',
   join: 'Entrar a la trobada',
   unsubscribe: link => `Si vols deixar el programa, <a href="${link}" style="color:rgba(39,39,39,0.5);">dona’t de baixa aquí</a>.`,
@@ -444,122 +520,170 @@ const CA: ProgramaTexts = {
     subject: `Comences el dilluns ${start}: un mes coneixent el teu ikigai`,
     blocks: [
       { kind: 'p', text: `T’has apuntat a «Un mes coneixent el teu ikigai». Comences el dilluns ${start}.` },
-      { kind: 'p', text: 'Durant quatre setmanes et arribarà un correu cada dilluns al matí, amb una sola cosa per fer aquella setmana. Tot surt d’«El Ikigai que no te contaron». No cal que tinguis el llibre.' },
-      { kind: 'p', text: 'Hi haurà trobades en grup, en línia, per a qui hi vulgui venir. T’avisaré la vigília.' },
+      { kind: 'p', text: 'Durant quatre setmanes et arribarà un correu cada dilluns al matí, amb el que toca aquella setmana, i un altre de més curt el dijous. Tot surt dels meus llibres, sobretot de «El Ikigai que no te contaron». No cal que els tinguis.' },
+      { kind: 'p', text: 'Són quatre setmanes, en aquest ordre: el que ja hi ha, el que hi ha a sota, fer diferent i tornar a tu.' },
+      { kind: 'p', text: 'Si durant el teu mes hi ha trobades en grup, en línia, t’aviso la vigília. Són opcionals.' },
       ...encuentrosBlock(CA, c),
       { kind: 'p', text: 'Si una setmana no pots, no passa res. El dilluns següent arriba el correu següent.' },
-      { kind: 'quote', text: 'Si un dia falles, l’endemà tornes. Sense drama.', cite: 'Capítol 6' },
+      cita(CA, 'Si un dia falles, l’endemà tornes. Sense drama.', 'Capítol 6'),
       ...sinTestBlocks(CA, c, CA.sinTest.bienvenida),
-      { kind: 'p', text: 'Mentrestant, només una cosa: busca una llibreta que et faci gust obrir. La faràs servir.' },
+      { kind: 'p', text: 'Mentrestant, només una cosa: busca una llibreta que et faci gust obrir. Tot el que facis aquest mes hi acabarà, i l’últim dia la rellegiràs sencera.' },
       { kind: 'sign', text: 'Manel' },
     ],
   }),
   semanal: {
+    semana1: c => ({
+      subject: c.exercise ? `Setmana 1: ${c.exercise.title.toLowerCase()}` : 'Setmana 1: el que ja hi ha',
+      blocks: [
+        ...(c.tieneTest ? [
+          { kind: 'p', text: 'Primera setmana: el que ja hi ha. Comencem pel que va sortir al teu test.' },
+          { kind: 'p', text: 'El retorn et va proposar un exercici. Aquesta setmana és per fer-lo de veritat, no per llegir-lo.' },
+        ] as ProgramaBlock[] : sinTestBlocks(CA, c, CA.sinTest.semana1)),
+        { kind: 'p', text: 'Abans de començar, a la primera pàgina de la llibreta escriu la data d’avui i una sola frase: el que esperes d’aquest mes. No el que creus que hauries d’esperar. El que realment esperes, encara que soni petit. La rellegiràs l’últim dia.' },
+        ...(c.exercise ? [exerciseBlock(CA, c.exercise)] : []),
+        { kind: 'p', text: 'I una pràctica per a tot el mes, de vint segons. Tres vegades al dia (abans d’una reunió, després de dinar, abans de dormir), fes el VOLver:' },
+        ej(CA, 'El mètode VOLver', 5, [
+          'V. Veure qui hi ha: com em sento ara mateix?',
+          'O. Observar el que fas: què estic fent en aquest moment?',
+          'L. Localitzar el lloc: què veig, sento, noto físicament ara?',
+          'No escriguis res. Només fes-ho. Amb el temps es torna tan automàtic que el faràs servir sense pensar-hi, just quan més el necessites.',
+        ], false, `${CA.allMonth} · Capítol 5`),
+        cita(CA, 'El buit no és a la teva vida. És entre tu i la teva vida. És distància, no absència. I la distància no s’omple: es recorre.', 'Capítol 1', true),
+        { kind: 'p', text: 'Dijous, un correu curt. El dilluns que ve, la segona setmana.', muted: true },
+        { kind: 'sign', text: 'Manel' },
+      ],
+    }),
     jueves1: c => ({
       subject: 'A mitja setmana',
       blocks: [
         { kind: 'p', text: 'A mitja primera setmana. Si encara no has començat l’exercici, avui també val.' },
-        { kind: 'p', text: 'Una pregunta per a aquesta nit: què has notat que no esperaves?' },
+        { kind: 'p', text: 'Una pregunta per a aquesta nit, a la llibreta: què has notat aquests dies que no esperaves?' },
+        { kind: 'p', text: 'I si t’has recordat del VOLver encara que sigui un cop, ja està funcionant.' },
         { kind: 'sign', text: 'Manel' },
         ...checkinBlock(c, 'Has fet l’exercici d’aquesta setmana?', 'Amb un clic n’hi ha prou. No canvia el que reps: només em diu com va.', { si: 'Sí', medias: 'A mitges', no: 'Aquesta setmana no' }),
-      ],
-    }),
-    jueves2: c => ({
-      subject: 'A mitja setmana: el teu mapa',
-      blocks: [
-        { kind: 'p', text: 'Hi ha alguna cosa que aparegui en més d’una secció del teu mapa? Si encara no ho has fet, deu minuts aquesta nit n’hi ha prou.' },
-        { kind: 'sign', text: 'Manel' },
-        ...checkinBlock(c, 'Has fet l’exercici d’aquesta setmana?', 'Amb un clic n’hi ha prou. No canvia el que reps: només em diu com va.', { si: 'Sí', medias: 'A mitges', no: 'Aquesta setmana no' }),
-      ],
-    }),
-    jueves3: c => ({
-      subject: 'A mitja setmana: el que es repeteix',
-      blocks: [
-        { kind: 'p', text: 'Mira el que has anotat aquestes nits. Es repeteix alguna cosa: una persona, un gest, un moment del dia?' },
-        { kind: 'p', text: 'Si encara no has fet PASO, l’enllaç continua al correu del dilluns.' },
-        { kind: 'sign', text: 'Manel' },
-        ...checkinBlock(c, 'Has fet l’exercici d’aquesta setmana?', 'Amb un clic n’hi ha prou. No canvia el que reps: només em diu com va.', { si: 'Sí', medias: 'A mitges', no: 'Aquesta setmana no' }),
-      ],
-    }),
-    jueves4: c => ({
-      subject: 'A mitja setmana: un mes després',
-      blocks: [
-        { kind: 'p', text: 'Has repetit el teu inventari? Abans de fer-ho, rellegeix la frase que vas escriure el primer dia.' },
-        { kind: 'cta', href: c.links.repetir, label: 'REPETIR EL MEU INVENTARI' },
-        { kind: 'sign', text: 'Manel' },
-        ...checkinBlock(c, 'Has fet l’exercici d’aquesta setmana?', 'Amb un clic n’hi ha prou. No canvia el que reps: només em diu com va.', { si: 'Sí', medias: 'A mitges', no: 'Aquesta setmana no' }),
-      ],
-    }),
-    semana1: c => ({
-      subject: c.exercise ? `Setmana 1: ${c.exercise.title.toLowerCase()}` : 'Setmana 1: l’inventari honest',
-      blocks: [
-        ...(c.tieneTest ? [
-          { kind: 'p', text: 'Primera setmana. Comencem pel que va sortir al teu inventari.' },
-          { kind: 'p', text: 'Quan vas fer el test, el retorn et va proposar un exercici. Aquesta setmana és per fer-lo de veritat, no per llegir-lo.' },
-        ] as ProgramaBlock[] : sinTestBlocks(CA, c, CA.sinTest.semana1)),
-        ...(c.exercise ? [exerciseBlock(CA, c.exercise)] : []),
-        { kind: 'p', text: 'Abans de començar, a la primera pàgina de la llibreta escriu la data d’avui i una sola frase: el que esperes d’aquest mes. No el que creus que hauries d’esperar. El que realment esperes, encara que soni petit.' },
-        { kind: 'p', text: 'Aquesta frase és una àncora. Quan arribis al final del mes i la rellegeixis, et dirà més sobre el camí fet que qualsevol exercici.' },
-        { kind: 'p', text: 'El dilluns que ve, la segona setmana.', muted: true },
-        { kind: 'sign', text: 'Manel' },
       ],
     }),
     semana2: c => ({
-      subject: 'Setmana 2: el teu mapa de l’Ikigai Actiu',
+      subject: 'Setmana 2: el que hi ha a sota',
       blocks: [
-        { kind: 'p', text: 'Segona setmana. Mirem l’Ikigai Actiu: el que fas, el que se’t dona bé, el que aportes.' },
-        exerciseBlock(CA, { title: 'El teu mapa de l’Ikigai Actiu', cap: 4, steps: [
-          'En una pàgina nova de la llibreta, divideix l’espai en quatre seccions i respon una pregunta a cadascuna:',
-          'Què m’apassiona fer? (encara que no em paguin per fer-ho) · En què soc bo? (que els altres també reconeixen) · Què podria aportar al món? (encara que sigui en petit) · De què podria viure fent alguna cosa que tingui sentit per a mi?',
-          'Mira si hi ha alguna cosa que aparegui en més d’una secció. Sol ser la pista més útil.',
-        ] }),
-        { kind: 'quote', text: 'El diagrama no dona una resposta definitiva: obre un espai de reflexió.', cite: 'Eines' },
-        { kind: 'p', text: 'Si vols anar més enllà, al final del llibre hi ha el test de les quatre estrelles i el test CAMINO.', muted: true },
+        { kind: 'p', text: 'Segona setmana: el que hi ha a sota. Fins ara has mirat el que fas. Aquesta setmana mirem el que et frena quan ho vols fer. No per arreglar-ho. Per veure-ho.' },
+        umbral(CA, 'Obre la llibreta i acaba aquesta frase, sense pensar-hi gaire: «El que més temo trobar aquí és…».'),
+        ej(CA, 'L’autòpsia amable', 2, [
+          'Anota els teus tres últims intents de canvi, els que siguin: exercici, un projecte, un hàbit, deixar alguna cosa. Per a cadascun: quina va ser l’espurna? Quant va durar l’eufòria? On va aparèixer la fricció?',
+          'Ara la pregunta important: quina sentència et vas dir en abandonar-los? Escriu-la literal, amb les paraules exactes que vas fer servir contra tu.',
+          'Mira les tres sentències juntes. S’assemblen? Quina és la frase mare, la que es repeteix a sota de totes?',
+        ], true),
+        ej(CA, 'Trobar la veu', 7, [
+          'Si aquesta frase mare tingués una veu, de qui seria? No busquis culpables; busca només reconèixer. De vegades és una persona concreta. De vegades és «l’ambient» d’una època de la teva vida.',
+          'Escriu quants anys tenies, més o menys, quan aquesta frase va començar a sonar dins teu. Aquest número és important: és l’edat de qui continua prenent, en part, les teves decisions d’avui.',
+        ], true),
+        { kind: 'p', text: 'Guarda aquesta pàgina. Dijous t’escric amb el que es fa amb ella.' },
+        { kind: 'p', text: 'Aquesta setmana mira cap a dins. Si en algun moment remou més del que et ve de gust, para. No cal arribar al fons en set dies.', muted: true },
+        cita(CA, 'Aquest “jo soc així” que repeteixes no és una descripció. És una instal·lació.', 'Pròleg', true),
         ...encuentrosBlock(CA, c),
         { kind: 'sign', text: 'Manel' },
+      ],
+    }),
+    jueves2: c => ({
+      subject: 'A mitja setmana: de qui és aquesta veu',
+      blocks: [
+        { kind: 'p', text: 'Torna a la teva frase mare i a l’edat que li vas posar. Imagina algú d’aquesta edat exacta, davant teu, explicant-te per què creu això. Li diries «quina ximpleria»? Probablement no. Li diries alguna cosa semblant a: té sentit que pensessis això, amb el que vas viure.' },
+        { kind: 'p', text: 'Des d’aquest to, no des del retret, tres preguntes:' },
+        ej(CA, 'Les tres preguntes', 10, [
+          'De qui és aquesta veu? Descriu-la: edat, situació, si pots fins i tot el lloc on eres.',
+          'A qui o a què protegia aleshores? Sigues concret: la teva seguretat, l’afecte d’algú, la pau a casa, el teu lloc al grup?',
+          'Protegeix avui alguna cosa que continuï realment en perill? Respon amb honestedat, no amb la resposta que «queda bé».',
+          'Si la resposta a la tercera és no, escriu una frase de tancament adreçada a aquesta veu més jove, com ara: «Gràcies per protegir-me aleshores. Ja no cal que continuïs fent-ho així». No ha de sonar perfecta. Ha de ser sincera.',
+        ], true),
+        cita(CA, 'No cridis al nen que et va protegir. Dona-li les gràcies, i digues-li que ja pot descansar.', 'Capítol 10', true),
+        { kind: 'sign', text: 'Manel' },
+        ...checkinBlock(c, 'Has fet l’exercici d’aquesta setmana?', 'Amb un clic n’hi ha prou. No canvia el que reps: només em diu com va.', { si: 'Sí', medias: 'A mitges', no: 'Aquesta setmana no' }),
       ],
     }),
     semana3: c => ({
-      subject: 'Setmana 3: com camines',
+      subject: 'Setmana 3: fer diferent',
       blocks: [
-        { kind: 'p', text: 'Tercera setmana. Ara l’altra cara: no què fas, sinó des d’on ho fas.' },
+        { kind: 'p', text: 'Tercera setmana: fer diferent. Amb el que vas veure la setmana passada, tornes al que fas i a com ho vius. Totes dues coses alhora.' },
+        umbral(CA, 'Llegeix en veu alta la frase de tancament que vas escriure dijous. Si no la vas arribar a escriure, llegeix la pàgina de la setmana passada que més et va remoure.'),
+        { kind: 'p', text: 'Per a una tarda d’aquesta setmana, el que fas:' },
+        exerciseBlock(CA, c.semana3.activo),
+        { kind: 'p', text: 'I per a cada dia, com ho vius:' },
+        exerciseBlock(CA, c.semana3.consciente),
+        cita(CA, 'Un ikigaier no tria entre les dues versions: les necessita juntes.', 'Capítol 4'),
         { kind: 'p', text: c.pasoConCuenta
-          ? 'Et proposo PASO, un test breu que compara com et mostres per adaptar-te amb com ets quan no has de representar cap paper. Per fer-lo, crea el teu compte a l’app: així el resultat queda desat al costat del teu recorregut.'
-          : 'Et proposo PASO, un test breu que compara com et mostres per adaptar-te amb com ets quan no has de representar cap paper. No cal registrar-te. Si crees un compte a l’app, el resultat queda desat al costat del teu recorregut.' },
+          ? 'Si et ve de gust una mirada més aquesta setmana: PASO és un test breu sobre com et mous pel món. Crea el teu compte perquè el resultat quedi guardat al costat del teu recorregut.'
+          : 'Si et ve de gust una mirada més aquesta setmana: PASO és un test breu i gratuït sobre com et mous pel món.', muted: true },
         { kind: 'cta', href: c.links.paso, label: 'FER PASO' },
-        { kind: 'p', text: 'PASO parla de la teva «màscara» en aquest sentit: la teva manera adaptada d’actuar. Les set màscares del llibre, les que vam aprendre per protegir-nos, són una altra cosa. En parlem al curs.', muted: true },
-        { kind: 'p', text: 'I una pregunta per a la setmana, del capítol 8. Tria algú amb qui convisquis cada dia i observa’t. Una frase a la llibreta cada nit:' },
-        { kind: 'quote', text: 'Què faig jo quan estic amb aquesta persona que no faig quan estic bé amb mi?', cite: 'Capítol 8' },
         { kind: 'sign', text: 'Manel' },
       ],
     }),
-    semana4: c => ({
-      subject: 'Setmana 4: un mes després',
+    jueves3: c => ({
+      subject: 'A mitja setmana: un pas en una altra direcció',
       blocks: [
-        { kind: 'p', text: 'Última setmana. Toca tornar al principi.' },
-        { kind: 'p', text: 'Torna a fer l’Inventari honest. En acabar veuràs les teves respostes de fa un mes al costat de les d’avui. No esperis un gran canvi: un mes és poc. Mira què s’ha mogut i què no.' },
-        { kind: 'cta', href: c.links.repetir, label: 'REPETIR EL MEU INVENTARI' },
-        exerciseBlock(CA, { title: 'Revisió mensual', cap: 6, steps: [
-          'Al final d’aquest mes, fes-te tres preguntes a la llibreta:',
-          'Què m’ha aportat equilibri aquest mes? · Què m’ha costat més del que valia? · Què vull ajustar el mes que ve?',
-          'I rellegeix la frase que vas escriure el primer dia.',
-        ] }),
+        { kind: 'p', text: 'Torna a la teva frase mare. Llegeix-la a poc a poc i fes-li tres preguntes: sempre?, segons qui?, quan va ser l’última vegada que no es va complir? Escriu aquesta excepció. Encara que sigui petita, existeix.' },
+        ej(CA, 'La conducta mínima', 11, [
+          'Identifica la conducta que la teva frase mare et demana sempre: quedar-te, callar, ajornar, el que sigui en el teu cas.',
+          'Ara dissenya la conducta mínima oposada: l’acció real més petita que puguis fer aquesta setmana en la direcció contrària. No la ideal ni la definitiva. La mínima que de veritat faràs.',
+          'Fes-la, sentint-te insegur si cal. I després anota què va passar realment, no el que temies que passés.',
+        ], true),
+        cita(CA, 'La conducta no és la conseqüència del canvi. És el seu punt d’entrada.', 'Capítol 11', true),
+        { kind: 'sign', text: 'Manel' },
+        ...checkinBlock(c, 'Has fet l’exercici d’aquesta setmana?', 'Amb un clic n’hi ha prou. No canvia el que reps: només em diu com va.', { si: 'Sí', medias: 'A mitges', no: 'Aquesta setmana no' }),
+      ],
+    }),
+    semana4: c => ({
+      subject: 'Setmana 4: tornar a tu',
+      blocks: [
+        { kind: 'p', text: 'Última setmana: tornar a tu. Toca tornar al principi, amb el que has vist pel camí.' },
+        umbral(CA, 'Escriu una excusa que hagis fet servir tota la vida. Ratlla-la, sense esborrar-la: que es continuï llegint.'),
+        { kind: 'p', text: 'Primer, repeteix el test. En acabar veuràs les teves respostes de fa un mes al costat de les d’avui. No esperis un gran canvi: un mes és poc. Mira què s’ha mogut i què no.' },
+        { kind: 'cta', href: c.links.repetir, label: 'REPETIR EL TEST' },
+        { kind: 'p', text: 'Després, una tarda tranquil·la, rellegeix la llibreta sencera des de la primera pàgina, seguida i sense corregir. I escriu això:' },
+        ej(CA, 'Els moments sense soroll', 3, [
+          'Fes una llista dels teus moments sense soroll: aquelles ocasions, recents o antigues, en què vas estar bé «sense motiu». Sigues concret: on, amb qui, fent què.',
+          'Mira’ls junts i busca què tenen en comú. No en el que hi havia, sinó en el que no hi havia: quina pressa, quin paper, quina exigència, quina comparació no sonava?',
+          'Acaba amb aquesta frase, a mà: «Quan el soroll baixa, jo soc…», i completa-la amb el primer que et vingui.',
+        ], true),
+        { kind: 'p', text: 'I un gest per quedar-te amb això. L’Emiko és mestra; en acabar la jornada apaga els llums de l’aula i diu en veu baixa «arigatou». Ningú no la sent. Tria el teu gest, petit i sempre igual, i aquesta setmana fes-lo cada nit mentre rellegeixes la teva frase «Quan el soroll baixa, jo soc…».' },
+        cita(CA, 'No et falta res. Et sobra el que no ets.', 'Capítol 3', true),
         ...encuentrosBlock(CA, c),
         { kind: 'sign', text: 'Manel' },
+      ],
+    }),
+    jueves4: c => ({
+      subject: 'A mitja setmana: el que t’emportes',
+      blocks: [
+        { kind: 'p', text: 'Queda poc. Dues coses per endur-te quan això acabi.' },
+        ej(CA, 'La teva acció mínima diària', 6, [
+          'Tria una sola acció petita que puguis repetir cada dia. Alguna cosa real per a la teva vida actual, no per a la teva vida ideal.',
+          'Decideix a quina hora del dia la faràs i registra cada vegada que la compleixes. Si un dia falles, l’endemà tornes. Sense drama.',
+        ]),
+        ej(CA, 'Revisió mensual', 6, [
+          'Què m’ha aportat equilibri aquest mes?',
+          'Què m’ha costat més del que valia?',
+          'Què vull ajustar el mes que ve?',
+        ]),
+        { kind: 'p', text: 'Si vols, respon aquest correu amb la teva frase «Quan el soroll baixa, jo soc…». La llegeixo jo.' },
+        { kind: 'sign', text: 'Manel' },
+        ...checkinBlock(c, 'Has fet l’exercici d’aquesta setmana?', 'Amb un clic n’hi ha prou. No canvia el que reps: només em diu com va.', { si: 'Sí', medias: 'A mitges', no: 'Aquesta setmana no' }),
       ],
     }),
     cierre: c => ({
       subject: 'Després d’aquest mes',
       blocks: [
         { kind: 'p', text: 'Has acabat «Un mes coneixent el teu ikigai». Si n’has fet encara que sigui una part, has fet una cosa que poca gent fa: mirar-te amb calma.' },
-        { kind: 'p', text: 'El que has treballat aquest mes són les dues cares de l’ikigai. A sota hi ha la por, les màscares i la manera com et parles per dins. Això és el que recorre el curs en línia: els tres actes del llibre, amb mi.' },
-        { kind: 'cta', href: c.links.curso, label: 'VEURE EL CURS' },
-        { kind: 'p', text: 'Si prefereixes continuar pel teu compte, el llibre és aquí:', muted: true },
-        { kind: 'cta', href: c.links.libro, label: 'EL IKIGAI QUE NO TE CONTARON' },
+        { kind: 'p', text: 'Mira el que tens ara a la llibreta: una frase de fa un mes, una frase mare i de qui era aquella veu, una frase de tancament, el fil que travessa la teva vida, uns dies de presència, un pas petit en una altra direcció i una línia que comença «Quan el soroll baixa, jo soc…». Fa un mes no hi havia res d’això.' },
+        { kind: 'p', text: 'Per als dies que vénen tens dues coses: el teu gest de cada nit i la teva acció mínima. I rellegeix la llibreta d’aquí a un mes. Et dirà més que aquest correu.' },
+        ...(c.links.curso ? [
+          { kind: 'p', text: 'Si vols continuar amb mi: el curs en línia recorre el que hi ha a sota (la por, les màscares, la manera com et parles per dins) en els tres actes del llibre.' },
+          ...cursoBlock(c, 'VEURE EL CURS'),
+        ] as ProgramaBlock[] : []),
+        { kind: 'p', text: 'Si prefereixes continuar pel teu compte, tot això hi és amb més calma als llibres.', muted: true },
+        { kind: 'cta', href: c.links.libros, label: 'ELS LLIBRES' },
         { kind: 'p', text: 'I si prefereixes viure-ho en persona, amb altres persones que es fan les teves mateixes preguntes, hi ha el taller presencial «Jo soc IKIGAIER»: quatre hores per escoltar-te.', muted: true },
         { kind: 'cta', href: c.links.taller, label: 'VEURE EL TALLER' },
         { kind: 'p', text: 'I si vols portar tot això a decisions concretes, pots respondre aquest correu.', muted: true },
-        { kind: 'quote', text: 'Continua caminant. Però fes-ho sense allunyar-te de tu.', cite: 'Epíleg' },
+        cita(CA, 'Continua caminant. Però fes-ho sense allunyar-te de tu.', 'Epíleg'),
         { kind: 'sign', text: 'Manel' },
       ],
     }),
@@ -595,15 +719,15 @@ const EN: ProgramaTexts = {
   semanas: {
     antes: 'Before you start · The ikigai test: a snapshot of what you do and where you do it from.',
     lista: [
-      'Week 1 · The exercise your test suggests, actually done.',
-      'Week 2 · Your map of the Active Ikigai: what you do, what you are good at, what you contribute.',
-      'Week 3 · Where you do it from: PASO and one question for each evening.',
-      'Week 4 · You repeat the test and compare it with the first one.',
+      'Week 1 · What is already there: the exercise your test suggests, one sentence for the whole month and twenty seconds of attention, three times a day.',
+      'Week 2 · What lies underneath: the sentence that holds you back, whose voice it is and what it was protecting.',
+      'Week 3 · Doing it differently: the thread that runs through your life, five minutes of presence a day and a small step in another direction.',
+      'Week 4 · Coming back to yourself: you retake the test, reread your notebook and take a gesture with you for every night.',
     ],
   },
   captura: {
     title: 'This is a snapshot of today. Shall we work on it for a month?',
-    body: '“A month getting to know your ikigai” is free. One email every Monday for four weeks, with one thing to do. No account. You can leave whenever you want.',
+    body: '“A month getting to know your ikigai” is free. One email every Monday for four weeks, and a short one on Thursday, with exercises from my books. No account. You can leave whenever you want.',
     button: 'Start the free month',
     solo: 'Just send me this reading',
     sending: 'Sending…',
@@ -620,17 +744,17 @@ const EN: ProgramaTexts = {
     metaDescription: 'Free four-week programme: one email every Monday with an exercise from “El Ikigai que no te contaron”. It starts with an ikigai test and ends by repeating it to see what has changed.',
     eyebrow: 'Free programme · 4 weeks',
     title: 'A month getting to know your ikigai',
-    lead: 'One email every Monday for four weeks, with one thing to do. It starts with a ten-minute test and ends by repeating it, to see what has moved.',
+    lead: 'Four weeks to look at what you do, what holds you back and how you come back to yourself, with exercises from my books. It starts with a ten-minute test and ends by repeating it, to see what has moved.',
     howTitle: 'How it works',
     needTitle: 'What you need',
     need: [
-      'A notebook and a little time each week.',
+      'A notebook and a few minutes a day.',
       'No account needed, and you don’t need the book.',
-      'Optional online group meetings.',
+      'If there are online group meetings during your month, I’ll let you know. They are optional.',
       'If you can’t do a week, that’s fine: the next email arrives the following Monday. You can unsubscribe with one click.',
     ],
     whoTitle: 'Who writes it',
-    who: 'Manel Rueda, author of “El Ikigai que no te contaron”. Everything you will do comes from that book.',
+    who: 'Manel Rueda, author of “El Ikigai que no te contaron” and “No todo lo que te frena es tuyo”. Everything you will do comes from those books.',
     formTitle: 'Start on Monday',
     placeholder: 'you@email.com',
     button: 'Start the free month',
@@ -659,8 +783,11 @@ const EN: ProgramaTexts = {
   dateLocale: 'en-GB',
   q: ['“', '”'],
   book: 'El Ikigai que no te contaron',
+  book2: 'No todo lo que te frena es tuyo',
   chapter: 'Chapter',
   thisWeek: 'This week',
+  umbral: { eyebrow: 'Before the week begins', title: 'A threshold' },
+  allMonth: 'For the whole month',
   encuentrosTitle: 'Group meeting (optional, online)',
   join: 'Join the meeting',
   unsubscribe: link => `If you want to leave the programme, <a href="${link}" style="color:rgba(39,39,39,0.5);">unsubscribe here</a>.`,
@@ -676,122 +803,170 @@ const EN: ProgramaTexts = {
     subject: `You start on Monday ${start}: a month getting to know your ikigai`,
     blocks: [
       { kind: 'p', text: `You have signed up for “A month getting to know your ikigai”. You start on Monday ${start}.` },
-      { kind: 'p', text: 'For four weeks you will get an email every Monday morning, with just one thing to do that week. Everything comes from “El Ikigai que no te contaron”. You don’t need to have the book.' },
-      { kind: 'p', text: 'There will be online group meetings for anyone who wants to come. I will let you know the day before.' },
+      { kind: 'p', text: 'For four weeks you will get an email every Monday morning with that week’s work, and a shorter one on Thursday. Everything comes from my books, above all “El Ikigai que no te contaron”. You don’t need to have them.' },
+      { kind: 'p', text: 'There are four weeks, in this order: what is already there, what lies underneath, doing it differently and coming back to yourself.' },
+      { kind: 'p', text: 'If there are group meetings during your month, online, I’ll let you know the day before. They are optional.' },
       ...encuentrosBlock(EN, c),
-      { kind: 'p', text: 'If you can’t make it one week, that’s fine. The next Monday brings the next email.' },
-      { kind: 'quote', text: 'If you miss a day, you come back the next. No drama.', cite: 'Chapter 6' },
+      { kind: 'p', text: 'If you can’t do a week, that’s fine. The next email arrives the following Monday.' },
+      cita(EN, 'If you miss a day, you come back the next. No drama.', 'Chapter 6'),
       ...sinTestBlocks(EN, c, EN.sinTest.bienvenida),
-      { kind: 'p', text: 'In the meantime, just one thing: find a notebook you enjoy opening. You will use it.' },
+      { kind: 'p', text: 'In the meantime, just one thing: find a notebook you enjoy opening. Everything you do this month will end up there, and on the last day you will reread it from start to finish.' },
       { kind: 'sign', text: 'Manel' },
     ],
   }),
   semanal: {
+    semana1: c => ({
+      subject: c.exercise ? `Week 1: ${c.exercise.title.toLowerCase()}` : 'Week 1: what is already there',
+      blocks: [
+        ...(c.tieneTest ? [
+          { kind: 'p', text: 'First week: what is already there. We start with what came up in your test.' },
+          { kind: 'p', text: 'Your reading suggested an exercise. This week is for actually doing it, not just reading it.' },
+        ] as ProgramaBlock[] : sinTestBlocks(EN, c, EN.sinTest.semana1)),
+        { kind: 'p', text: 'Before you start, on the first page of your notebook write today’s date and one sentence: what you expect from this month. Not what you think you should expect. What you really expect, even if it sounds small. You will reread it on the last day.' },
+        ...(c.exercise ? [exerciseBlock(EN, c.exercise)] : []),
+        { kind: 'p', text: 'And one practice for the whole month, twenty seconds long. Three times a day (before a meeting, after lunch, before sleeping), do the VOLver:' },
+        ej(EN, 'The VOLver method', 5, [
+          'V. See who is here: how do I feel right now?',
+          'O. Observe what you are doing: what am I doing at this moment?',
+          'L. Locate the place: what do I see, hear, feel physically now?',
+          'Don’t write anything. Just do it. Over time it becomes so automatic that you will use it without thinking, just when you need it most.',
+        ], false, `${EN.allMonth} · Chapter 5`),
+        cita(EN, 'The emptiness isn’t in your life. It is between you and your life. It is distance, not absence. And distance isn’t filled: it is travelled.', 'Chapter 1', true),
+        { kind: 'p', text: 'On Thursday, a short email. Next Monday, week two.', muted: true },
+        { kind: 'sign', text: 'Manel' },
+      ],
+    }),
     jueves1: c => ({
       subject: 'Midweek',
       blocks: [
         { kind: 'p', text: 'Halfway through the first week. If you haven’t started the exercise yet, today works just as well.' },
-        { kind: 'p', text: 'A question for tonight: what have you noticed that you didn’t expect?' },
+        { kind: 'p', text: 'One question for tonight, in your notebook: what have you noticed these days that you didn’t expect?' },
+        { kind: 'p', text: 'And if you have remembered the VOLver even once, it is already working.' },
         { kind: 'sign', text: 'Manel' },
         ...checkinBlock(c, 'Have you done this week’s exercise?', 'One click is enough. It doesn’t change what you receive: it just tells me how it’s going.', { si: 'Yes', medias: 'Partly', no: 'Not this week' }),
-      ],
-    }),
-    jueves2: c => ({
-      subject: 'Midweek: your map',
-      blocks: [
-        { kind: 'p', text: 'Is there something that appears in more than one section of your map? If you haven’t done it yet, ten minutes tonight is enough.' },
-        { kind: 'sign', text: 'Manel' },
-        ...checkinBlock(c, 'Have you done this week’s exercise?', 'One click is enough. It doesn’t change what you receive: it just tells me how it’s going.', { si: 'Yes', medias: 'Partly', no: 'Not this week' }),
-      ],
-    }),
-    jueves3: c => ({
-      subject: 'Midweek: what repeats',
-      blocks: [
-        { kind: 'p', text: 'Look at what you have written these nights. Does anything repeat: a person, a gesture, a moment of the day?' },
-        { kind: 'p', text: 'If you haven’t taken PASO yet, the link is still in Monday’s email.' },
-        { kind: 'sign', text: 'Manel' },
-        ...checkinBlock(c, 'Have you done this week’s exercise?', 'One click is enough. It doesn’t change what you receive: it just tells me how it’s going.', { si: 'Yes', medias: 'Partly', no: 'Not this week' }),
-      ],
-    }),
-    jueves4: c => ({
-      subject: 'Midweek: a month later',
-      blocks: [
-        { kind: 'p', text: 'Have you retaken your inventory? Before you do, reread the sentence you wrote on the first day.' },
-        { kind: 'cta', href: c.links.repetir, label: 'RETAKE MY INVENTORY' },
-        { kind: 'sign', text: 'Manel' },
-        ...checkinBlock(c, 'Have you done this week’s exercise?', 'One click is enough. It doesn’t change what you receive: it just tells me how it’s going.', { si: 'Yes', medias: 'Partly', no: 'Not this week' }),
-      ],
-    }),
-    semana1: c => ({
-      subject: c.exercise ? `Week 1: ${c.exercise.title.toLowerCase()}` : 'Week 1: the honest inventory',
-      blocks: [
-        ...(c.tieneTest ? [
-          { kind: 'p', text: 'First week. We start with what came up in your inventory.' },
-          { kind: 'p', text: 'When you took the test, your reading suggested an exercise. This week is for actually doing it, not just reading it.' },
-        ] as ProgramaBlock[] : sinTestBlocks(EN, c, EN.sinTest.semana1)),
-        ...(c.exercise ? [exerciseBlock(EN, c.exercise)] : []),
-        { kind: 'p', text: 'Before you start, on the first page of your notebook write today’s date and a single sentence: what you expect from this month. Not what you think you should expect. What you really expect, even if it sounds small.' },
-        { kind: 'p', text: 'That sentence is an anchor. When you reach the end of the month and reread it, it will tell you more about the road travelled than any exercise.' },
-        { kind: 'p', text: 'Next Monday, the second week.', muted: true },
-        { kind: 'sign', text: 'Manel' },
       ],
     }),
     semana2: c => ({
-      subject: 'Week 2: your Active Ikigai map',
+      subject: 'Week 2: what lies underneath',
       blocks: [
-        { kind: 'p', text: 'Second week. We look at Active Ikigai: what you do, what you are good at, what you contribute.' },
-        exerciseBlock(EN, { title: 'Your Active Ikigai map', cap: 4, steps: [
-          'On a new page of your notebook, divide the space into four sections and answer one question in each:',
-          'What do I love doing? (even if nobody pays me for it) · What am I good at? (that others also recognise) · What could I give to the world? (even in a small way) · What could I live on, doing something that makes sense to me?',
-          'See whether something appears in more than one section. That is usually the most useful clue.',
-        ] }),
-        { kind: 'quote', text: 'The diagram doesn’t give a final answer: it opens a space for reflection.', cite: 'Tools' },
-        { kind: 'p', text: 'If you want to go further, the four stars test and the CAMINO test are at the end of the book.', muted: true },
+        { kind: 'p', text: 'Second week: what lies underneath. So far you have looked at what you do. This week we look at what holds you back when you want to do it. Not to fix it. To see it.' },
+        umbral(EN, 'Open your notebook and finish this sentence, without thinking too much: “What I most fear finding here is…”.'),
+        ej(EN, 'The kind autopsy', 2, [
+          'Write down your last three attempts to change, whatever they were: exercise, a project, a habit, giving something up. For each one: what was the spark? How long did the high last? Where did the friction appear?',
+          'Now the important question: what sentence did you tell yourself when you gave each one up? Write it word for word, with the exact words you used against yourself.',
+          'Look at the three sentences together. Are they alike? Which is the mother sentence, the one repeating underneath them all?',
+        ], true),
+        ej(EN, 'Finding the voice', 7, [
+          'If that mother sentence had a voice, whose would it be? Don’t look for someone to blame; just look to recognise. Sometimes it is a specific person. Sometimes it is “the atmosphere” of a time in your life.',
+          'Write down roughly how old you were when that sentence started sounding inside you. That number matters: it is the age of whoever is still making, in part, your decisions today.',
+        ], true),
+        { kind: 'p', text: 'Keep that page. On Thursday I’ll write with what to do with it.' },
+        { kind: 'p', text: 'This week looks inward. If at any point it stirs up more than you feel like, stop. There is no need to reach the bottom in seven days.', muted: true },
+        cita(EN, 'That ‘I’m just like this’ you keep repeating isn’t a description. It’s an installation.', 'Prologue', true),
         ...encuentrosBlock(EN, c),
         { kind: 'sign', text: 'Manel' },
+      ],
+    }),
+    jueves2: c => ({
+      subject: 'Midweek: whose voice is it',
+      blocks: [
+        { kind: 'p', text: 'Go back to your mother sentence and the age you gave it. Picture someone of exactly that age in front of you, telling you why they believe it. Would you say “how silly”? Probably not. You would say something like: it makes sense that you thought that, given what you lived through.' },
+        { kind: 'p', text: 'From that tone, not from reproach, three questions:' },
+        ej(EN, 'The three questions', 10, [
+          'Whose voice is this? Describe it: age, situation, even the place where you were, if you can.',
+          'Who or what was it protecting back then? Be specific: your safety, someone’s affection, peace at home, your place in the group?',
+          'Does it protect anything today that is still really in danger? Answer honestly, not with the answer that “looks good”.',
+          'If the answer to the third is no, write a closing sentence addressed to that younger voice, something like: “Thank you for protecting me back then. You don’t need to keep doing it this way.” It doesn’t have to sound perfect. It has to be sincere.',
+        ], true),
+        cita(EN, 'Don’t shout at the child who protected you. Thank them, and tell them they can rest now.', 'Chapter 10', true),
+        { kind: 'sign', text: 'Manel' },
+        ...checkinBlock(c, 'Have you done this week’s exercise?', 'One click is enough. It doesn’t change what you receive: it just tells me how it’s going.', { si: 'Yes', medias: 'Partly', no: 'Not this week' }),
       ],
     }),
     semana3: c => ({
-      subject: 'Week 3: how you walk',
+      subject: 'Week 3: doing it differently',
       blocks: [
-        { kind: 'p', text: 'Third week. Now the other side: not what you do, but where you do it from.' },
+        { kind: 'p', text: 'Third week: doing it differently. With what you saw last week, you go back to what you do and how you live it. Both at once.' },
+        umbral(EN, 'Read aloud the closing sentence you wrote on Thursday. If you didn’t get to write it, read the page from last week that stirred you most.'),
+        { kind: 'p', text: 'For one afternoon this week, what you do:' },
+        exerciseBlock(EN, c.semana3.activo),
+        { kind: 'p', text: 'And for every day, how you live it:' },
+        exerciseBlock(EN, c.semana3.consciente),
+        cita(EN, 'An ikigaier doesn’t choose between the two versions: they need them together.', 'Chapter 4'),
         { kind: 'p', text: c.pasoConCuenta
-          ? 'I suggest PASO, a short test that compares how you show up in order to adapt with who you are when you don’t have to play a role. To take it, create your account in the app: that way your result is saved alongside your journey.'
-          : 'I suggest PASO, a short test that compares how you show up in order to adapt with who you are when you don’t have to play a role. You don’t need to sign up. If you create an account in the app, your result is saved alongside your journey.' },
+          ? 'If you’d like one more look this week: PASO is a short test about how you move through the world. Create your account so the result is saved alongside your journey.'
+          : 'If you’d like one more look this week: PASO is a short, free test about how you move through the world.', muted: true },
         { kind: 'cta', href: c.links.paso, label: 'TAKE PASO' },
-        { kind: 'p', text: 'PASO talks about your “mask” in that sense: your adapted way of acting. The seven masks in the book, the ones we learned to protect ourselves, are something else. We look at them in the course.', muted: true },
-        { kind: 'p', text: 'And a question for the week, from chapter 8. Choose someone you live alongside every day and observe yourself. One sentence in your notebook each night:' },
-        { kind: 'quote', text: 'What do I do when I am with this person that I don’t do when I am well with myself?', cite: 'Chapter 8' },
         { kind: 'sign', text: 'Manel' },
       ],
     }),
-    semana4: c => ({
-      subject: 'Week 4: a month later',
+    jueves3: c => ({
+      subject: 'Midweek: one step in another direction',
       blocks: [
-        { kind: 'p', text: 'Last week. Time to go back to the beginning.' },
-        { kind: 'p', text: 'Take the honest inventory again. When you finish, you will see your answers from a month ago next to today’s. Don’t expect a big change: a month is short. Look at what has moved and what hasn’t.' },
-        { kind: 'cta', href: c.links.repetir, label: 'RETAKE MY INVENTORY' },
-        exerciseBlock(EN, { title: 'Monthly review', cap: 6, steps: [
-          'At the end of this month, ask yourself three questions in your notebook:',
-          'What brought me balance this month? · What cost me more than it was worth? · What do I want to adjust next month?',
-          'And reread the sentence you wrote on the first day.',
-        ] }),
+        { kind: 'p', text: 'Go back to your mother sentence. Read it slowly and ask it three questions: always? According to whom? When was the last time it didn’t come true? Write down that exception. However small, it exists.' },
+        ej(EN, 'The minimal behaviour', 11, [
+          'Identify the behaviour your mother sentence always asks of you: staying put, keeping quiet, putting things off, whatever it is in your case.',
+          'Now design the opposite minimal behaviour: the smallest real action you can take this week in the other direction. Not the ideal one, not the definitive one. The minimal one you will actually do.',
+          'Do it, feeling unsure if you have to. Then write down what really happened, not what you feared would happen.',
+        ], true),
+        cita(EN, 'Behaviour isn’t the consequence of change. It is its point of entry.', 'Chapter 11', true),
+        { kind: 'sign', text: 'Manel' },
+        ...checkinBlock(c, 'Have you done this week’s exercise?', 'One click is enough. It doesn’t change what you receive: it just tells me how it’s going.', { si: 'Yes', medias: 'Partly', no: 'Not this week' }),
+      ],
+    }),
+    semana4: c => ({
+      subject: 'Week 4: coming back to yourself',
+      blocks: [
+        { kind: 'p', text: 'Last week: coming back to yourself. Time to go back to the beginning, with what you have seen along the way.' },
+        umbral(EN, 'Write down an excuse you have used all your life. Cross it out, without erasing it: it should still be readable.'),
+        { kind: 'p', text: 'First, retake the test. When you finish you will see your answers from a month ago next to today’s. Don’t expect a big change: a month is not long. Look at what has moved and what hasn’t.' },
+        { kind: 'cta', href: c.links.repetir, label: 'RETAKE THE TEST' },
+        { kind: 'p', text: 'Then, one quiet afternoon, reread your whole notebook from the first page, in one go and without correcting anything. And write this:' },
+        ej(EN, 'The moments without noise', 3, [
+          'Make a list of your moments without noise: those times, recent or long ago, when you were fine “for no reason”. Be specific: where, with whom, doing what.',
+          'Look at them together and find what they have in common. Not in what was there, but in what wasn’t: what hurry, what role, what demand, what comparison wasn’t sounding?',
+          'Finish with this sentence, by hand: “When the noise goes down, I am…”, and complete it with the first thing that comes.',
+        ], true),
+        { kind: 'p', text: 'And a gesture to hold on to it. Emiko is a teacher; at the end of her day she switches off the classroom lights and says “arigatou” under her breath. Nobody hears her. Choose your gesture, small and always the same, and this week do it every night while you reread your sentence “When the noise goes down, I am…”.' },
+        cita(EN, 'You aren’t missing anything. You have too much of what you are not.', 'Chapter 3', true),
         ...encuentrosBlock(EN, c),
         { kind: 'sign', text: 'Manel' },
+      ],
+    }),
+    jueves4: c => ({
+      subject: 'Midweek: what you take with you',
+      blocks: [
+        { kind: 'p', text: 'Not long left. Two things to take with you when this ends.' },
+        ej(EN, 'Your minimum daily action', 6, [
+          'Choose one small action you can repeat every day. Something real for your current life, not for your ideal life.',
+          'Decide what time of day you will do it and note each time you do. If you miss a day, you come back the next. No drama.',
+        ]),
+        ej(EN, 'Monthly review', 6, [
+          'What has brought me balance this month?',
+          'What has cost me more than it was worth?',
+          'What do I want to adjust next month?',
+        ]),
+        { kind: 'p', text: 'If you like, reply to this email with your sentence “When the noise goes down, I am…”. I read them myself.' },
+        { kind: 'sign', text: 'Manel' },
+        ...checkinBlock(c, 'Have you done this week’s exercise?', 'One click is enough. It doesn’t change what you receive: it just tells me how it’s going.', { si: 'Yes', medias: 'Partly', no: 'Not this week' }),
       ],
     }),
     cierre: c => ({
       subject: 'After this month',
       blocks: [
-        { kind: 'p', text: 'You have finished “A month getting to know your ikigai”. If you did even part of it, you did something few people do: look at yourself calmly.' },
-        { kind: 'p', text: 'What you worked on this month are the two sides of ikigai. Underneath are fear, masks and the way you talk to yourself. That is what the online course goes through: the book’s three acts, with me.' },
-        { kind: 'cta', href: c.links.curso, label: 'SEE THE COURSE' },
-        { kind: 'p', text: 'If you would rather continue on your own, the book is here:', muted: true },
-        { kind: 'cta', href: c.links.libro, label: 'EL IKIGAI QUE NO TE CONTARON' },
+        { kind: 'p', text: 'You have finished “A month getting to know your ikigai”. If you have done even part of it, you have done something few people do: look at yourself calmly.' },
+        { kind: 'p', text: 'Look at what is in your notebook now: a sentence from a month ago, a mother sentence and whose voice it was, a closing sentence, the thread that runs through your life, a few days of presence, a small step in another direction and a line that begins “When the noise goes down, I am…”. A month ago none of that was there.' },
+        { kind: 'p', text: 'For the days ahead you have two things: your gesture every night and your minimum action. And reread the notebook in a month. It will tell you more than this email.' },
+        ...(c.links.curso ? [
+          { kind: 'p', text: 'If you want to continue with me: the online course goes through what lies underneath (fear, masks, the way you talk to yourself inside) across the three acts of the book.' },
+          ...cursoBlock(c, 'SEE THE COURSE'),
+        ] as ProgramaBlock[] : []),
+        { kind: 'p', text: 'If you would rather continue on your own, all of this is in the books, with more time.', muted: true },
+        { kind: 'cta', href: c.links.libros, label: 'THE BOOKS' },
         { kind: 'p', text: 'And if you would rather live it in person, with other people asking themselves the same questions, there is the in-person workshop “I am IKIGAIER”: four hours to listen to yourself.', muted: true },
         { kind: 'cta', href: c.links.taller, label: 'SEE THE WORKSHOP' },
         { kind: 'p', text: 'And if you want to take this into concrete decisions, you can reply to this email.', muted: true },
-        { kind: 'quote', text: 'Keep walking. But do it without moving away from yourself.', cite: 'Epilogue' },
+        cita(EN, 'Keep walking. But do it without moving away from yourself.', 'Epilogue'),
         { kind: 'sign', text: 'Manel' },
       ],
     }),

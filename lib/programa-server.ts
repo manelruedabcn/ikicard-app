@@ -47,7 +47,7 @@ const PASO_CON_CUENTA = process.env.PROGRAMA_PASO_CON_CUENTA === '1'
 function links(insc: Inscripcion) {
   const l = lang(insc.locale)
   const libro = { es: '/es/libros/el-ikigai-que-no-te-contaron/', ca: '/ca/llibres/el-ikigai-que-no-te-contaron/', en: '/en/books/el-ikigai-que-no-te-contaron/' }[l]
-  const talleres = { es: '/es/talleres/', ca: '/ca/tallers/', en: '/en/workshops/' }[l]
+  const librosPage = { es: '/es/libros/', ca: '/ca/llibres/', en: '/en/books/' }[l]
   const taller = { es: '/es/taller/', ca: '/ca/taller/', en: '/en/workshop/' }[l]
   return {
     // Con cuenta: el registro vuelve a /paso. Sin cuenta: directo a /paso.
@@ -55,9 +55,10 @@ function links(insc: Inscripcion) {
     // El mismo enlace personal sirve para el primer test (entrada por la
     // página del programa) y para repetirlo en la semana 4.
     repetir: `${APP_URL}/${l}/inventario?prog=${insc.token}`,
-    // Mientras el curso online no tenga página propia, lleva a talleres.
-    curso: process.env.PROGRAMA_CURSO_URL || `${WEB_URL}${talleres}`,
+    // Sin página propia del curso, no se ofrece (null).
+    curso: process.env.PROGRAMA_CURSO_URL || null,
     libro: `${WEB_URL}${libro}`,
+    libros: `${WEB_URL}${librosPage}`,
     // Taller presencial «Yo soy IKIGAIER» (cierre del programa).
     taller: `${WEB_URL}${taller}`,
   }
