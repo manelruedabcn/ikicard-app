@@ -1,5 +1,5 @@
 -- ============================================================
--- «UN MES CONOCIENDO TU IKIGAI» — doble confirmación.
+-- «UN MES CONOCIENDO TU IKIGAI» — doble confirmación y dos entradas.
 -- Pedir el programa crea la inscripción «pendiente»; la persona entra al
 -- pulsar «Confirmar mi plaza» en el correo de su devolución. Así nadie
 -- apunta un correo ajeno ni uno con errata, y queda constancia de que
@@ -16,6 +16,14 @@ ALTER TABLE programa_inscripciones DROP CONSTRAINT IF EXISTS programa_inscripcio
 ALTER TABLE programa_inscripciones ADD CONSTRAINT programa_inscripciones_status_check
   CHECK (status IN ('pendiente', 'activa', 'completada', 'baja'));
 ALTER TABLE programa_inscripciones ALTER COLUMN status SET DEFAULT 'pendiente';
+
+-- Por dónde entró: «test» (pidió el programa al acabar el test) o
+-- «programa» (se apuntó en la página del programa; su primera tarea es
+-- hacer el test).
+ALTER TABLE programa_inscripciones ADD COLUMN IF NOT EXISTS origen TEXT NOT NULL DEFAULT 'test';
+ALTER TABLE programa_inscripciones DROP CONSTRAINT IF EXISTS programa_inscripciones_origen_check;
+ALTER TABLE programa_inscripciones ADD CONSTRAINT programa_inscripciones_origen_check
+  CHECK (origen IN ('test', 'programa'));
 
 -- Buscar la pendiente de un correo al repetir el test.
 CREATE INDEX IF NOT EXISTS programa_inscripciones_email_status_idx

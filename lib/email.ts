@@ -514,7 +514,7 @@ export async function sendInventarioEmail(
 // Cada correo del programa es una lista de bloques (lib/programa-content.ts):
 // párrafos, citas del libro, el ejercicio de la semana, botones y encuentros.
 // Siempre lleva enlace para dejar el programa.
-export async function sendProgramaEmail(to: string, locale: string, mail: ProgramaMail, unsubLink: string) {
+export async function sendProgramaEmail(to: string, locale: string, mail: ProgramaMail, unsubLink: string | null) {
   const t = getProgramaTexts(locale)
   const [qo, qc] = t.q
   const html = mail.blocks.map(b => {
@@ -554,7 +554,7 @@ export async function sendProgramaEmail(to: string, locale: string, mail: Progra
     html: shell(`
       <p style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#8b8179;text-align:center;margin:0 0 22px;">${escapeHtml(t.name)}</p>
       ${html}
-      <p style="font-size:12px;color:rgba(39,39,39,0.4);text-align:center;margin-top:28px;">${t.unsubscribe(unsubLink)}</p>
+      ${unsubLink ? `<p style="font-size:12px;color:rgba(39,39,39,0.4);text-align:center;margin-top:28px;">${t.unsubscribe(unsubLink)}</p>` : ''}
     `),
   })
   if (delivery.error) throw new Error(delivery.error.message)

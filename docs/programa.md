@@ -6,7 +6,20 @@ conversión del embudo: quien llega al final ha trabajado un mes y conoce a Mane
 
 ## Cómo funciona
 
-- **Doble confirmación:** marcar la casilla crea la inscripción **pendiente**.
+- **Dos entradas al mismo programa** (columna `origen`):
+  - **Test** (`origen = test`): al acabar el test, el recuadro final presenta
+    el programa como siguiente paso. «Empezar el mes gratis» lo pide; «Solo
+    envíame esta devolución», no.
+  - **Página del programa** (`/[locale]/programa`, `origen = programa`): para
+    redes, talleres, newsletter o QR. Solo pide el correo; llega «Confirma tu
+    plaza» por separado (reenvío limitado a uno cada 10 minutos). Al confirmar,
+    la bienvenida le pide **hacer el test primero** con su enlace personal
+    (`/inventario?prog=token`): ese test es su punto de partida, se guarda como
+    `first_answers` y la devolución se le envía sola a su correo. Si llega al
+    primer lunes sin test, la semana 1 se lo vuelve a pedir.
+  - El mismo enlace personal repite el test en la semana 4. Antes de la
+    semana 4, repetirlo no compara nada.
+- **Doble confirmación:** pedir el programa crea la inscripción **pendiente**.
   El correo de la devolución abre con un recuadro «Confirma tu plaza» y un
   botón; solo al pulsarlo entra en el programa (`/api/programa/confirmar`).
   Quien no lo pulsa recibe su devolución y nada más. Si tiene sesión en la

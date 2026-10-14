@@ -11,6 +11,8 @@ export interface ProgramaFila {
   locale: string
   start_date: string
   status: string
+  // Por dónde entró: el test o la página del programa.
+  origen: string
   created_at: string
   // 0 = aún no ha empezado · 1-4 = semana en curso · 5 = cierre enviado o pasado
   semana: number
@@ -31,6 +33,7 @@ export interface ProgramaResumen {
   leads: number
   activas: number
   pendientes: number
+  porPagina: number
   completadas: number
   bajas: number
   repitieron: number
@@ -50,7 +53,7 @@ export async function getProgramaResumen(): Promise<ProgramaResumen> {
     admin.from('inventario_attempts').select('id', { count: 'exact', head: true }).gte('created_at', haceSiete),
     admin.from('inventario_leads').select('id', { count: 'exact', head: true }),
     admin.from('programa_inscripciones')
-      .select('id, email, locale, start_date, status, created_at, final_attempt_id')
+      .select('id, email, locale, start_date, status, origen, created_at, final_attempt_id')
       .order('created_at', { ascending: false })
       .limit(500),
     admin.from('programa_checkins').select('inscripcion_id, semana, respuesta'),
@@ -73,6 +76,7 @@ export async function getProgramaResumen(): Promise<ProgramaResumen> {
       locale: i.locale,
       start_date: i.start_date,
       status: i.status,
+      origen: i.origen || 'test',
       created_at: i.created_at,
       semana,
       checkins: porInscripcion.get(i.id) || {},
@@ -85,6 +89,7 @@ export async function getProgramaResumen(): Promise<ProgramaResumen> {
     leads: leads.count || 0,
     activas: filas.filter(f => f.status === 'activa').length,
     pendientes: filas.filter(f => f.status === 'pendiente').length,
+    porPagina: filas.filter(f => f.origen === 'programa').length,
     completadas: filas.filter(f => f.status === 'completada').length,
     bajas: filas.filter(f => f.status === 'baja').length,
     repitieron: filas.filter(f => f.repitio).length,

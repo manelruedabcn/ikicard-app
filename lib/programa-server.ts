@@ -51,6 +51,8 @@ function links(insc: Inscripcion) {
   return {
     // Con cuenta: el registro vuelve a /paso. Sin cuenta: directo a /paso.
     paso: PASO_CON_CUENTA ? `${APP_URL}/${l}/login?next=${encodeURIComponent(`/${l}/paso`)}` : `${APP_URL}/${l}/paso`,
+    // El mismo enlace personal sirve para el primer test (entrada por la
+    // página del programa) y para repetirlo en la semana 4.
     repetir: `${APP_URL}/${l}/inventario?prog=${insc.token}`,
     // Mientras el curso online no tenga página propia, lleva a talleres.
     curso: process.env.PROGRAMA_CURSO_URL || `${WEB_URL}${talleres}`,
@@ -86,6 +88,7 @@ async function contexto(insc: Inscripcion, semanaCheckin: number | null = null):
     links: links(insc),
     encuentros: await encuentrosPara(insc),
     pasoConCuenta: PASO_CON_CUENTA,
+    tieneTest: Boolean(insc.first_answers),
     checkin: semanaCheckin ? checkinLinks(insc, semanaCheckin) : null,
   }
 }
@@ -150,7 +153,9 @@ export async function prepararInscripcion(input: {
   leadId: string | null
   userId: string | null
   attemptId: string | null
-  answers: InvAnswers
+  // null: entra por la página del programa y aún no ha hecho el test.
+  answers: InvAnswers | null
+  origen: 'test' | 'programa'
 }): Promise<{ inscripcion: Inscripcion; estado: PreparadaEstado }> {
   const admin = createAdminClient()
   const { data: activa } = await admin
@@ -163,13 +168,14 @@ export async function prepararInscripcion(input: {
 
   // Los datos con los que entra son los de su último test: si repite el
   // Inventario antes de confirmar, la pendiente se actualiza (mismo enlace).
-  const datos = {
-    locale: lang(input.locale),
-    lead_id: input.leadId,
-    user_id: input.userId,
-    first_attempt_id: input.attemptId,
-    first_answers: input.answers,
-    first_exercise: buildLectura(input.answers).exercise,
+  // Sin test (página del programa) no se pisan unas respuestas anteriores.
+  const datos: Record<string, unknown> = { locale: lang(input.locale) }
+  if (input.leadId) datos.lead_id = input.leadId
+  if (input.userId) datos.user_id = input.userId
+  if (input.answers) {
+    datos.first_attempt_id = input.attemptId
+    datos.first_answers = input.answers
+    datos.first_exercise = buildLectura(input.answers).exercise
   }
   const { data: pendiente } = await admin
     .from('programa_inscripciones')
@@ -185,7 +191,7 @@ export async function prepararInscripcion(input: {
     : await admin
         .from('programa_inscripciones')
         // start_date provisional: el definitivo se fija al confirmar.
-        .insert({ ...datos, email: input.email, status: 'pendiente', start_date: nextMonday(madridParts().date) })
+        .insert({ ...datos, email: input.email, origen: input.origen, status: 'pendiente', start_date: nextMonday(madridParts().date) })
         .select(INSCRIPCION_COLS)
         .single()
   if (res.error || !res.data) throw new Error(res.error?.message || 'inscripción no creada')
@@ -200,6 +206,38 @@ export async function enviarBienvenida(insc: Inscripcion): Promise<boolean> {
 
 export function confirmarUrl(insc: Inscripcion): string {
   return `${APP_URL}/api/programa/confirmar?t=${insc.token}&l=${lang(insc.locale)}`
+}
+
+// Correo «Confirma tu plaza» para quien se apunta en la página del programa
+// (quien viene del test lo recibe dentro de su devolución). Si lo vuelve a
+// pedir, se reenvía, pero no más de una vez cada 10 minutos: nadie puede
+// usar el formulario para llenar de correos el buzón de otra persona.
+const REENVIO_MIN = 10
+
+export async function enviarConfirmacion(insc: Inscripcion): Promise<boolean> {
+  const admin = createAdminClient()
+  const { data: previo } = await admin
+    .from('programa_envios')
+    .select('sent_at')
+    .eq('inscripcion_id', insc.id)
+    .eq('mensaje', 'confirmacion')
+    .maybeSingle()
+  if (previo?.sent_at && Date.now() - Date.parse(previo.sent_at) < REENVIO_MIN * 60_000) return false
+
+  const t = getProgramaTexts(insc.locale)
+  await sendProgramaEmail(insc.email, insc.locale, {
+    subject: t.confirmar.subject,
+    blocks: [
+      { kind: 'p', text: t.confirmar.text },
+      { kind: 'cta', href: confirmarUrl(insc), label: t.confirmar.button },
+      { kind: 'p', text: t.confirmar.note, muted: true },
+      { kind: 'sign', text: 'Manel' },
+    ],
+  }, null)
+  await admin
+    .from('programa_envios')
+    .upsert({ inscripcion_id: insc.id, mensaje: 'confirmacion', sent_at: new Date().toISOString() }, { onConflict: 'inscripcion_id,mensaje' })
+  return true
 }
 
 export type ConfirmarEstado = 'confirmada' | 'ya' | 'invalid'
@@ -231,9 +269,16 @@ export async function confirmarInscripcion(token: string): Promise<{ estado: Con
   // la reintenta cada hora hasta su primer lunes.
   await enviarBienvenida(inscripcion).catch(err => console.error('[programa] bienvenida error:', err))
 
+  // El consentimiento de marketing es el que dio (o no) al dejar su correo.
+  let marketingConsent = false
+  if (inscripcion.lead_id) {
+    const { data: lead } = await admin.from('inventario_leads').select('consent').eq('id', inscripcion.lead_id).maybeSingle()
+    marketingConsent = Boolean(lead?.consent)
+  }
   await syncCrmContact({
     userId: insc.user_id,
     email: inscripcion.email,
+    marketingConsent,
     sourceType: 'programa',
     sourceId: inscripcion.id,
     sourceDetail: { start_date: inscripcion.start_date, locale: inscripcion.locale },
