@@ -31,17 +31,28 @@ conversión del embudo: quien llega al final ha trabajado un mes y conoce a Mane
 - **Correos** (a las 8:00 de Madrid, desde `/api/cron/programa`, que GitHub
   Actions llama cada hora: `.github/workflows/programa.yml`):
 
+Cuatro semanas con nombre humano. Por debajo siguen las cuatro fases del
+sistema (Despertar · Descender · Atravesar · Retornar) y sus umbrales del
+mazo; **las fases nunca se nombran**. La PNL también va por debajo
+(atención de estado, reencuadre de la intención positiva, preguntas de
+precisión sobre la frase madre, gesto ancla) y **ningún término suyo aparece**.
+Libros: IKIGAI = «El Ikigai que no te contaron»; NOTODO = «No todo lo que te
+frena es tuyo».
+
 | Día | Correo | Contenido | Fuente |
 |---|---|---|---|
-| 0 (lunes) | Semana 1 | El ejercicio que le salió en el Inventario + la frase ancla en la libreta | Ejercicio de su devolución, cap. 1 |
-| 3 (jueves) | Jueves 1 | Dos líneas, una pregunta y «¿lo has hecho?» | — |
-| 7 | Semana 2 | Tu mapa del Ikigai Activo | Cap. 4 y Herramientas |
-| 10 | Jueves 2 | Ídem | — |
-| 14 | Semana 3 | PASO + la pregunta del contraste interno | PASO, cap. 8 |
-| 17 | Jueves 3 | Ídem | — |
-| 21 | Semana 4 | Repetir el Inventario (enlace personal) + revisión mensual | Cap. 6 |
-| 24 | Jueves 4 | Ídem, con el enlace para repetir | — |
-| 28 | Cierre | Propuesta: el curso online; el libro; responder al correo | Epílogo |
+| 0 (lunes) | Semana 1 · Lo que ya hay | Ejercicio de su test + frase ancla del primer día + el método VOLver (20 s, tres veces al día, todo el mes) | Su devolución · IKIGAI cap. 5 · cita NOTODO cap. 1 |
+| 3 (jueves) | Jueves 1 | ¿Qué has notado que no esperabas? + «¿lo has hecho?» | — |
+| 7 | Semana 2 · Lo que hay debajo | Umbral «Lo que más temo encontrar aquí es…» · La autopsia amable (frase madre) · Encontrar la voz (de quién, qué edad) | NOTODO caps. 2 y 7 |
+| 10 | Jueves 2 | Las tres preguntas (de quién es la voz, qué protegía, si protege hoy algo en peligro) + frase de cierre | NOTODO cap. 10 |
+| 14 | Semana 3 · Hacer distinto | Umbral: leer en voz alta la frase de cierre · Activo: Tu ikigai en el tiempo (o Lo que dejaste atrás) · Consciente: Encuentra tu cotidiano (o Los siete pilares) · PASO opcional | IKIGAI caps. 4, 9, 10 |
+| 17 | Jueves 3 | Preguntas a la frase madre (¿siempre?, ¿según quién?, la excepción) + La conducta mínima | NOTODO cap. 11 |
+| 21 | Semana 4 · Volver a ti | Umbral: una excusa tachada sin borrar · repetir el test y comparar · releer la libreta · Los momentos sin ruido («Cuando el ruido baja, yo soy…») · un gesto cada noche | NOTODO cap. 3 · IKIGAI cap. 4 (Emiko) |
+| 24 | Jueves 4 | Tu acción mínima diaria + Revisión mensual + invitación a responder con su frase | IKIGAI cap. 6 |
+| 28 | Cierre | Lo que tiene ahora en la libreta · lo que se lleva (gesto y acción mínima) · curso (solo si `PROGRAMA_CURSO_URL`), libros, taller, responder | Epílogo |
+
+La semana 3 nunca repite el ejercicio de la semana 1 (`ejerciciosSemana3` en
+`lib/programa-server.ts`).
 
 - **«¿Has hecho el ejercicio de esta semana?»** (correos del jueves): un clic
   con «Sí · A medias · Esta semana no». **No bloquea nada**: el lunes siguiente
@@ -56,7 +67,8 @@ conversión del embudo: quien llega al final ha trabajado un mes y conoce a Mane
 - **Encuentros en grupo** (opcionales, online): se dan de alta en la tabla
   `programa_encuentros` (fecha y hora, enlace, lengua; vacía = todas). A cada
   persona se le invita a los que caen dentro de su mes (30 días desde su
-  inicio): aparecen en los correos de bienvenida y de las semanas 2 y 4, y se
+  inicio): aparecen en los correos de bienvenida y de las semanas 2 y 4 (si no hay ninguno,
+  esos correos solo dicen «si los hay, te aviso»), y se
   avisa **la víspera** con su propio correo.
 - **Semana 4:** el enlace `…/inventario?prog=<token>` guarda el nuevo intento
   como final y muestra «Hace un mes y hoy»: solo las respuestas que han
