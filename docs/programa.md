@@ -37,7 +37,7 @@ conversión del embudo: quien llega al final ha trabajado un mes y conoce a Mane
     la bienvenida le pide **hacer el test primero** con su enlace personal
     (`/inventario?prog=token`): ese test es su punto de partida, se guarda como
     `first_answers` y la devolución se le envía sola a su correo. Si llega al
-    primer lunes sin test, la semana 1 se lo vuelve a pedir.
+    primer correo semanal sin test, la semana 1 se lo vuelve a pedir.
   - El mismo enlace personal repite el test en la semana 4. Antes de la
     semana 4, repetirlo no compara nada.
 - **Doble confirmación:** pedir el programa crea la inscripción **pendiente**.
@@ -46,9 +46,11 @@ conversión del embudo: quien llega al final ha trabajado un mes y conoce a Mane
   Quien no lo pulsa recibe su devolución y nada más. Si tiene sesión en la
   app con ese mismo correo ya verificado, entra directamente. Repetir el test
   antes de confirmar actualiza la misma pendiente (mismo enlace).
-- **Inicio:** cada persona empieza el **lunes siguiente** a confirmar (fecha de
-  Madrid). Recibe al momento un correo de bienvenida con esa fecha; si ese
-  envío falla, la tarea programada lo reintenta cada hora hasta su primer lunes.
+- **Inicio:** el mes de cada persona empieza **el mismo día en que entra** (fecha
+  de Madrid): la semana 1 se abre al momento, la 2 a los 7 días, la 3 a los 14,
+  la 4 a los 21 y el cierre a los 28. Los textos no nombran días de la semana
+  («al empezar cada semana», «a mitad de semana»). Recibe al momento un correo de bienvenida con esa fecha; si ese
+  envío falla, la tarea programada lo reintenta cada hora ese mismo día.
 - **Correos** (a las 8:00 de Madrid, desde `/api/cron/programa`, que GitHub
   Actions llama cada hora: `.github/workflows/programa.yml`):
 
@@ -62,8 +64,8 @@ frena es tuyo».
 
 | Día | Correo | Contenido | Fuente |
 |---|---|---|---|
-| 0 (lunes) | Semana 1 · Lo que ya hay | Ejercicio de su test + frase ancla del primer día + el método VOLver (20 s, tres veces al día, todo el mes) | Su devolución · IKIGAI cap. 5 · cita NOTODO cap. 1 |
-| 3 (jueves) | Jueves 1 | ¿Qué has notado que no esperabas? + «¿lo has hecho?» | — |
+| 0 (el día que entra) | Semana 1 · Lo que ya hay | Ejercicio de su test + frase ancla del primer día + el método VOLver (20 s, tres veces al día, todo el mes) | Su devolución · IKIGAI cap. 5 · cita NOTODO cap. 1 |
+| 3 (mitad de semana) | Jueves 1 | ¿Qué has notado que no esperabas? + «¿lo has hecho?» | — |
 | 7 | Semana 2 · Lo que hay debajo | Umbral «Lo que más temo encontrar aquí es…» · La autopsia amable (frase madre) · Encontrar la voz (de quién, qué edad) | NOTODO caps. 2 y 7 |
 | 10 | Jueves 2 | Las tres preguntas (de quién es la voz, qué protegía, si protege hoy algo en peligro) + frase de cierre | NOTODO cap. 10 |
 | 14 | Semana 3 · Hacer distinto | Umbral: leer en voz alta la frase de cierre · Activo: Tu ikigai en el tiempo (o Lo que dejaste atrás) · Consciente: Encuentra tu cotidiano (o Los siete pilares) · PASO opcional | IKIGAI caps. 4, 9, 10 |
@@ -76,13 +78,13 @@ La semana 3 nunca repite el ejercicio de la semana 1 (`ejerciciosSemana3` en
 `lib/programa-server.ts`).
 
 - **«¿Has hecho el ejercicio de esta semana?»** (correos del jueves): un clic
-  con «Sí · A medias · Esta semana no». **No bloquea nada**: el lunes siguiente
+  con «Sí · A medias · Esta semana no». **No bloquea nada**: el correo de la semana siguiente
   llega igual; si respondió «no» o «a medias», empieza reconociéndolo («No
   pasa nada si la semana pasada no pudo ser…»). Se guarda en
   `programa_checkins` y sirve para saber quién se implica de verdad. Como
   algunos gestores de correo abren los enlaces solos para analizarlos, el
   clic solo se registra cuando el navegador de la persona lo confirma.
-- Si la tarea programada falla varios días, los lunes y el cierre pendientes
+- Si la tarea programada falla varios días, los correos de inicio de semana y el cierre pendientes
   se recuperan, pero un recordatorio de jueves atrasado se descarta.
 
 - **Encuentros en grupo** (opcionales, online): se dan de alta en la tabla
