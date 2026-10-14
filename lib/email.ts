@@ -438,6 +438,55 @@ export async function sendWorkshopAdminEmail(input: {
   })
 }
 
+// ── Aviso interno · mensaje desde el guía de la web ──────────
+// El guía (la burbuja con la cara de Manel en ikigaier.com) no usa IA: son
+// preguntas cerradas. Cuando alguien pide una llamada, escribe o pide aviso
+// de talleres, llega aquí. «Responder» contesta directamente a esa persona.
+export async function sendGuiaAdminEmail(input: {
+  tipo: 'escribir' | 'llamada' | 'aviso'
+  nombre: string
+  email: string
+  telefono: string
+  cuando: string
+  mensaje: string
+  ruta: string[]
+  pagina: string
+  lang: string
+}) {
+  const notifyTo = process.env.GUIA_NOTIFY_EMAIL || process.env.WORKSHOP_NOTIFY_EMAIL || 'manelrueda@gmail.com'
+  const safe = (s: string) => s.replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;',
+  })[c] || c)
+  const quien = input.nombre || input.email
+  const asunto = {
+    llamada: `Quiere una llamada · ${quien}`,
+    escribir: `Mensaje desde la web · ${quien}`,
+    aviso: `Aviso de talleres · ${input.email}`,
+  }[input.tipo]
+  const titulo = { llamada: 'Quiere una llamada', escribir: 'Te ha escrito', aviso: 'Quiere aviso de talleres' }[input.tipo]
+  const fila = (k: string, v: string) => v ? `<strong>${k}:</strong> ${safe(v)}<br>` : ''
+
+  const delivery = await resend().emails.send({
+    from: FROM,
+    to: notifyTo,
+    replyTo: input.email,
+    subject: `Guía · ${asunto}`,
+    html: shell(`
+      <h1 style="font-size:26px;font-weight:normal;text-align:center;margin:0 0 20px;">${titulo}</h1>
+      <p style="font-size:15px;line-height:1.8;color:rgba(39,39,39,0.8);">
+        ${fila('Nombre', input.nombre)}${fila('Correo', input.email)}${fila('Teléfono', input.telefono)}${fila('Cuándo le va bien', input.cuando)}
+      </p>
+      ${input.mensaje ? `<p style="font-size:16px;line-height:1.8;white-space:pre-wrap;border-left:2px solid #c2866b;padding-left:16px;">${safe(input.mensaje)}</p>` : ''}
+      <p style="font-size:13px;line-height:1.7;color:rgba(39,39,39,0.55);">
+        ${fila('Lo que eligió en el guía', input.ruta.join(' → '))}${fila('Página', input.pagina)}${fila('Idioma', input.lang)}
+      </p>
+      <p style="font-size:13px;color:rgba(39,39,39,0.55);">Para contestar, responde a este correo.</p>
+    `),
+  })
+  if (delivery.error) throw new Error(delivery.error.message)
+  return delivery
+}
+
 // ── Inventario honesto · devolución (transaccional) ──────────
 // La pidió la persona al terminar el test. Reproduce la misma devolución que
 // vio en pantalla (mismas reglas, recalculada en el servidor). El enlace de
