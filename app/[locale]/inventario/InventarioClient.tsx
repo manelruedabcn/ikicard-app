@@ -335,6 +335,7 @@ export default function InventarioClient({ locale, userId, source, prog }: Props
             texto={d.texto}
             attemptId={attemptId}
             source={source}
+            logged={Boolean(userId)}
           />
         )}
 
@@ -449,111 +450,105 @@ function LeadCapture({
   texto,
   attemptId,
   source,
+  logged,
 }: {
   locale: string
   answers: InvAnswers
   texto: string
   attemptId: string | null
   source: string | null
+  logged: boolean
 }) {
   // El programa de un mes es el siguiente paso natural tras el test: es lo
-  // principal del recuadro. Pulsar «Empezar el mes gratis» ya es pedirlo (no
-  // hace falta casilla); quien solo quiera su devolución tiene el enlace de
-  // debajo. Las cartas de Manel (marketing) siempre van aparte.
+  // principal del recuadro. Para hacerlo hace falta cuenta; el test que
+  // acaba de hacer pasa a ser su punto de partida (?intento=). Quien solo
+  // quiera su devolución por correo tiene el formulario de debajo, sin
+  // cuenta. Las cartas de Manel (marketing) siempre van aparte.
   const copy = getInvCopy(locale).mail
   const t = getProgramaTexts(locale)
   const [email, setEmail] = useState('')
   const [consent, setConsent] = useState(false)
-  const [modo, setModo] = useState<'programa' | 'solo' | null>(null)
-  const [programaEstado, setProgramaEstado] = useState<'pendiente' | 'confirmada' | 'ya' | 'error' | null>(null)
   const [status, setStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
-
-  if (status === 'done') {
-    const msg = modo === 'solo' || !programaEstado || programaEstado === 'error'
-      ? t.captura.doneSolo
-      : programaEstado === 'pendiente' ? t.optInPending : programaEstado === 'ya' ? t.optInYa : t.optInDone
-    return (
-      <div className="rounded-xl bg-[#c2866b]/[0.08] px-5 py-6">
-        <p className="text-sm leading-relaxed text-[#272727]/75">{msg}</p>
-      </div>
-    )
-  }
+  const empezar = `/${locale}/programa/empezar${attemptId ? `?intento=${attemptId}` : ''}`
 
   const valid = EMAIL_RE.test(email.trim())
-  const send = async (programa: boolean) => {
+  const send = async (e: React.FormEvent) => {
+    e.preventDefault()
     if (!valid || status === 'sending') return
-    setModo(programa ? 'programa' : 'solo')
     setStatus('sending')
     try {
       const res = await fetch('/api/inventario/lead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), consent, programa, answers, texto, attemptId, locale, source }),
+        body: JSON.stringify({ email: email.trim(), consent, programa: false, answers, texto, attemptId, locale, source }),
       })
-      if (res.ok) {
-        const j = await res.json().catch(() => null)
-        setProgramaEstado(j?.programa ?? null)
-      }
       setStatus(res.ok ? 'done' : 'error')
-      if (res.ok) trackEvent('generate_lead', { tool: 'inventario', consent, programa })
+      if (res.ok) trackEvent('generate_lead', { tool: 'inventario', consent, programa: false })
     } catch {
       setStatus('error')
     }
   }
 
   return (
-    <form
-      onSubmit={e => { e.preventDefault(); send(true) }}
-      className="rounded-xl border border-[#c2866b]/40 bg-[#c2866b]/[0.06] px-5 py-7 sm:px-7 space-y-5"
-    >
-      <div className="space-y-3">
-        <p className="text-[11px] tracking-[0.2em] uppercase text-[#c2866b]">{t.landing.eyebrow}</p>
-        <p className="font-[family-name:var(--font-cormorant)] text-3xl leading-tight text-[#272727]">{t.captura.title}</p>
-        <p className="text-[15px] leading-relaxed text-[#272727]/75">{t.captura.body}</p>
-      </div>
-      <ol className="space-y-1.5 text-sm leading-relaxed text-[#272727]/70">
-        {t.semanas.lista.map(w => <li key={w}>{w}</li>)}
-      </ol>
-      <div className="flex flex-col sm:flex-row gap-2">
-        <input
-          id="inv-email"
-          type="email"
-          inputMode="email"
-          autoComplete="email"
-          aria-label="Email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          placeholder={copy.placeholder}
-          className="flex-1 min-w-0 rounded-lg border border-[#272727]/20 bg-white px-4 py-3 text-sm text-[#272727] focus:border-[#c2866b] focus:outline-none"
-        />
-        <button
-          type="submit"
-          disabled={!valid || status === 'sending'}
-          className="px-6 py-3 bg-[#272727] text-[#FDFBF7] text-xs tracking-widest hover:bg-[#c2866b] transition-colors disabled:opacity-40"
+    <div className="space-y-4">
+      <section className="rounded-xl border border-[#c2866b]/40 bg-[#c2866b]/[0.06] px-5 py-7 sm:px-7 space-y-5">
+        <div className="space-y-3">
+          <p className="text-[11px] tracking-[0.2em] uppercase text-[#c2866b]">{t.landing.eyebrow}</p>
+          <p className="font-[family-name:var(--font-cormorant)] text-3xl leading-tight text-[#272727]">{t.captura.title}</p>
+          <p className="text-[15px] leading-relaxed text-[#272727]/75">{t.captura.body}</p>
+        </div>
+        <ol className="space-y-1.5 text-sm leading-relaxed text-[#272727]/70">
+          {t.semanas.lista.map(w => <li key={w}>{w}</li>)}
+        </ol>
+        <Link
+          href={empezar}
+          onClick={() => trackEvent('programa_empezar', { origen: 'test', logged })}
+          className="inline-block px-6 py-3 bg-[#272727] text-[#FDFBF7] text-xs tracking-widest hover:bg-[#c2866b] transition-colors"
         >
-          {status === 'sending' && modo === 'programa' ? t.captura.sending : t.captura.button}
-        </button>
-      </div>
-      <button
-        type="button"
-        onClick={() => send(false)}
-        disabled={!valid || status === 'sending'}
-        className="text-sm text-[#272727]/60 underline underline-offset-4 hover:text-[#c2866b] disabled:no-underline disabled:opacity-50"
-      >
-        {status === 'sending' && modo === 'solo' ? t.captura.sending : t.captura.solo}
-      </button>
-      <label htmlFor="inv-consent" className="flex items-start gap-2 cursor-pointer border-t border-[#272727]/10 pt-4">
-        <input
-          id="inv-consent"
-          type="checkbox"
-          checked={consent}
-          onChange={e => setConsent(e.target.checked)}
-          className="mt-1 accent-[#c2866b]"
-        />
-        <span className="text-xs leading-relaxed text-[#272727]/55">{copy.consent}</span>
-      </label>
-      {status === 'error' && <p className="text-xs text-red-700/70">{copy.error}</p>}
-    </form>
+          {logged ? t.cuenta.logged : t.captura.button}
+        </Link>
+        {!logged && <p className="text-xs leading-relaxed text-[#272727]/55">{t.cuenta.nota}</p>}
+      </section>
+
+      {status === 'done' ? (
+        <p className="rounded-xl bg-[#272727]/[0.04] px-5 py-4 text-sm leading-relaxed text-[#272727]/75">{t.captura.doneSolo}</p>
+      ) : (
+        <form onSubmit={send} className="rounded-xl bg-[#272727]/[0.04] px-5 py-5 space-y-3">
+          <p className="text-sm text-[#272727]/75">{t.captura.solo}</p>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input
+              id="inv-email"
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              aria-label="Email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder={copy.placeholder}
+              className="flex-1 min-w-0 rounded-lg border border-[#272727]/20 bg-white px-4 py-3 text-sm text-[#272727] focus:border-[#c2866b] focus:outline-none"
+            />
+            <button
+              type="submit"
+              disabled={!valid || status === 'sending'}
+              className="px-6 py-3 border border-[#272727]/40 text-[#272727] text-xs tracking-widest hover:border-[#c2866b] hover:text-[#94563b] transition-colors disabled:opacity-40"
+            >
+              {status === 'sending' ? t.captura.sending : copy.button}
+            </button>
+          </div>
+          <label htmlFor="inv-consent" className="flex items-start gap-2 cursor-pointer">
+            <input
+              id="inv-consent"
+              type="checkbox"
+              checked={consent}
+              onChange={e => setConsent(e.target.checked)}
+              className="mt-1 accent-[#c2866b]"
+            />
+            <span className="text-xs leading-relaxed text-[#272727]/55">{copy.consent}</span>
+          </label>
+          {status === 'error' && <p className="text-xs text-red-700/70">{copy.error}</p>}
+        </form>
+      )}
+    </div>
   )
 }
 

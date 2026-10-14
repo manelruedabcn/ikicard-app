@@ -41,6 +41,10 @@ veces sin romper nada).
    estado «pendiente» y `confirmed_at` (doble confirmación: la persona entra
    al pulsar «Confirmar mi plaza» en el correo de su devolución).
 
+   `programa-panel.sql` va **después** de `programa-confirmacion.sql`: registra
+   la herramienta `programa` (ruta `/mes`), deja a cada persona ver su propia
+   inscripción y crea `programa_respuestas` (su libreta, RLS por usuario).
+
 ## Parte B — Conceder acceso a IKIBOARD
 
 Con las tablas creadas, la app sigue redirigiendo al dashboard a quien no tenga la

@@ -13,7 +13,13 @@
     "welcome_back": "Bienvenido de nuevo.",
     "prepared": "Hoy tienes preparado esto para ti.",
     "empty": "Aún no hay nada preparado para ti. Vuelve pronto.",
-    "expires": "Disponible hasta el {date}"
+    "expires": "Disponible hasta el {date}",
+    "tools": {
+      "programa": {
+        "name": "Un mes conociendo tu ikigai",
+        "description": "Tu programa de cuatro semanas: el calendario, cada semana y tu libreta"
+      }
+    }
   },
   "viaje": {
     "start_title": "El Viaje de 20 días",

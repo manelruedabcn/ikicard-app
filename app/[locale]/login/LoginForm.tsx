@@ -6,13 +6,14 @@ import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { trackEvent } from '@/lib/analytics'
 
-export default function LoginForm({ locale, next = null, linkError = false }: { locale: string; next?: string | null; linkError?: boolean }) {
+// registro: se abre en «Crear cuenta» (p. ej. al empezar el programa de un mes).
+export default function LoginForm({ locale, next = null, linkError = false, registro = false }: { locale: string; next?: string | null; linkError?: boolean; registro?: boolean }) {
   const router = useRouter()
   const pathname = usePathname()
   const supabase = createClient()
   const t = useTranslations('auth')
   const tn = useTranslations('nav')
-  const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('login')
+  const [mode, setMode] = useState<'login' | 'register' | 'forgot'>(registro ? 'register' : 'login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(linkError ? t('link_error') : '')

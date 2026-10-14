@@ -1,11 +1,11 @@
 import 'server-only'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { unsubUrl } from '@/lib/notify'
-import { sendProgramaEmail } from '@/lib/email'
+import { sendInventarioEmail, sendProgramaEmail } from '@/lib/email'
 import { syncCrmContact } from '@/lib/crm-sync'
-import { getInvExercise } from '@/lib/inventario-content'
-import { buildLectura, type ExerciseKey, type InvAnswers } from '@/lib/inventario'
-import { encuentroEnVentana, madridParts, nextMonday, PROGRAMA_CHECKINS, semanaDeJueves, type ProgramaCheckin } from '@/lib/programa'
+import { buildDevolucion, getInvExercise } from '@/lib/inventario-content'
+import { buildLectura, parseInvAnswers, type ExerciseKey, type InvAnswers } from '@/lib/inventario'
+import { addDays, encuentroEnVentana, madridParts, nextMonday, PROGRAMA_CALENDARIO, PROGRAMA_CHECKINS, semanaDeJueves, type ProgramaCheckin } from '@/lib/programa'
 import {
   formatProgramaDate,
   formatProgramaDateTime,
@@ -32,9 +32,10 @@ export interface Inscripcion {
   first_attempt_id: string | null
   first_answers: unknown
   first_exercise: string | null
+  user_id: string | null
 }
 
-const INSCRIPCION_COLS = 'id, email, locale, start_date, status, token, lead_id, first_attempt_id, first_answers, first_exercise'
+const INSCRIPCION_COLS = 'id, email, locale, start_date, status, token, lead_id, first_attempt_id, first_answers, first_exercise, user_id'
 
 function lang(locale: string): 'es' | 'ca' | 'en' {
   return locale === 'en' ? 'en' : locale === 'ca' ? 'ca' : 'es'
@@ -130,9 +131,40 @@ export async function enviarUnaVez(insc: Inscripcion, mensaje: string, mail: Pro
   }
 }
 
+// Quien tiene cuenta tiene su mes en el panel: el correo lo enlaza justo
+// después del primer párrafo. El correo sigue siendo completo.
+function conPanel(insc: Inscripcion, mail: ProgramaMail): ProgramaMail {
+  if (!insc.user_id) return mail
+  const t = getProgramaTexts(insc.locale)
+  const cta = { kind: 'cta' as const, href: `${APP_URL}/${lang(insc.locale)}/mes`, label: t.abrirMes }
+  return { ...mail, blocks: [mail.blocks[0], cta, ...mail.blocks.slice(1)] }
+}
+
+// Frases de su libreta (panel), leídas en el servidor.
+async function respuestas(insc: Inscripcion, campos: string[]): Promise<Record<string, string>> {
+  if (!insc.user_id) return {}
+  const admin = createAdminClient()
+  const { data } = await admin
+    .from('programa_respuestas')
+    .select('campo, texto')
+    .eq('inscripcion_id', insc.id)
+    .in('campo', campos)
+  return Object.fromEntries((data || []).map(r => [r.campo, r.texto as string]))
+}
+
 export async function enviarSemanal(insc: Inscripcion, key: ProgramaSemanal): Promise<boolean> {
   const t = getProgramaTexts(insc.locale)
   const mail = t.semanal[key](await contexto(insc, semanaDeJueves(key)))
+
+  // Cierre: le devuelve sus propias frases (la del primer día y la del
+  // ruido), si las escribió en su libreta del panel.
+  if (key === 'cierre') {
+    const r = await respuestas(insc, ['ancla', 'ruido'])
+    const eco = [r.ancla && t.cierreEco.ancla(r.ancla.trim()), r.ruido && t.cierreEco.ruido(r.ruido.trim())]
+      .filter((x): x is string => Boolean(x))
+      .map(text => ({ kind: 'p' as const, text }))
+    mail.blocks.splice(1, 0, ...eco)
+  }
 
   // Lunes de las semanas 2-4: si el jueves anterior respondió «no» o «a
   // medias», el correo empieza reconociéndolo. Nunca bloquea nada.
@@ -148,7 +180,7 @@ export async function enviarSemanal(insc: Inscripcion, key: ProgramaSemanal): Pr
     const linea = data?.respuesta ? t.retomar[data.respuesta as ProgramaCheckin] : undefined
     if (linea) mail.blocks.unshift({ kind: 'p', text: linea, muted: true })
   }
-  return enviarUnaVez(insc, key, mail)
+  return enviarUnaVez(insc, key, conPanel(insc, mail))
 }
 
 export async function enviarAvisoEncuentro(insc: Inscripcion, encuentro: { id: string; starts_at: string; url: string }) {
@@ -216,7 +248,7 @@ export async function prepararInscripcion(input: {
 export async function enviarBienvenida(insc: Inscripcion): Promise<boolean> {
   const t = getProgramaTexts(insc.locale)
   const mail = t.bienvenida(await contexto(insc), formatProgramaDate(insc.locale, insc.start_date))
-  return enviarUnaVez(insc, 'bienvenida', mail)
+  return enviarUnaVez(insc, 'bienvenida', conPanel(insc, mail))
 }
 
 export function confirmarUrl(insc: Inscripcion): string {
@@ -302,13 +334,110 @@ export async function confirmarInscripcion(token: string): Promise<{ estado: Con
   return { estado: 'confirmada', inscripcion }
 }
 
-type InscripcionToken = Inscripcion & { final_attempt_id: string | null; user_id: string | null }
+// ── El programa con cuenta ─────────────────────────────────────
+// Para hacer el programa hay que tener cuenta: la cuenta ya verifica el
+// correo, así que la inscripción entra activa directamente (sin «Confirmar
+// mi plaza») y la persona recibe la herramienta «programa» en su panel.
+
+async function darPermisoPrograma(userId: string) {
+  const admin = createAdminClient()
+  const { data: tool } = await admin.from('tools').select('id').eq('code', 'programa').maybeSingle()
+  if (!tool) throw new Error('falta la herramienta «programa» (migrations/programa-panel.sql)')
+  const { data: ya } = await admin
+    .from('entitlements')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('tool_id', tool.id)
+    .maybeSingle()
+  if (ya) return
+  const { error } = await admin.from('entitlements').insert({ user_id: userId, tool_id: tool.id, source: 'free' })
+  if (error) throw new Error(error.message)
+}
+
+export async function inscribirConCuenta(input: {
+  userId: string
+  email: string
+  locale: string
+  // Test hecho antes de entrar (desde el final del test): sus respuestas
+  // son el punto de partida y su devolución se le envía al correo.
+  attemptId: string | null
+}): Promise<{ inscripcion: Inscripcion; nueva: boolean }> {
+  const admin = createAdminClient()
+  const email = input.email.trim().toLowerCase()
+
+  // ¿Ya está dentro? Por su cuenta o por su correo (se apuntó antes sin cuenta).
+  const porCuenta = await admin.from('programa_inscripciones').select(INSCRIPCION_COLS)
+    .eq('user_id', input.userId).eq('status', 'activa').maybeSingle()
+  const porCorreo = porCuenta.data ? null : await admin.from('programa_inscripciones').select(INSCRIPCION_COLS)
+    .eq('email', email).eq('status', 'activa').maybeSingle()
+  const activa = (porCuenta.data || porCorreo?.data) as Inscripcion | null
+  if (activa) {
+    if (!activa.user_id) {
+      await admin.from('programa_inscripciones').update({ user_id: input.userId }).eq('id', activa.id)
+      activa.user_id = input.userId
+    }
+    await darPermisoPrograma(input.userId)
+    return { inscripcion: activa, nueva: false }
+  }
+
+  let answers: InvAnswers | null = null
+  if (input.attemptId) {
+    const { data: intento } = await admin.from('inventario_attempts').select('answers, user_id').eq('id', input.attemptId).maybeSingle()
+    // Solo un intento sin dueño o suyo: nadie adopta el test de otra persona.
+    if (intento && (!intento.user_id || intento.user_id === input.userId)) {
+      answers = parseInvAnswers(intento.answers)
+      if (!intento.user_id) await admin.from('inventario_attempts').update({ user_id: input.userId }).eq('id', input.attemptId)
+    }
+  }
+
+  const { inscripcion } = await prepararInscripcion({
+    email, locale: input.locale, leadId: null, userId: input.userId,
+    attemptId: answers ? input.attemptId : null, answers, origen: answers ? 'test' : 'programa',
+  })
+  const r = await confirmarInscripcion(inscripcion.token)
+  const final = r.inscripcion ?? inscripcion
+  await darPermisoPrograma(input.userId)
+
+  if (answers && r.estado === 'confirmada') {
+    await sendInventarioEmail(email, lang(input.locale), buildDevolucion(answers, '', lang(input.locale)), null)
+      .catch(err => console.error('[programa] devolución error:', err))
+  }
+  return { inscripcion: final, nueva: r.estado === 'confirmada' }
+}
+
+// ── El panel (/mes) ────────────────────────────────────────────
+// Cada correo del calendario se abre en el panel el día que sale (fecha de
+// Madrid). El contenido es el mismo que el del correo, sin el check-in por
+// enlace (en el panel se responde con botones).
+export interface PanelItem {
+  key: ProgramaSemanal
+  date: string
+  abierto: boolean
+  mail: ProgramaMail | null
+}
+
+export async function panelDelPrograma(insc: Inscripcion): Promise<{ items: PanelItem[]; today: string; checkins: Partial<Record<number, ProgramaCheckin>> }> {
+  const t = getProgramaTexts(insc.locale)
+  const today = madridParts().date
+  const ctx = await contexto(insc, null)
+  const items = PROGRAMA_CALENDARIO.map(({ key, day }) => {
+    const date = addDays(insc.start_date, day)
+    const abierto = date <= today
+    return { key, date, abierto, mail: abierto ? t.semanal[key](ctx) : null }
+  })
+  const admin = createAdminClient()
+  const { data } = await admin.from('programa_checkins').select('semana, respuesta').eq('inscripcion_id', insc.id)
+  const checkins = Object.fromEntries((data || []).map(c => [c.semana, c.respuesta as ProgramaCheckin]))
+  return { items, today, checkins }
+}
+
+type InscripcionToken = Inscripcion & { final_attempt_id: string | null }
 
 export async function inscripcionPorToken(token: string): Promise<InscripcionToken | null> {
   const admin = createAdminClient()
   const { data } = await admin
     .from('programa_inscripciones')
-    .select(`${INSCRIPCION_COLS}, final_attempt_id, user_id`)
+    .select(`${INSCRIPCION_COLS}, final_attempt_id`)
     .eq('token', token)
     .maybeSingle()
   return (data as InscripcionToken | null) ?? null
