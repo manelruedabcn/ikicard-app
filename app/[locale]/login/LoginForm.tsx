@@ -25,6 +25,13 @@ export default function LoginForm({ locale, next = null, linkError = false }: { 
     { code: 'en', label: 'EN' },
   ]
 
+  // Supabase a veces devuelve el error sin texto («{}»), por ejemplo cuando
+  // falla el envío del correo. Mejor una frase comprensible que nada.
+  function showError(err: { message?: string } | null) {
+    const msg = err?.message?.trim()
+    setError(!msg || msg === '{}' ? t('generic_error') : msg)
+  }
+
   function switchMode(next: 'login' | 'register' | 'forgot') {
     setMode(next)
     setError('')
@@ -40,7 +47,7 @@ export default function LoginForm({ locale, next = null, linkError = false }: { 
     if (mode === 'login') {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) {
-        setError(error.message)
+        showError(error)
       } else {
         trackEvent('login', { method: 'email' })
         router.push(next ?? `/${locale}/dashboard`)
@@ -59,7 +66,7 @@ export default function LoginForm({ locale, next = null, linkError = false }: { 
         },
       })
       if (error) {
-        setError(error.message)
+        showError(error)
       } else {
         trackEvent('sign_up', { method: 'email' })
         setMessage(t('register_confirm'))
@@ -69,7 +76,7 @@ export default function LoginForm({ locale, next = null, linkError = false }: { 
         redirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent(`/${locale}/reset-password`)}`,
       })
       if (error) {
-        setError(error.message)
+        showError(error)
       } else {
         setMessage(t('forgot_sent'))
       }
@@ -86,7 +93,7 @@ export default function LoginForm({ locale, next = null, linkError = false }: { 
         redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next ?? `/${locale}/dashboard`)}`,
       },
     })
-    if (error) setError(error.message)
+    if (error) showError(error)
     // Si no hay error, el navegador ya está redirigiendo a Google.
   }
 
