@@ -6,8 +6,15 @@ conversión del embudo: quien llega al final ha trabajado un mes y conoce a Mane
 
 ## Cómo funciona
 
-- **Inicio:** cada persona empieza el **lunes siguiente** a apuntarse (fecha de
-  Madrid). Recibe al momento un correo de bienvenida con esa fecha.
+- **Doble confirmación:** marcar la casilla crea la inscripción **pendiente**.
+  El correo de la devolución abre con un recuadro «Confirma tu plaza» y un
+  botón; solo al pulsarlo entra en el programa (`/api/programa/confirmar`).
+  Quien no lo pulsa recibe su devolución y nada más. Si tiene sesión en la
+  app con ese mismo correo ya verificado, entra directamente. Repetir el test
+  antes de confirmar actualiza la misma pendiente (mismo enlace).
+- **Inicio:** cada persona empieza el **lunes siguiente** a confirmar (fecha de
+  Madrid). Recibe al momento un correo de bienvenida con esa fecha; si ese
+  envío falla, la tarea programada lo reintenta cada hora hasta su primer lunes.
 - **Correos** (a las 8:00 de Madrid, desde `/api/cron/programa`, que GitHub
   Actions llama cada hora: `.github/workflows/programa.yml`):
 

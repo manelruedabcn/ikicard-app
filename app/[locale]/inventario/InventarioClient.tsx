@@ -438,14 +438,19 @@ function LeadCapture({
   const [email, setEmail] = useState('')
   const [consent, setConsent] = useState(false)
   const [programa, setPrograma] = useState(false)
-  const [inscrita, setInscrita] = useState(false)
+  // Estado del programa tras enviar: pendiente de confirmar, dentro o ya estaba.
+  const [programaEstado, setProgramaEstado] = useState<'pendiente' | 'confirmada' | 'ya' | null>(null)
   const [status, setStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
 
   if (status === 'done') {
     return (
       <div className="rounded-xl bg-[#c2866b]/[0.08] px-5 py-6">
         <p className="text-sm text-[#272727]/75">{copy.done}</p>
-        {inscrita && <p className="text-sm text-[#272727]/75 mt-2">{programaTexts.optInDone}</p>}
+        {programaEstado && (
+          <p className="text-sm text-[#272727]/75 mt-2">
+            {programaEstado === 'pendiente' ? programaTexts.optInPending : programaEstado === 'ya' ? programaTexts.optInYa : programaTexts.optInDone}
+          </p>
+        )}
       </div>
     )
   }
@@ -463,7 +468,7 @@ function LeadCapture({
       })
       if (res.ok) {
         const j = await res.json().catch(() => null)
-        if (j?.programa === 'inscrita' || j?.programa === 'ya') setInscrita(true)
+        if (j?.programa === 'pendiente' || j?.programa === 'confirmada' || j?.programa === 'ya') setProgramaEstado(j.programa)
       }
       setStatus(res.ok ? 'done' : 'error')
       if (res.ok) trackEvent('generate_lead', { tool: 'inventario', consent })

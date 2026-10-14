@@ -20,13 +20,20 @@ export function invUuid(value: unknown): string | null {
   return typeof value === 'string' && UUID_RE.test(value) ? value : null
 }
 
-// user_id desde la sesión (cookie), nunca desde el body: null = anónimo.
-export async function sessionUserId(): Promise<string | null> {
+// Usuario desde la sesión (cookie), nunca desde el body: null = anónimo.
+// El email solo cuenta como verificado si Supabase lo ha confirmado.
+export async function sessionUser(): Promise<{ id: string; verifiedEmail: string | null } | null> {
   try {
     const supabase = createClient()
     const { data } = await supabase.auth.getUser()
-    return data.user?.id ?? null
+    const u = data.user
+    if (!u) return null
+    return { id: u.id, verifiedEmail: u.email && u.email_confirmed_at ? u.email.toLowerCase() : null }
   } catch {
     return null
   }
+}
+
+export async function sessionUserId(): Promise<string | null> {
+  return (await sessionUser())?.id ?? null
 }

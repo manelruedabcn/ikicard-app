@@ -41,7 +41,15 @@ export interface ProgramaContext {
 interface ProgramaTexts {
   name: string
   optIn: string
+  // Tras pedir el programa: falta confirmar con el botón del correo.
+  optInPending: string
   optInDone: string
+  // Ya tenía una inscripción activa con este correo.
+  optInYa: string
+  // Bloque «Confirma tu plaza» dentro del correo de la devolución.
+  confirmar: { title: string; text: string; button: string; note: string }
+  // Página que se abre al pulsar «Confirmar mi plaza».
+  confirmarPage: { checking: string; confirmada: (start: string) => string; ya: string; invalid: string; error: string }
   dateLocale: string
   q: [string, string]
   book: string
@@ -82,6 +90,21 @@ const ES: ProgramaTexts = {
   name: 'Un mes conociendo tu ikigai',
   optIn: 'Quiero hacer gratis «Un mes conociendo tu ikigai»: un correo cada lunes durante cuatro semanas, con un ejercicio del libro, encuentros en grupo opcionales y, al final, una propuesta para seguir. Puedo darme de baja cuando quiera.',
   optInDone: 'Te has apuntado a «Un mes conociendo tu ikigai». Te he escrito con la fecha de inicio.',
+  optInPending: 'Falta un paso: en el correo que te acabo de enviar, arriba del todo, pulsa «Confirmar mi plaza». Sin eso no empieza el programa.',
+  optInYa: 'Ya estás dentro de «Un mes conociendo tu ikigai» con este correo.',
+  confirmar: {
+    title: 'Confirma tu plaza',
+    text: 'Has pedido hacer «Un mes conociendo tu ikigai». Para empezar, confirma que este correo es tuyo. El programa arranca el lunes siguiente a confirmar.',
+    button: 'CONFIRMAR MI PLAZA',
+    note: 'Si no lo has pedido tú, ignóralo: sin confirmar no recibirás nada más.',
+  },
+  confirmarPage: {
+    checking: 'Confirmando…',
+    confirmada: start => `Hecho. Empiezas el lunes ${start}. Te acabo de escribir con lo que viene.`,
+    ya: 'Ya estabas dentro del programa. El correo de cada lunes te llega a esta misma dirección.',
+    invalid: 'Este enlace no es válido o ya no está activo.',
+    error: 'No se ha podido confirmar ahora. Vuelve a pulsar el botón del correo en unos minutos.',
+  },
   dateLocale: 'es-ES',
   q: ['«', '»'],
   book: 'El Ikigai que no te contaron',
@@ -238,6 +261,21 @@ const CA: ProgramaTexts = {
   name: 'Un mes coneixent el teu ikigai',
   optIn: 'Vull fer gratis «Un mes coneixent el teu ikigai»: un correu cada dilluns durant quatre setmanes, amb un exercici del llibre, trobades en grup opcionals i, al final, una proposta per continuar. Em puc donar de baixa quan vulgui.',
   optInDone: 'T’has apuntat a «Un mes coneixent el teu ikigai». T’he escrit amb la data d’inici.',
+  optInPending: 'Falta un pas: al correu que t’acabo d’enviar, a dalt de tot, prem «Confirmar la meva plaça». Sense això el programa no comença.',
+  optInYa: 'Ja ets dins de «Un mes coneixent el teu ikigai» amb aquest correu.',
+  confirmar: {
+    title: 'Confirma la teva plaça',
+    text: 'Has demanat fer «Un mes coneixent el teu ikigai». Per començar, confirma que aquest correu és teu. El programa arrenca el dilluns següent a confirmar.',
+    button: 'CONFIRMAR LA MEVA PLAÇA',
+    note: 'Si no ho has demanat tu, ignora-ho: sense confirmar no rebràs res més.',
+  },
+  confirmarPage: {
+    checking: 'Confirmant…',
+    confirmada: start => `Fet. Comences el dilluns ${start}. T’acabo d’escriure amb el que ve.`,
+    ya: 'Ja eres dins del programa. El correu de cada dilluns t’arriba a aquesta mateixa adreça.',
+    invalid: 'Aquest enllaç no és vàlid o ja no està actiu.',
+    error: 'No s’ha pogut confirmar ara. Torna a prémer el botó del correu d’aquí a uns minuts.',
+  },
   dateLocale: 'ca-ES',
   q: ['«', '»'],
   book: 'El Ikigai que no te contaron',
@@ -394,6 +432,21 @@ const EN: ProgramaTexts = {
   name: 'A month getting to know your ikigai',
   optIn: 'I want to do “A month getting to know your ikigai” for free: an email every Monday for four weeks, with an exercise from the book, optional group meetings and, at the end, a proposal to keep going. I can unsubscribe at any time.',
   optInDone: 'You have signed up for “A month getting to know your ikigai”. I have emailed you the start date.',
+  optInPending: 'One more step: in the email I have just sent you, at the very top, press “Confirm my place”. The programme doesn’t start without it.',
+  optInYa: 'You are already in “A month getting to know your ikigai” with this email.',
+  confirmar: {
+    title: 'Confirm your place',
+    text: 'You asked to do “A month getting to know your ikigai”. To start, confirm that this email is yours. The programme begins on the Monday after you confirm.',
+    button: 'CONFIRM MY PLACE',
+    note: 'If this wasn’t you, ignore it: without confirming you won’t receive anything else.',
+  },
+  confirmarPage: {
+    checking: 'Confirming…',
+    confirmada: start => `Done. You start on Monday ${start}. I have just emailed you what comes next.`,
+    ya: 'You were already in the programme. The Monday email reaches you at this same address.',
+    invalid: 'This link isn’t valid or is no longer active.',
+    error: 'It couldn’t be confirmed right now. Press the button in the email again in a few minutes.',
+  },
   dateLocale: 'en-GB',
   q: ['“', '”'],
   book: 'El Ikigai que no te contaron',

@@ -2,11 +2,12 @@ import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { cleanTexto, parseInvAnswers } from '@/lib/inventario'
 import { buildDevolucion } from '@/lib/inventario-content'
-import { invLocale, invSource, invUuid, sessionUserId } from '@/lib/inventario-server'
+import { invLocale, invSource, invUuid, sessionUser } from '@/lib/inventario-server'
 import { sendInventarioEmail } from '@/lib/email'
 import { unsubUrl } from '@/lib/notify'
 import { syncCrmContact } from '@/lib/crm-sync'
-import { inscribirEnPrograma } from '@/lib/programa-server'
+import { confirmarInscripcion, confirmarUrl, prepararInscripcion } from '@/lib/programa-server'
+import { getProgramaTexts } from '@/lib/programa-content'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,7 +36,8 @@ export async function POST(req: Request) {
   }
   if (!answers) return NextResponse.json({ ok: false, error: 'bad answers' }, { status: 400 })
 
-  const userId = await sessionUserId()
+  const user = await sessionUser()
+  const userId = user?.id ?? null
   const admin = createAdminClient()
   const now = new Date().toISOString()
 
@@ -90,35 +92,44 @@ export async function POST(req: Request) {
     unsubscribedAt: lead.unsubscribed_at,
   }).catch(err => console.error('[inventario lead] crm sync error:', err))
 
+  // Programa «Un mes conociendo tu ikigai» (casilla propia, no depende del
+  // consentimiento de marketing). Doble confirmación: queda pendiente y el
+  // correo de la devolución lleva el botón «Confirmar mi plaza». Si la
+  // persona tiene sesión con este mismo correo ya verificado, entra directa.
+  // Si algo falla aquí, la devolución se envía igual.
+  let programaEstado: 'pendiente' | 'confirmada' | 'ya' | 'error' | null = null
+  let programaConfirm: { url: string; texts: ReturnType<typeof getProgramaTexts>['confirmar'] } | null = null
+  let autoConfirmToken: string | null = null
+  if (programa) {
+    try {
+      const { inscripcion, estado } = await prepararInscripcion({ email, locale, leadId: lead.id, userId, attemptId, answers })
+      programaEstado = estado
+      if (estado === 'pendiente') {
+        if (user?.verifiedEmail === email) autoConfirmToken = inscripcion.token
+        else programaConfirm = { url: confirmarUrl(inscripcion), texts: getProgramaTexts(locale).confirmar }
+      }
+    } catch (err) {
+      console.error('[inventario lead] programa error:', err)
+      programaEstado = 'error'
+    }
+  }
+
   // Envío transaccional: confirmamos éxito solo cuando Resend acepta el correo.
   const devolucion = buildDevolucion(answers, texto, locale)
   const unsub = finalConsent && !lead.unsubscribed_at ? unsubUrl(`inv:${lead.id}`, locale) : null
   try {
-    await sendInventarioEmail(email, locale, devolucion, unsub)
+    await sendInventarioEmail(email, locale, devolucion, unsub, programaConfirm)
   } catch (err) {
     console.error('[inventario lead] email error:', err)
     return NextResponse.json({ ok: false, error: 'email failed' }, { status: 502 })
   }
 
-  // El programa es un servicio que la persona pide (casilla propia): la
-  // inscripción no depende del consentimiento de marketing. Si falla, la
-  // devolución ya está enviada; lo indicamos sin romper la respuesta.
-  let programaEstado: 'inscrita' | 'ya' | 'error' | null = null
-  if (programa) {
+  if (autoConfirmToken) {
     try {
-      const { inscripcion, nueva } = await inscribirEnPrograma({ email, locale, leadId: lead.id, userId, attemptId, answers })
-      programaEstado = nueva ? 'inscrita' : 'ya'
-      await syncCrmContact({
-        userId,
-        email,
-        sourceType: 'programa',
-        sourceId: inscripcion.id,
-        sourceDetail: { start_date: inscripcion.start_date, locale },
-        marketingConsent: consent,
-        unsubscribedAt: lead.unsubscribed_at,
-      }).catch(err => console.error('[inventario lead] crm programa error:', err))
+      const { estado } = await confirmarInscripcion(autoConfirmToken)
+      programaEstado = estado === 'invalid' ? 'error' : estado
     } catch (err) {
-      console.error('[inventario lead] programa error:', err)
+      console.error('[inventario lead] programa confirm error:', err)
       programaEstado = 'error'
     }
   }

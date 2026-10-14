@@ -448,6 +448,8 @@ export async function sendInventarioEmail(
   locale: string,
   d: InvDevolucion,
   unsubLink: string | null,
+  // Pidió el programa de un mes: el correo abre con «Confirma tu plaza».
+  programa: { url: string; texts: { title: string; text: string; button: string; note: string } } | null = null,
 ) {
   const copy = getInvCopy(locale)
   const p = (text: string, extra = '') =>
@@ -470,7 +472,17 @@ export async function sendInventarioEmail(
       + (d.attention.main.note ? p(d.attention.main.note) : '')
       + (d.attention.also ? p(d.attention.also, 'font-size:14px;color:#8b8179;') : '')
 
+  const confirmar = programa
+    ? `<div style="border:1px solid #c2866b;padding:22px 20px 6px;margin:0 0 32px;text-align:center;">
+        <p style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#c2866b;margin:0 0 10px;">${escapeHtml(programa.texts.title)}</p>
+        ${p(programa.texts.text, 'text-align:center;')}
+        ${button(programa.url, escapeHtml(programa.texts.button))}
+        ${p(programa.texts.note, 'font-size:13px;color:#8b8179;text-align:center;')}
+      </div>`
+    : ''
+
   const html = shell(`
+    ${confirmar}
     <h1 style="font-size:26px;font-weight:normal;text-align:center;margin:0 0 12px;">${escapeHtml(copy.resultTitle)}</h1>
     ${p(copy.resultIntro, 'text-align:center;')}
     ${h2(`${copy.activoTitle} · ${copy.activoSub}`)}${list(d.activo)}

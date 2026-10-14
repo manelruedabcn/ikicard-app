@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { verifyCronSecret } from '@/lib/secrets'
 import { addDays, encuentroEnVentana, madridParts, PROGRAMA_SEND_HOUR, semanalesPendientes } from '@/lib/programa'
-import { enviarAvisoEncuentro, enviarSemanal, INSCRIPCION_COLS, type Inscripcion } from '@/lib/programa-server'
+import { enviarAvisoEncuentro, enviarBienvenida, enviarSemanal, INSCRIPCION_COLS, type Inscripcion } from '@/lib/programa-server'
 
 export const dynamic = 'force-dynamic'
 
@@ -48,6 +48,14 @@ export async function POST(req: NextRequest) {
 
   // 1. Correos semanales
   for (const insc of inscripciones) {
+    // Bienvenida que falló al confirmar: se reintenta hasta su primer lunes.
+    if (!enviados.get(insc.id)?.has('bienvenida') && insc.start_date >= today) {
+      try {
+        if (await enviarBienvenida(insc)) semanales++
+      } catch (e) {
+        console.error('[programa cron] bienvenida', insc.id, e)
+      }
+    }
     if (insc.start_date > today) continue
     const pendientes = semanalesPendientes(insc.start_date, today, enviados.get(insc.id) || new Set())
     if (!pendientes.length) continue

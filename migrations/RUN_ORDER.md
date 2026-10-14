@@ -37,6 +37,10 @@ veces sin romper nada).
    `programa_encuentros`. Tampoco necesita permisos. Los encuentros se dan de
    alta a mano en `programa_encuentros` (ver `docs/programa.md`).
 
+   `programa-confirmacion.sql` va **después** de `programa.sql`: añade el
+   estado «pendiente» y `confirmed_at` (doble confirmación: la persona entra
+   al pulsar «Confirmar mi plaza» en el correo de su devolución).
+
 ## Parte B — Conceder acceso a IKIBOARD
 
 Con las tablas creadas, la app sigue redirigiendo al dashboard a quien no tenga la

@@ -30,6 +30,7 @@ export interface ProgramaResumen {
   inventarios: { total: number; semana: number }
   leads: number
   activas: number
+  pendientes: number
   completadas: number
   bajas: number
   repitieron: number
@@ -83,6 +84,7 @@ export async function getProgramaResumen(): Promise<ProgramaResumen> {
     inventarios: { total: totalInv.count || 0, semana: semanaInv.count || 0 },
     leads: leads.count || 0,
     activas: filas.filter(f => f.status === 'activa').length,
+    pendientes: filas.filter(f => f.status === 'pendiente').length,
     completadas: filas.filter(f => f.status === 'completada').length,
     bajas: filas.filter(f => f.status === 'baja').length,
     repitieron: filas.filter(f => f.repitio).length,
