@@ -1,5 +1,6 @@
 import 'server-only'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { sendTelegram } from '@/lib/telegram'
 
 type SyncInput = {
   userId?: string | null
@@ -53,6 +54,17 @@ export async function syncCrmContact(input: SyncInput) {
   if (contactResult.error || !contactResult.data) throw contactResult.error ?? new Error('CRM contact not saved')
   const contactId = contactResult.data.id
 
+  // ¿Es una puerta nueva para este contacto? (contacto nuevo, o uno conocido
+  // que entra por otro sitio: p. ej. hizo PASO y ahora el Inventario). Se
+  // mira ANTES del upsert para avisar una sola vez por contacto y origen.
+  const { data: prevSource } = await admin
+    .from('crm_contact_sources')
+    .select('contact_id')
+    .eq('contact_id', contactId)
+    .eq('source_type', input.sourceType)
+    .limit(1)
+    .maybeSingle()
+
   await admin.from('crm_contact_sources').upsert({
     contact_id: contactId,
     source_type: input.sourceType,
@@ -74,4 +86,59 @@ export async function syncCrmContact(input: SyncInput) {
       { onConflict: 'contact_id,tag_id' },
     )
   }
+
+  if (!prevSource && shouldNotify(input)) {
+    await sendTelegram(formatNotice({
+      contactId,
+      isNewContact: !existing,
+      sourceType: input.sourceType,
+      name: payload.first_name,
+      email: payload.email,
+      phone: payload.phone,
+      marketing: payload.marketing_consent,
+    }))
+  }
+}
+
+const SOURCE_LABEL: Record<SyncInput['sourceType'], string> = {
+  registro: 'Registro en la plataforma',
+  paso: 'Test PASO',
+  taller: 'Inscripción al taller',
+  inventario: 'Inventario honesto',
+  programa: 'Un mes conociendo tu ikigai',
+}
+
+// Los registros ya avisan desde su propio webhook (api/hooks/new-user), y las
+// cargas de datos antiguos (sourceCreatedAt de hace más de un día) no son
+// novedad: así no se duplica ni se inunda Telegram.
+function shouldNotify(input: SyncInput): boolean {
+  if (input.sourceType === 'registro') return false
+  if (input.sourceCreatedAt) {
+    const age = Date.now() - new Date(input.sourceCreatedAt).getTime()
+    if (age > 24 * 60 * 60 * 1000) return false
+  }
+  return true
+}
+
+function formatNotice(n: {
+  contactId: string
+  isNewContact: boolean
+  sourceType: SyncInput['sourceType']
+  name: string
+  email: string | null
+  phone: string | null
+  marketing: boolean
+}): string {
+  return [
+    n.isNewContact
+      ? `🆕 Nuevo contacto · ${SOURCE_LABEL[n.sourceType]}`
+      : `🔁 Contacto que vuelve · ${SOURCE_LABEL[n.sourceType]}`,
+    '',
+    `👤 ${n.name || 'Sin nombre'}`,
+    n.email ? `✉️ ${n.email}` : null,
+    n.phone ? `📱 ${n.phone}` : null,
+    `Acepta comunicaciones: ${n.marketing ? 'sí' : 'no'}`,
+    '',
+    `Ficha: https://app.ikigaier.com/es/admin/crm/${n.contactId}`,
+  ].filter(l => l !== null).join('\n')
 }
