@@ -35,7 +35,7 @@ export default async function ProgramaAdminPage({ params: { locale } }: { params
         <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <Stat value={r.inventarios.total} label="Tests de ikigai hechos" sub={`${r.inventarios.semana} en los últimos 7 días`} />
           <Stat value={r.leads} label="Han dejado su email" />
-          <Stat value={r.activas} label="En el programa ahora" sub={`${r.pendientes} sin confirmar su plaza · ${r.porPagina} entraron por la página`} highlight />
+          <Stat value={r.activas} label="En el programa ahora" sub={`${r.esperandoTest} pendientes del test · ${r.pendientes} sin confirmar su plaza · ${r.porPagina} entraron por la página`} highlight />
           <Stat value={r.completadas} label="Han terminado" sub={`${r.repitieron} repitieron el test · ${r.bajas} bajas`} />
         </section>
 
@@ -68,6 +68,7 @@ export default async function ProgramaAdminPage({ params: { locale } }: { params
 
         <section>
           <h2 className="mb-4 font-[family-name:var(--font-cormorant)] text-2xl text-[#272727]">Personas</h2>
+          <p className="mb-3 text-xs text-[#272727]/55">Los envíos registrados fueron aceptados por el proveedor. No son confirmaciones de entrega ni de apertura. Las reservas de envío no se cuentan.</p>
           <div className="overflow-x-auto rounded-xl border border-[#272727]/15 bg-white">
             <table className="w-full text-sm">
               <thead className="bg-[#272727] text-left text-[#FDFBF7]">
@@ -78,11 +79,12 @@ export default async function ProgramaAdminPage({ params: { locale } }: { params
                   <th className="px-4 py-3 font-medium">Va por</th>
                   {[1, 2, 3, 4].map(s => <th key={s} className="px-3 py-3 font-medium">Jueves {s}</th>)}
                   <th className="px-4 py-3 font-medium">Repitió</th>
+                  <th className="px-4 py-3 font-medium">Envíos registrados</th>
                 </tr>
               </thead>
               <tbody>
                 {r.filas.length === 0 ? (
-                  <tr><td colSpan={9} className="px-4 py-6 text-center text-[#272727]/45">Todavía no hay nadie en el programa.</td></tr>
+                  <tr><td colSpan={10} className="px-4 py-6 text-center text-[#272727]/45">Todavía no hay nadie en el programa.</td></tr>
                 ) : r.filas.map(f => (
                   <tr key={f.id} className="border-t border-[#272727]/10">
                     <td className="px-4 py-3">
@@ -90,11 +92,12 @@ export default async function ProgramaAdminPage({ params: { locale } }: { params
                       <span className="block text-[11px] text-[#272727]/45">{f.origen === 'programa' ? 'Página del programa' : 'Test'}</span>
                     </td>
                     <td className="px-4 py-3 uppercase text-[#272727]/60">{f.locale}</td>
-                    <td className="px-4 py-3 text-[#272727]/60">{fecha(f.start_date)}</td>
+                    <td className="px-4 py-3 text-[#272727]/60">{f.esperandoTest ? 'Tras el test' : fecha(f.start_date)}</td>
                     <td className="px-4 py-3">
                       {f.status === 'pendiente' ? <span className="text-[#272727]/45">Sin confirmar</span>
                         : f.status === 'baja' ? <span className="text-[#272727]/45">Baja</span>
                         : f.status === 'completada' ? <span className="text-[#4f5d47]">Terminado</span>
+                        : f.esperandoTest ? <span className="text-[#272727]/45">Pendiente del test</span>
                         : f.semana === 0 ? <span className="text-[#272727]/45">Aún no empieza</span>
                         : f.semana >= 5 ? 'Cierre' : `Semana ${f.semana}`}
                     </td>
@@ -104,6 +107,7 @@ export default async function ProgramaAdminPage({ params: { locale } }: { params
                       </td>
                     ))}
                     <td className="px-4 py-3">{f.repitio ? 'Sí' : <span className="text-[#272727]/25">—</span>}</td>
+                    <td className="px-4 py-3">{f.envios}{f.ultimoEnvio && <span className="block text-[11px] text-[#272727]/45">Último: {fechaHora(f.ultimoEnvio)}</span>}</td>
                   </tr>
                 ))}
               </tbody>

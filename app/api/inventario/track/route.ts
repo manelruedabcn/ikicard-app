@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { buildLectura, parseInvAnswers } from '@/lib/inventario'
 import { invLocale, invSource, invUuid, sessionUserId } from '@/lib/inventario-server'
-import { inscripcionPorToken } from '@/lib/programa-server'
+import { inscripcionPorToken, enviarSemanal } from '@/lib/programa-server'
 import { daysBetween, madridParts } from '@/lib/programa'
 
 export const dynamic = 'force-dynamic'
@@ -57,10 +57,24 @@ export async function POST(req: Request) {
       }
       const first = parseInvAnswers(insc.first_answers)
       if (!first) {
-        await admin
+        const { data: semana1, error: envioError } = await admin.from('programa_envios')
+          .select('mensaje').eq('inscripcion_id', insc.id).eq('mensaje', 'semana1').maybeSingle()
+        if (envioError) return NextResponse.json({ ok: false }, { status: 500 })
+        // Solo se fija un calendario nuevo si la persona todavía no lo había
+        // empezado. Las inscripciones antiguas conservan sus fechas y envíos.
+        const inicio = semana1 ? {} : { start_date: madridParts().date }
+        const { data: actualizada, error: inicioError } = await admin
           .from('programa_inscripciones')
-          .update({ first_attempt_id: data.id, first_answers: answers, first_exercise: lectura.exercise })
+          .update({ first_attempt_id: data.id, first_answers: answers, first_exercise: lectura.exercise, ...inicio })
           .eq('id', insc.id)
+          .is('first_answers', null)
+          .select('id')
+          .maybeSingle()
+        if (inicioError) return NextResponse.json({ ok: false }, { status: 500 })
+        if (actualizada && insc.status === 'activa') {
+          await enviarSemanal({ ...insc, ...inicio, first_attempt_id: data.id, first_answers: answers, first_exercise: lectura.exercise }, 'semana1')
+            .catch(err => console.error('[programa] semana1 error:', err))
+        }
         return NextResponse.json({ ok: true, id: data.id, programa: true, inicio: true })
       }
       const semana4 = daysBetween(insc.start_date, madridParts().date) >= 21

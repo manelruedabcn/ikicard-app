@@ -1,7 +1,8 @@
 # «Un mes conociendo tu ikigai» — programa gratuito de 4 semanas
 
-Continuación del [Inventario honesto](inventario.md). Quien recibe su devolución
-por email puede marcar una casilla aparte para apuntarse. Es la herramienta de
+Continuación del [Inventario honesto](inventario.md). Se entra con cuenta desde
+la página del programa o al terminar el test. El flujo anterior por correo
+se conserva para las inscripciones antiguas. Es la herramienta de
 conversión del embudo: quien llega al final ha trabajado un mes y conoce a Manel.
 
 ## Cómo funciona
@@ -13,7 +14,8 @@ conversión del embudo: quien llega al final ha trabajado un mes y conoce a Mane
   vuelve. Con sesión, `inscribirConCuenta()` crea la inscripción **activa**
   directamente (la cuenta ya verifica el correo: no hace falta «Confirmar mi
   plaza»), da la herramienta **«programa»** en el panel (`entitlements`) y
-  envía la bienvenida. Si viene del test, ese intento es su punto de partida y
+  envía la bienvenida. Sin test, el calendario espera y se envía un único
+  recordatorio cuando han pasado 48 horas desde la confirmación. Si viene del test, ese intento es su punto de partida y
   su devolución se le envía al correo.
 - **El panel del programa (`/[locale]/mes`)**: calendario de las cuatro
   semanas (cada correo se abre el día que sale), el mismo contenido de los
@@ -27,7 +29,9 @@ conversión del embudo: quien llega al final ha trabajado un mes y conoce a Mane
 - El flujo anterior solo por correo (`/api/programa/inscribir`, botón
   «Confirmar mi plaza») sigue funcionando para quien ya se apuntó así, pero
   ninguna página lo usa ya.
-- **Dos entradas al mismo programa** (columna `origen`):
+- **Flujo anterior por correo** (solo para inscripciones antiguas).
+  Las dos entradas siguientes describen ese flujo; las páginas actuales usan cuenta.
+  **Dos entradas al mismo programa** (columna `origen`):
   - **Test** (`origen = test`): al acabar el test, el recuadro final presenta
     el programa como siguiente paso. «Empezar el mes gratis» lo pide; «Solo
     envíame esta devolución», no.
@@ -46,13 +50,24 @@ conversión del embudo: quien llega al final ha trabajado un mes y conoce a Mane
   Quien no lo pulsa recibe su devolución y nada más. Si tiene sesión en la
   app con ese mismo correo ya verificado, entra directamente. Repetir el test
   antes de confirmar actualiza la misma pendiente (mismo enlace).
-- **Inicio:** el mes de cada persona empieza **el mismo día en que entra** (fecha
-  de Madrid): la semana 1 se abre al momento, la 2 a los 7 días, la 3 a los 14,
-  la 4 a los 21 y el cierre a los 28. Los textos no nombran días de la semana
-  («al empezar cada semana», «a mitad de semana»). Recibe al momento un correo de bienvenida con esa fecha; si ese
-  envío falla, la tarea programada lo reintenta cada hora ese mismo día.
-- **Correos** (a las 8:00 de Madrid, desde `/api/cron/programa`, que GitHub
-  Actions llama cada hora: `.github/workflows/programa.yml`):
+- **Inicio:** para las nuevas inscripciones las cuatro semanas empiezan al
+  terminar el test inicial (fecha de Madrid). Si ya lo hizo al apuntarse,
+  empiezan al confirmar la inscripción. Semana 1 se envía al momento; si
+  falla, la tarea programada la recupera. Semanas 2, 3 y 4 a los 7, 14 y 21
+  días del inicio, y cierre el día 28. El panel espera al test y no muestra
+  fechas provisionales como si las semanas ya hubieran empezado.
+- **Compatibilidad:** quien ya recibió `semana1` conserva su calendario,
+  aunque todavía no tenga el test. No se borran envíos ni se reinician sus
+  fechas. Completar el primer test más tarde solo fija un inicio nuevo si
+  aún no se había enviado esa primera semana.
+- **Correos:** bienvenida + cuatro semanales + cuatro de mitad de semana +
+  cierre = diez. Además, un recordatorio si falta el test a las 48 horas y
+  los avisos de encuentros que correspondan. La bienvenida y la primera
+  semana se intentan al confirmar/terminar el test. Los restantes salen
+  **a partir de las 8:00 de Madrid**, en la siguiente ejecución disponible
+  de GitHub Actions (cada hora). No se promete una hora exacta de entrega.
+- **Servicio de envío:** Resend, remitente `IKIGAIER <hola@ikigaier.com>`.
+  Es distinto del SMTP de Brevo configurado en Gmail para el correo manual.
 
 Cuatro semanas con nombre humano. Por debajo siguen las cuatro fases del
 sistema (Despertar · Descender · Atravesar · Retornar) y sus umbrales del
@@ -64,7 +79,7 @@ frena es tuyo».
 
 | Día | Correo | Contenido | Fuente |
 |---|---|---|---|
-| 0 (el día que entra) | Semana 1 · Lo que ya hay | Ejercicio de su test + frase ancla del primer día + el método VOLver (20 s, tres veces al día, todo el mes) | Su devolución · IKIGAI cap. 5 · cita NOTODO cap. 1 |
+| 0 (al terminar el test) | Semana 1 · Lo que ya hay | Ejercicio de su test + frase ancla del primer día + el método VOLver (20 s, tres veces al día, todo el mes) | Su devolución · IKIGAI cap. 5 · cita NOTODO cap. 1 |
 | 3 (mitad de semana) | Jueves 1 | ¿Qué has notado que no esperabas? + «¿lo has hecho?» | — |
 | 7 | Semana 2 · Lo que hay debajo | Umbral «Lo que más temo encontrar aquí es…» · La autopsia amable (frase madre) · Encontrar la voz (de quién, qué edad) | NOTODO caps. 2 y 7 |
 | 10 | Jueves 2 | Las tres preguntas (de quién es la voz, qué protegía, si protege hoy algo en peligro) + frase de cierre | NOTODO cap. 10 |
@@ -118,9 +133,15 @@ el servidor.
 - `programa_inscripciones`: una por persona y edición; una sola **activa** por
   email. Guarda las respuestas y el ejercicio con los que entró, el token del
   enlace de la semana 4 y los intentos inicial y final.
-- `programa_envios`: cada correo enviado (clave inscripción + mensaje). Evita
-  duplicados aunque la tarea se ejecute cada hora; si un envío falla, se
-  libera y se reintenta en la siguiente ejecución.
+- `programa_envios`: aceptación del proveedor por inscripción + mensaje.
+  Las filas `reserva:<mensaje>` son reservas temporales, no correos enviados;
+  caducan tras 15 minutos y no se cuentan en administración. Tras aceptar
+  Resend, se registra la fila definitiva. Se usa también una clave estable
+  de idempotencia de Resend para reintentos inmediatos. No equivale a una
+  garantía de entrega ni de apertura: para eso se consulta el proveedor.
+  Su protección de idempotencia tiene una ventana limitada; una caída larga
+  entre aceptación y registro necesita contrastarse con los registros de
+  Resend antes de reenviar manualmente.
 - `programa_encuentros`: los encuentros, que da de alta Manel.
 - `programa_checkins`: la respuesta de un clic de cada jueves (semana 1-4).
 
@@ -155,3 +176,26 @@ traducciones al catalán y al inglés.
   jueves y si repitió el test.
 - Los encuentros en grupo: alta (fecha y hora de Madrid, enlace, lengua, nota
   interna) y borrado, sin entrar en Supabase.
+
+## Correcciones y verificación · 17/11/2026
+
+- Bienvenida fallida: ya se reintenta después del día de alta.
+- Un fallo al leer el historial de envíos detiene la ejecución: no se supone
+  que todo está pendiente. Los errores de envío hacen fallar la tarea para
+  que queden visibles en GitHub Actions.
+- Si el cierre llegó a registrarse pero falló completar la inscripción,
+  la siguiente ejecución recupera el estado sin volver a enviar el cierre.
+  Una reserva ajena no se interpreta como un cierre enviado.
+- Administración muestra personas pendientes del test, número de envíos
+  registrados y fecha del último. No presenta esos datos como aperturas.
+- La web enlaza directamente al registro del programa; la entrada de la app
+  no se indexa. La promesa ES/CA/EN es de dos correos semanales más bienvenida
+  y cierre. El curso solo se ofrece en los correos si tiene URL configurada.
+- Pruebas sin destinatarios reales: `npm test`. Cubren calendario, espera,
+  48 horas y cambio horario, compatibilidad con inscripciones anteriores,
+  reservas y reintentos, primera semana, semana 4, cierre y errores.
+- Verificación de compilación y tipos: `npm run build`.
+
+No se han cambiado DNS, SMTP, claves ni tablas de Supabase. El seguimiento
+individual de entregas, rebotes, aperturas y clics sigue correspondiendo a
+Resend; no se ha activado seguimiento adicional de personas.

@@ -109,3 +109,15 @@ export const PROGRAMA_LIBRETA: Record<ProgramaSemanal, ProgramaCampo[]> = {
 
 export const PROGRAMA_CAMPOS: ProgramaCampo[] = Object.values(PROGRAMA_LIBRETA).flat()
 export const PROGRAMA_TEXTO_MAX = 2000
+
+// Quien ya recibió la semana 1 conserva su calendario anterior. Las nuevas
+// inscripciones esperan al test: no consumen semanas mientras lo preparan.
+export function esperaTest(firstAnswers: unknown, enviados: Set<string>): boolean {
+  return !firstAnswers && !enviados.has('semana1')
+}
+
+export function recordatorioTestPendiente(confirmedAt: string | null, enviados: Set<string>, now = Date.now()): boolean {
+  if (!confirmedAt || enviados.has('recordatorio_test')) return false
+  const confirmed = Date.parse(confirmedAt)
+  return Number.isFinite(confirmed) && now - confirmed >= 48 * 60 * 60 * 1000
+}

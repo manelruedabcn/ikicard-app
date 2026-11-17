@@ -12,6 +12,7 @@ import ProgramaClient from './ProgramaClient'
 export function generateMetadata({ params: { locale } }: { params: { locale: string } }): Metadata {
   const t = getProgramaTexts(locale).landing
   return {
+    robots: { index: false },
     title: t.metaTitle,
     description: t.metaDescription,
     alternates: {

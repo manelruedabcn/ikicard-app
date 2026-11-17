@@ -21,6 +21,7 @@ interface PanelItem { key: ProgramaSemanal; date: string; abierto: boolean; mail
 interface Panel {
   inscripcionId: string
   startDate: string
+  esperandoTest: boolean
   tieneTest: boolean
   testUrl: string
   items: PanelItem[]
@@ -62,7 +63,7 @@ function Programa({ locale, userId, panel }: { locale: string; userId: string; p
   const semanaActual = ultimo === 'cierre' ? 5 : ultimo ? Number(/\d/.exec(ultimo)?.[0]) : 0
   const [tab, setTab] = useState<Tab>(semanaActual >= 1 && semanaActual <= 4 ? (semanaActual as Tab) : semanaActual === 5 ? 'cierre' : 1)
 
-  const estado = semanaActual === 0
+  const estado = panel.esperandoTest ? p.testButton : semanaActual === 0
     ? p.startsOn(formatProgramaDate(locale, panel.startDate))
     : semanaActual === 5 ? p.finished : p.weekOf(semanaActual)
 
@@ -86,6 +87,7 @@ function Programa({ locale, userId, panel }: { locale: string; userId: string; p
         </section>
       )}
 
+      {!panel.esperandoTest && <>
       <nav className="flex flex-wrap gap-2 mb-10" aria-label={p.title}>
         {tabs.map(x => (
           <button
@@ -114,6 +116,7 @@ function Programa({ locale, userId, panel }: { locale: string; userId: string; p
             checkin={{ semana: tab as number, inicial: panel.checkins[tab as number] ?? null }} />
         </div>
       )}
+      </>}
     </Shell>
   )
 }
