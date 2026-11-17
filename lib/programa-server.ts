@@ -5,7 +5,7 @@ import { sendInventarioEmail, sendProgramaEmail } from '@/lib/email'
 import { syncCrmContact } from '@/lib/crm-sync'
 import { buildDevolucion, getInvExercise } from '@/lib/inventario-content'
 import { buildLectura, parseInvAnswers, type ExerciseKey, type InvAnswers } from '@/lib/inventario'
-import { addDays, encuentroEnVentana, madridParts, PROGRAMA_CALENDARIO, PROGRAMA_CHECKINS, semanaDeJueves, type ProgramaCheckin } from '@/lib/programa'
+import { addDays, encuentroEnVentana, madridParts, PROGRAMA_CALENDARIO, PROGRAMA_CHECKINS, esperaTest, semanaDeJueves, type ProgramaCheckin } from '@/lib/programa'
 import {
   formatProgramaDate,
   formatProgramaDateTime,
@@ -27,6 +27,8 @@ export interface Inscripcion {
   locale: string
   start_date: string
   status: string
+  confirmed_at: string | null
+  created_at: string
   token: string
   lead_id: string | null
   first_attempt_id: string | null
@@ -35,7 +37,7 @@ export interface Inscripcion {
   user_id: string | null
 }
 
-const INSCRIPCION_COLS = 'id, email, locale, start_date, status, token, lead_id, first_attempt_id, first_answers, first_exercise, user_id'
+const INSCRIPCION_COLS = 'id, email, locale, start_date, status, token, lead_id, first_attempt_id, first_answers, first_exercise, user_id, confirmed_at, created_at'
 
 function lang(locale: string): 'es' | 'ca' | 'en' {
   return locale === 'en' ? 'en' : locale === 'ca' ? 'ca' : 'es'
@@ -109,25 +111,42 @@ async function contexto(insc: Inscripcion, semanaCheckin: number | null = null):
   }
 }
 
-// Envía un correo del programa UNA sola vez: primero reserva la fila en
-// programa_envios (clave primaria inscripción + mensaje); si ya existía, no
-// envía. Si el envío falla, libera la reserva para reintentar en la siguiente
-// ejecución.
+// Una reserva con caducidad evita que una ejecución interrumpida bloquee el
+// correo para siempre. La fila del mensaje solo se crea tras la aceptación
+// de Resend. Su clave de idempotencia protege también el reintento inmediato
+// si el proveedor aceptó el mensaje pero se perdió la respuesta.
 export async function enviarUnaVez(insc: Inscripcion, mensaje: string, mail: ProgramaMail): Promise<boolean> {
   const admin = createAdminClient()
-  const { data: reservado, error } = await admin
-    .from('programa_envios')
-    .upsert({ inscripcion_id: insc.id, mensaje }, { onConflict: 'inscripcion_id,mensaje', ignoreDuplicates: true })
+  const previo = await admin.from('programa_envios').select('mensaje')
+    .eq('inscripcion_id', insc.id).eq('mensaje', mensaje).maybeSingle()
+  if (previo.error) throw new Error(previo.error.message)
+  if (previo.data) return false
+
+  const reserva = `reserva:${mensaje}`
+  const vencimiento = new Date(Date.now() - 15 * 60_000).toISOString()
+  const limpiar = await admin.from('programa_envios').delete()
+    .eq('inscripcion_id', insc.id).eq('mensaje', reserva).lt('sent_at', vencimiento)
+  if (limpiar.error) throw new Error(limpiar.error.message)
+  const { data: reservado, error } = await admin.from('programa_envios')
+    .upsert({ inscripcion_id: insc.id, mensaje: reserva, sent_at: new Date().toISOString() }, { onConflict: 'inscripcion_id,mensaje', ignoreDuplicates: true })
     .select('mensaje')
   if (error) throw new Error(error.message)
   if (!reservado || reservado.length === 0) return false
 
   try {
-    await sendProgramaEmail(insc.email, insc.locale, mail, unsubUrl(`prog:${insc.id}`, insc.locale))
+    // Otra ejecución pudo terminar entre la primera lectura y la reserva.
+    const terminado = await admin.from('programa_envios').select('mensaje')
+      .eq('inscripcion_id', insc.id).eq('mensaje', mensaje).maybeSingle()
+    if (terminado.error) throw new Error(terminado.error.message)
+    if (terminado.data) return false
+    await sendProgramaEmail(insc.email, insc.locale, mail, unsubUrl(`prog:${insc.id}`, insc.locale), `programa/${insc.id}/${mensaje}`)
+    const guardado = await admin.from('programa_envios')
+      .upsert({ inscripcion_id: insc.id, mensaje, sent_at: new Date().toISOString() }, { onConflict: 'inscripcion_id,mensaje', ignoreDuplicates: true })
+    if (guardado.error) throw new Error(guardado.error.message)
     return true
-  } catch (err) {
-    await admin.from('programa_envios').delete().eq('inscripcion_id', insc.id).eq('mensaje', mensaje)
-    throw err
+  } finally {
+    const liberar = await admin.from('programa_envios').delete().eq('inscripcion_id', insc.id).eq('mensaje', reserva)
+    if (liberar.error) console.error('[programa] liberar reserva', insc.id, liberar.error.message)
   }
 }
 
@@ -251,6 +270,18 @@ export async function enviarBienvenida(insc: Inscripcion): Promise<boolean> {
   return enviarUnaVez(insc, 'bienvenida', conPanel(insc, mail))
 }
 
+export async function enviarRecordatorioTest(insc: Inscripcion): Promise<boolean> {
+  const t = getProgramaTexts(insc.locale)
+  return enviarUnaVez(insc, 'recordatorio_test', {
+    subject: t.recordatorioTest.subject,
+    blocks: [
+      { kind: 'p', text: t.recordatorioTest.text },
+      { kind: 'cta', href: links(insc).repetir, label: t.sinTest.button },
+      { kind: 'sign', text: 'Manel' },
+    ],
+  })
+}
+
 export function confirmarUrl(insc: Inscripcion): string {
   return `${APP_URL}/api/programa/confirmar?t=${insc.token}&l=${lang(insc.locale)}`
 }
@@ -313,8 +344,11 @@ export async function confirmarInscripcion(token: string): Promise<{ estado: Con
   const inscripcion = data as Inscripcion
 
   // Si la bienvenida falla, la persona ya está dentro: la tarea programada
-  // la reintenta cada hora hasta su primer lunes.
+  // la reintenta en la siguiente ejecución, también después del día de alta.
   await enviarBienvenida(inscripcion).catch(err => console.error('[programa] bienvenida error:', err))
+  if (inscripcion.first_answers) {
+    await enviarSemanal(inscripcion, 'semana1').catch(err => console.error('[programa] semana1 error:', err))
+  }
 
   // El consentimiento de marketing es el que dio (o no) al dejar su correo.
   let marketingConsent = false
@@ -416,19 +450,23 @@ export interface PanelItem {
   mail: ProgramaMail | null
 }
 
-export async function panelDelPrograma(insc: Inscripcion): Promise<{ items: PanelItem[]; today: string; checkins: Partial<Record<number, ProgramaCheckin>> }> {
+export async function panelDelPrograma(insc: Inscripcion): Promise<{ items: PanelItem[]; today: string; esperandoTest: boolean; checkins: Partial<Record<number, ProgramaCheckin>> }> {
   const t = getProgramaTexts(insc.locale)
   const today = madridParts().date
   const ctx = await contexto(insc, null)
+  const { data: envios, error: enviosError } = await createAdminClient().from('programa_envios')
+    .select('mensaje').eq('inscripcion_id', insc.id)
+  if (enviosError) throw new Error(enviosError.message)
+  const esperandoTest = esperaTest(insc.first_answers, new Set((envios || []).map(e => e.mensaje)))
   const items = PROGRAMA_CALENDARIO.map(({ key, day }) => {
     const date = addDays(insc.start_date, day)
-    const abierto = date <= today
+    const abierto = !esperandoTest && date <= today
     return { key, date, abierto, mail: abierto ? t.semanal[key](ctx) : null }
   })
   const admin = createAdminClient()
   const { data } = await admin.from('programa_checkins').select('semana, respuesta').eq('inscripcion_id', insc.id)
   const checkins = Object.fromEntries((data || []).map(c => [c.semana, c.respuesta as ProgramaCheckin]))
-  return { items, today, checkins }
+  return { items, today, esperandoTest, checkins }
 }
 
 type InscripcionToken = Inscripcion & { final_attempt_id: string | null }

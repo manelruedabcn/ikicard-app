@@ -8,11 +8,19 @@ on:
     - cron: '0 * * * *'
   workflow_dispatch: {}
 
+permissions:
+  contents: read
+
+concurrency:
+  group: programa-un-mes
+  cancel-in-progress: false
+
 jobs:
   send:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Trigger programa endpoint
         run: |
-          curl -fsS -X POST "https://app.ikigaier.com/api/cron/programa" \
+          curl -fsS --connect-timeout 15 --max-time 240 -X POST "https://app.ikigaier.com/api/cron/programa" \
             -H "x-cron-secret: ${{ secrets.CRON_SECRET }}"

@@ -31,7 +31,7 @@ export default async function MesPage({ params: { locale } }: { params: { locale
   if (!insc) return <MesClient locale={locale} userId={user.id} panel={null} />
 
   const inscripcion = insc as Inscripcion
-  const { items, today, checkins } = await panelDelPrograma(inscripcion)
+  const { items, today, esperandoTest, checkins } = await panelDelPrograma(inscripcion)
   const { data: resp } = await supabase
     .from('programa_respuestas')
     .select('campo, texto')
@@ -44,6 +44,7 @@ export default async function MesPage({ params: { locale } }: { params: { locale
       panel={{
         inscripcionId: inscripcion.id,
         startDate: inscripcion.start_date,
+        esperandoTest,
         tieneTest: Boolean(inscripcion.first_answers),
         testUrl: `/${locale}/inventario?prog=${inscripcion.token}`,
         items,
