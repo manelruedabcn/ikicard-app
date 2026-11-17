@@ -7,12 +7,15 @@ type SyncInput = {
   firstName?: string | null
   email?: string | null
   phone?: string | null
-  sourceType: 'registro' | 'paso' | 'taller' | 'inventario' | 'programa'
+  sourceType: 'registro' | 'paso' | 'taller' | 'inventario' | 'programa' | 'web'
   sourceId?: string | null
   sourceDetail?: Record<string, unknown>
   sourceCreatedAt?: string
   marketingConsent?: boolean
   unsubscribedAt?: string | null
+  // false: quien llama envía su propio aviso (p. ej. los formularios de la web,
+  // que avisan con todo lo que ha escrito la persona). Por defecto, true.
+  notify?: boolean
 }
 
 const TAGS: Record<SyncInput['sourceType'], { name: string; color: string }> = {
@@ -21,9 +24,10 @@ const TAGS: Record<SyncInput['sourceType'], { name: string; color: string }> = {
   taller: { name: 'Taller 29/9', color: '#c2866b' },
   inventario: { name: 'Inventario honesto', color: '#9a7b5f' },
   programa: { name: 'Un mes conociendo tu ikigai', color: '#7a8b6f' },
+  web: { name: 'Formulario web', color: '#8c5a45' },
 }
 
-export async function syncCrmContact(input: SyncInput) {
+export async function syncCrmContact(input: SyncInput): Promise<string | undefined> {
   const admin = createAdminClient()
   const email = input.email?.trim().toLowerCase() || null
   const phone = input.phone?.replace(/[^+\d]/g, '') || null
@@ -87,7 +91,7 @@ export async function syncCrmContact(input: SyncInput) {
     )
   }
 
-  if (!prevSource && shouldNotify(input)) {
+  if (!prevSource && input.notify !== false && shouldNotify(input)) {
     await sendTelegram(formatNotice({
       contactId,
       isNewContact: !existing,
@@ -98,6 +102,7 @@ export async function syncCrmContact(input: SyncInput) {
       marketing: payload.marketing_consent,
     }))
   }
+  return contactId
 }
 
 const SOURCE_LABEL: Record<SyncInput['sourceType'], string> = {
@@ -106,6 +111,7 @@ const SOURCE_LABEL: Record<SyncInput['sourceType'], string> = {
   taller: 'Inscripción al taller',
   inventario: 'Inventario honesto',
   programa: 'Un mes conociendo tu ikigai',
+  web: 'Formulario de la web',
 }
 
 // Los registros ya avisan desde su propio webhook (api/hooks/new-user), y las
