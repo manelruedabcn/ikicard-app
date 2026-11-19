@@ -24,3 +24,10 @@ jobs:
         run: |
           curl -fsS --connect-timeout 15 --max-time 240 -X POST "https://app.ikigaier.com/api/cron/programa" \
             -H "x-cron-secret: ${{ secrets.CRON_SECRET }}"
+      # Seguimiento del Inventario a los 3 días. Paso aparte: si falla, el
+      # programa ya se ha enviado y la siguiente ejecución lo reintenta.
+      - name: Trigger seguimiento del Inventario
+        continue-on-error: true
+        run: |
+          curl -fsS --connect-timeout 15 --max-time 240 -X POST "https://app.ikigaier.com/api/cron/inventario-seguimiento" \
+            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}"
