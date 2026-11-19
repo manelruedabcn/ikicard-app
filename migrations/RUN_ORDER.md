@@ -118,3 +118,9 @@ persiste al recargar (RLS + `herida_results`).
 (Nota: hubo una segunda versión de esta misma herramienta, "pains", con las
 mismas 15 frases pero construida en paralelo y sin el cruce con Máscaras.
 Se retiró del repo el 2026-08-31 — no ejecutes `migrations/pains.sql`, ya no existe.)
+
+## Seguimiento del Inventario (19-11-2026)
+
+Ejecutar `migrations/inventario-seguimiento.sql` en el SQL editor de Supabase
+**antes** de desplegar el código del seguimiento. Crea `inventario_seguimientos`
+(RLS activada, sin políticas: solo el servidor lee y escribe).

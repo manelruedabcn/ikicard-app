@@ -6,6 +6,7 @@ import { generarTitulares } from '@/lib/paso-titulares'
 import { getRareza } from '@/lib/paso-rareza'
 import { getInvCopy, type InvDevolucion } from '@/lib/inventario-content'
 import { getProgramaTexts, type ProgramaMail } from '@/lib/programa-content'
+import { getSeguimientoTexts, SEGUIMIENTO_RESPUESTAS, type SeguimientoRespuesta } from '@/lib/inventario-seguimiento-content'
 
 // El cliente se crea al primer envío, no al cargar el módulo: así la
 // compilación no exige RESEND_API_KEY (los despliegues de prueba no la tienen).
@@ -495,6 +496,9 @@ export async function sendInventarioEmail(
   unsubLink: string | null,
   // Pidió el programa de un mes: el correo abre con «Confirma tu plaza».
   programa: { url: string; texts: { title: string; text: string; button: string; note: string } } | null = null,
+  // Siguiente paso: quien no está en el programa ve al final la invitación a
+  // «Un mes conociendo tu ikigai», con este mismo test como punto de partida.
+  siguiente: { url: string; texts: { title: string; body: string; button: string } } | null = null,
 ) {
   const copy = getInvCopy(locale)
   const p = (text: string, extra = '') =>
@@ -542,6 +546,11 @@ export async function sendInventarioEmail(
       ${d.exercise.steps.map(s => p(s, 'font-size:14px;')).join('')}
     </div>
     ${p(d.close, 'font-size:14px;color:#5c554f;')}
+    ${siguiente ? `<div style="border-top:1px solid #e1c7ba;margin:32px 0 0;padding:26px 0 0;text-align:center;">
+        <p style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#c2866b;margin:0 0 10px;">${escapeHtml(siguiente.texts.title)}</p>
+        ${p(siguiente.texts.body, 'text-align:center;')}
+        ${button(siguiente.url, escapeHtml(siguiente.texts.button))}
+      </div>` : ''}
     ${unsubLink ? `<p style="font-size:12px;color:rgba(39,39,39,0.4);text-align:center;margin-top:24px;">${copy.mail.unsubscribe(unsubLink)}</p>` : ''}
   `)
 
@@ -551,6 +560,36 @@ export async function sendInventarioEmail(
     subject: copy.mail.subject,
     html,
   })
+  if (delivery.error) throw new Error(delivery.error.message)
+  return delivery
+}
+
+// ── Seguimiento del Inventario a los 3 días ──────────────────
+// Una sola pregunta y tres botones de un clic. Es comunicación, no la
+// devolución: solo se envía con consentimiento y siempre lleva la baja.
+export async function sendSeguimientoEmail(
+  to: string,
+  locale: string,
+  links: Record<SeguimientoRespuesta, string>,
+  unsubLink: string,
+  idempotencyKey?: string,
+) {
+  const s = getSeguimientoTexts(locale)
+  const unsub = getInvCopy(locale).mail.unsubscribe(unsubLink)
+  const option = (r: SeguimientoRespuesta) =>
+    `<a href="${links[r]}" style="display:block;border:1px solid #c2866b;color:#272727;text-decoration:none;font-size:15px;padding:14px 18px;margin:0 0 10px;text-align:center;">${escapeHtml(s.labels[r])}</a>`
+  const html = shell(`
+    <p style="font-size:15px;line-height:1.7;color:rgba(39,39,39,0.8);margin:0 0 18px;">${escapeHtml(s.intro)}</p>
+    <p style="font-family:Georgia,serif;font-size:22px;line-height:1.4;margin:0 0 22px;">${escapeHtml(s.question)}</p>
+    <div style="max-width:320px;margin:0 auto 18px;">${SEGUIMIENTO_RESPUESTAS.map(option).join('')}</div>
+    <p style="font-size:14px;line-height:1.6;color:#8b8179;margin:0 0 6px;">${escapeHtml(s.note)}</p>
+    <p style="font-size:15px;color:#403b37;margin:18px 0 0;">${escapeHtml(s.sign)}</p>
+    <p style="font-size:12px;color:rgba(39,39,39,0.4);text-align:center;margin-top:28px;">${unsub}</p>
+  `)
+  const delivery = await resend().emails.send(
+    { from: FROM, to, subject: s.subject, html },
+    idempotencyKey ? { idempotencyKey } : undefined,
+  )
   if (delivery.error) throw new Error(delivery.error.message)
   return delivery
 }

@@ -282,6 +282,26 @@ export async function enviarRecordatorioTest(insc: Inscripcion): Promise<boolean
   })
 }
 
+// ¿Ya hace (o hizo) el programa con este correo? Sirve para no invitar a
+// «Un mes conociendo tu ikigai» a quien ya está dentro o lo terminó.
+export async function estaEnPrograma(email: string): Promise<boolean> {
+  const admin = createAdminClient()
+  const { data, error } = await admin
+    .from('programa_inscripciones')
+    .select('id')
+    .eq('email', email.trim().toLowerCase())
+    .in('status', ['activa', 'completada'])
+    .limit(1)
+  if (error) throw new Error(error.message)
+  return Boolean(data?.length)
+}
+
+// Entrada al programa con cuenta. Con el intento, ese test es su punto de
+// partida (lo recoge /programa/empezar).
+export function empezarUrl(locale: string, attemptId: string | null): string {
+  return `${APP_URL}/${lang(locale)}/programa/empezar${attemptId ? `?intento=${attemptId}` : ''}`
+}
+
 export function confirmarUrl(insc: Inscripcion): string {
   return `${APP_URL}/api/programa/confirmar?t=${insc.token}&l=${lang(insc.locale)}`
 }

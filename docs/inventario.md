@@ -95,3 +95,25 @@ por lengua; la lógica es la misma). El libro está publicado en castellano: en
 catalán e inglés, las citas y los ejercicios son **traducción propia, pendiente
 de revisión de Manel**. Las frases de CAMINO salen del módulo CAMINO de cada
 lengua. Regla del proyecto: la lengua se llama **castellano**, nunca «español».
+
+## Después del test: programa y seguimiento (19-11-2026)
+
+- **Correo de la devolución.** Al final lleva «Esto es una foto de hoy.
+  ¿Lo trabajamos durante un mes?» con el botón «Empezar el mes gratis»
+  (`/programa/empezar?intento=<id>`: ese test es el punto de partida). No
+  aparece si la persona está o estuvo en el programa, ni si acaba de pedirlo.
+  Va dentro de la devolución, que es transaccional, así que no depende del
+  consentimiento de comunicaciones.
+- **Seguimiento a los 3 días** (`lib/inventario-seguimiento.ts`, tabla
+  `inventario_seguimientos`, migración `inventario-seguimiento.sql`). Una
+  pregunta, «¿Lo que leíste tenía que ver contigo?», y tres botones de un clic
+  (Sí, bastante · A medias · No mucho). Solo con `consent = true`, sin baja y
+  sin programa (activa, completada o baja). Uno por persona aunque repita el
+  test, y nunca para tests anteriores al 19-11-2026 ni de hace más de 7 días.
+  Lo envía `/api/cron/inventario-seguimiento`, de 8:00 a 21:00 de Madrid, en el
+  mismo flujo horario que el programa (`.github/workflows/programa.yml`).
+- **La respuesta** (`/api/inventario/seguimiento`): el GET no guarda nada
+  (los gestores de correo abren enlaces solos); el navegador confirma con un
+  POST. «Sí» y «A medias» ven el botón al programa con ese mismo test; «No»
+  ve el agradecimiento y hola@ikigaier.com para contarlo. Las respuestas se
+  consultan en `inventario_seguimientos` (respuesta, respondido_at).

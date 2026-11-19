@@ -5,7 +5,7 @@ import { buildDevolucion } from '@/lib/inventario-content'
 import { guardarLead, invLocale, invSource, invUuid, sessionUser } from '@/lib/inventario-server'
 import { sendInventarioEmail } from '@/lib/email'
 import { unsubUrl } from '@/lib/notify'
-import { confirmarInscripcion, confirmarUrl, inscripcionPorToken, prepararInscripcion } from '@/lib/programa-server'
+import { confirmarInscripcion, confirmarUrl, empezarUrl, estaEnPrograma, inscripcionPorToken, prepararInscripcion } from '@/lib/programa-server'
 import { getProgramaTexts } from '@/lib/programa-content'
 
 export const dynamic = 'force-dynamic'
@@ -90,11 +90,26 @@ export async function POST(req: Request) {
     }
   }
 
+  // Siguiente paso al final del correo: el programa de un mes, salvo para
+  // quien ya está dentro, lo ha terminado o acaba de pedirlo. Si la consulta
+  // falla, la devolución sale igual, sin la invitación.
+  let siguiente: { url: string; texts: { title: string; body: string; button: string } } | null = null
+  if (!progInsc && !programaConfirm && !autoConfirmToken && programaEstado !== 'ya') {
+    const dentro = await estaEnPrograma(email).catch(err => {
+      console.error('[inventario lead] programa check error:', err?.message)
+      return true
+    })
+    if (!dentro) {
+      const { title, body, button } = getProgramaTexts(locale).captura
+      siguiente = { url: empezarUrl(locale, attemptId), texts: { title, body, button } }
+    }
+  }
+
   // Envío transaccional: confirmamos éxito solo cuando Resend acepta el correo.
   const devolucion = buildDevolucion(answers, texto, locale)
   const unsub = finalConsent && !lead.unsubscribed_at ? unsubUrl(`inv:${lead.id}`, locale) : null
   try {
-    await sendInventarioEmail(email, locale, devolucion, unsub, programaConfirm)
+    await sendInventarioEmail(email, locale, devolucion, unsub, programaConfirm, siguiente)
   } catch (err) {
     console.error('[inventario lead] email error:', err)
     return NextResponse.json({ ok: false, error: 'email failed' }, { status: 502 })
