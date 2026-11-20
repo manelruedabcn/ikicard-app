@@ -12,6 +12,10 @@ type SyncInput = {
   sourceDetail?: Record<string, unknown>
   sourceCreatedAt?: string
   marketingConsent?: boolean
+  // Idioma en que se ha dirigido la persona. Si no se pasa, se toma del
+  // locale/lang del origen. Solo se guarda si el contacto aún no tiene uno
+  // (así no se pisa lo que Manel haya corregido a mano en la ficha).
+  language?: string | null
   unsubscribedAt?: string | null
   // false: quien llama envía su propio aviso (p. ej. los formularios de la web,
   // que avisan con todo lo que ha escrito la persona). Por defecto, true.
@@ -40,6 +44,9 @@ export async function syncCrmContact(input: SyncInput): Promise<string | undefin
   const { data: existing } = await query.maybeSingle()
 
   const now = new Date().toISOString()
+  const language = existing?.language || normalizeLanguage(
+    input.language ?? input.sourceDetail?.locale ?? input.sourceDetail?.lang,
+  )
   const payload = {
     user_id: input.userId || existing?.user_id || null,
     first_name: input.firstName?.trim() || existing?.first_name || (email ? email.split('@')[0] : ''),
@@ -49,6 +56,7 @@ export async function syncCrmContact(input: SyncInput): Promise<string | undefin
     marketing_consent_at:
       existing?.marketing_consent_at || (input.marketingConsent ? now : null),
     unsubscribed_at: input.unsubscribedAt ?? existing?.unsubscribed_at ?? null,
+    language,
     updated_at: now,
   }
 
@@ -100,9 +108,17 @@ export async function syncCrmContact(input: SyncInput): Promise<string | undefin
       email: payload.email,
       phone: payload.phone,
       marketing: payload.marketing_consent,
+      language: payload.language,
     }))
   }
   return contactId
+}
+
+const LANGUAGE_LABEL: Record<string, string> = { es: 'castellano', ca: 'catalán', en: 'inglés' }
+
+export function normalizeLanguage(value: unknown): 'es' | 'ca' | 'en' | null {
+  const code = String(value ?? '').trim().toLowerCase().slice(0, 2)
+  return code === 'es' || code === 'ca' || code === 'en' ? code : null
 }
 
 const SOURCE_LABEL: Record<SyncInput['sourceType'], string> = {
@@ -134,6 +150,7 @@ function formatNotice(n: {
   email: string | null
   phone: string | null
   marketing: boolean
+  language: string | null
 }): string {
   return [
     n.isNewContact
@@ -143,6 +160,7 @@ function formatNotice(n: {
     `👤 ${n.name || 'Sin nombre'}`,
     n.email ? `✉️ ${n.email}` : null,
     n.phone ? `📱 ${n.phone}` : null,
+    n.language ? `Idioma: ${LANGUAGE_LABEL[n.language] ?? n.language}` : null,
     `Acepta comunicaciones: ${n.marketing ? 'sí' : 'no'}`,
     '',
     `Ficha: https://app.ikigaier.com/es/admin/crm/${n.contactId}`,

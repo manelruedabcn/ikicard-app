@@ -13,11 +13,14 @@ export type CrmContact = {
   unsubscribed_at: string | null
   next_action: string | null
   next_action_at: string | null
+  language: 'es' | 'ca' | 'en' | null
   created_at: string
   updated_at: string
   sources: { source_type: string; source_id: string; detail: Record<string, unknown>; created_at: string }[]
   tags: { id: string; name: string; color: string }[]
 }
+
+export const CRM_LANGUAGES = { es: 'Castellano', ca: 'Catalán', en: 'Inglés' } as const
 
 export type CrmNote = { id: string; body: string; created_at: string }
 type CrmTag = { id: string; name: string; color: string }
