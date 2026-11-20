@@ -19,8 +19,11 @@ export async function updateCrmContact(form: FormData) {
   if (!['lead', 'cliente', 'inactivo'].includes(status)) throw new Error('Estado no válido')
   const nextAction = String(form.get('next_action') || '').trim().slice(0, 300) || null
   const nextActionAt = String(form.get('next_action_at') || '') || null
+  const languageRaw = String(form.get('language') || '')
+  const language = ['es', 'ca', 'en'].includes(languageRaw) ? languageRaw : null
   await admin.from('crm_contacts').update({
     status,
+    language,
     next_action: nextAction,
     next_action_at: nextActionAt ? new Date(nextActionAt).toISOString() : null,
     updated_at: new Date().toISOString(),

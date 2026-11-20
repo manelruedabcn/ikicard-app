@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { isCurrentUserAdmin } from '@/lib/admin'
-import { listCrmContacts } from '@/lib/crm'
+import { CRM_LANGUAGES, listCrmContacts } from '@/lib/crm'
 
 type Search = { q?: string; status?: string; source?: string; consent?: string }
 
@@ -49,7 +49,7 @@ export default async function CrmPage({ params: { locale }, searchParams }: { pa
             <tbody>
               {contacts.map(c => (
                 <tr key={c.id} className="border-t border-[#272727]/10 align-top hover:bg-[#c2866b]/[0.035]">
-                  <td className="px-4 py-4"><Link href={`/${locale}/admin/crm/${c.id}`} className="font-medium text-[#272727] hover:text-[#c2866b]">{c.first_name || 'Sin nombre'}</Link><div className="mt-1 text-xs text-[#272727]/50">{c.email || c.phone || '—'}</div></td>
+                  <td className="px-4 py-4"><Link href={`/${locale}/admin/crm/${c.id}`} className="font-medium text-[#272727] hover:text-[#c2866b]">{c.first_name || 'Sin nombre'}</Link><div className="mt-1 text-xs text-[#272727]/50">{c.email || c.phone || '—'}{c.language && <span className="ml-2 rounded bg-[#272727]/[0.06] px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-[#272727]/60" title={CRM_LANGUAGES[c.language]}>{c.language}</span>}</div></td>
                   <td className="px-4 py-4 text-xs text-[#272727]/60">{Array.from(new Set(c.sources.map(s => s.source_type))).join(' · ') || '—'}</td>
                   <td className="px-4 py-4"><div className="flex flex-wrap gap-1">{c.tags.map(tag => <span key={tag.id} className="rounded-full px-2 py-1 text-[10px]" style={{ backgroundColor: `${tag.color}18`, color: tag.color }}>{tag.name}</span>)}</div></td>
                   <td className="px-4 py-4 capitalize text-[#272727]/70">{c.status}</td>
