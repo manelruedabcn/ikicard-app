@@ -12,10 +12,14 @@
 const MARGIN = 16 // mm
 const GAP = 6 // mm entre bloques
 
-// En el clon: fuera la ikionda (html2canvas la desplaza sobre el título) y
-// todo lo interactivo; dentro el pie de marca, que en pantalla está oculto.
+// En el clon: la ikionda se oculta pero conserva su hueco (html2canvas la
+// desplaza sobre el título y, sin el hueco, el título se pega al texto); fuera
+// lo interactivo; dentro el pie de marca, que en pantalla está oculto.
 function prepararClon(doc: Document) {
-  doc.querySelectorAll<HTMLElement>('.foco-onda, .foco-no-export').forEach(el => {
+  doc.querySelectorAll<HTMLElement>('.foco-onda').forEach(el => {
+    el.style.visibility = 'hidden'
+  })
+  doc.querySelectorAll<HTMLElement>('.foco-no-export').forEach(el => {
     el.style.display = 'none'
   })
   doc.querySelectorAll<HTMLElement>('.foco-print-only').forEach(el => {
