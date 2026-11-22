@@ -246,14 +246,14 @@ export default function FocoClient({ locale, userId, previous }: Props) {
     <Shell userId={userId} locale={locale} footer={copy.footer} wide>
       <style>{`.foco-print-only{display:none}`}</style>
       <article ref={informeRef} className="w-full max-w-3xl mt-4 space-y-12 bg-[#FDFBF7]">
-        <header>
+        <header className="foco-pdf-block">
           <p className="text-xs tracking-[0.3em] uppercase text-[#c2866b] mb-3">{copy.resultEyebrow}</p>
           <h1 className="font-[family-name:var(--font-cormorant)] text-5xl sm:text-6xl leading-[1.05] text-[#272727]">{P.t}</h1>
           <Onda />
           <p className="font-[family-name:var(--font-cormorant)] italic text-2xl leading-snug text-[#272727]/70">{P.l}</p>
         </header>
 
-        <section className="rounded-xl bg-[#272727]/[0.04] p-6 sm:p-8">
+        <section className="foco-pdf-block rounded-xl bg-[#272727]/[0.04] p-6 sm:p-8">
           <p className="text-[11px] tracking-[0.2em] uppercase text-[#A8794B] mb-2">{copy.culpaEyebrow}</p>
           <h2 className="font-[family-name:var(--font-cormorant)] text-3xl text-[#272727]">{P.ct}</h2>
           <Onda />
@@ -263,8 +263,10 @@ export default function FocoClient({ locale, userId, previous }: Props) {
         </section>
 
         <section>
-          <h2 className="font-[family-name:var(--font-cormorant)] text-3xl text-[#272727]">{copy.mapTitle}</h2>
-          <p className="text-sm text-[#272727]/55 mt-1 mb-8">{copy.mapSub}</p>
+          <div className="foco-pdf-block pb-2">
+            <h2 className="font-[family-name:var(--font-cormorant)] text-3xl text-[#272727]">{copy.mapTitle}</h2>
+            <p className="text-sm text-[#272727]/55 mt-1 mb-6">{copy.mapSub}</p>
+          </div>
           <div className="space-y-10">
             {FOCO_DIMS.map(k => {
               const d = copy.dims[k]
@@ -272,7 +274,7 @@ export default function FocoClient({ locale, userId, previous }: Props) {
               const z = d.zones[zone]
               const pos = Math.max(3, Math.min(97, r.scores[k]))
               return (
-                <div key={k}>
+                <div key={k} className="foco-pdf-block">
                   <div className="flex items-baseline justify-between gap-4 mb-3">
                     <h3 className="font-[family-name:var(--font-cormorant)] text-2xl text-[#272727]">{d.name}</h3>
                     <span className="text-xs tracking-[0.12em] uppercase text-[#c2866b] text-right">{z.z}</span>
@@ -300,7 +302,7 @@ export default function FocoClient({ locale, userId, previous }: Props) {
           </div>
         </section>
 
-        <section>
+        <section className="foco-pdf-block">
           <h2 className="font-[family-name:var(--font-cormorant)] text-3xl text-[#272727]">{copy.integTitle}</h2>
           <p className="text-sm text-[#272727]/55 mt-1 mb-6">{copy.integSub}</p>
           <div className="rounded-xl border border-[#272727]/12 p-6">
@@ -327,7 +329,7 @@ export default function FocoClient({ locale, userId, previous }: Props) {
           </div>
         </section>
 
-        <section className="text-center py-4">
+        <section className="foco-pdf-block text-center py-4">
           <Onda center />
           <p className="font-[family-name:var(--font-cormorant)] text-2xl leading-snug text-[#272727]">
             {copy.principio.map((l, i) => (
@@ -376,7 +378,7 @@ export default function FocoClient({ locale, userId, previous }: Props) {
 
         {/* Pie de marca: solo aparece en el PDF, para que quien lo reciba sepa
             dónde hacer su propio test. */}
-        <div className="foco-print-only pt-6 border-t border-[#272727]/15 text-center">
+        <div className="foco-print-only foco-pdf-block pt-6 border-t border-[#272727]/15 text-center">
           <p className="text-xs tracking-[0.3em] uppercase text-[#c2866b] mb-1">{copy.pdfFooter[0]}</p>
           <p className="font-[family-name:var(--font-cormorant)] text-lg text-[#272727]">{copy.pdfFooter[1]}</p>
         </div>
@@ -414,7 +416,7 @@ function Card({ label, text, accent = false }: { label: string; text: string; ac
 // La ikionda: separador de marca (pincelada en grafito).
 function Onda({ center = false }: { center?: boolean }) {
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src="/brand/ikionda.png" alt="" aria-hidden="true" className={`block w-[120px] h-auto my-5 ${center ? 'mx-auto' : ''}`} />
+  return <img src="/brand/ikionda.png" alt="" aria-hidden="true" className={`foco-onda block w-[120px] h-auto my-5 ${center ? 'mx-auto' : ''}`} />
 }
 
 function Shell({
