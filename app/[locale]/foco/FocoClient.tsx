@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { trackEvent } from '@/lib/analytics'
 import { FOCO_DIMS, FOCO_TOTAL, computeFoco, focoZone, type FocoAnswers } from '@/lib/foco'
 import { getFocoCopy } from '@/lib/foco-content'
+import { generarFocoPdf } from '@/lib/foco-pdf'
 
 type Stage = 'intro' | 'test' | 'result'
 
@@ -15,6 +16,10 @@ interface Props {
   // Último resultado guardado (solo con sesión): se muestra al volver.
   previous: number[] | null
 }
+
+// Resultado hecho sin cuenta: se guarda en el navegador para no perderlo si la
+// persona se registra justo después (vuelve a /foco ya con sesión).
+const PENDING_KEY = 'foco_pending_v1'
 
 const empty = (): FocoAnswers => new Array(FOCO_TOTAL).fill(null)
 
@@ -27,7 +32,26 @@ export default function FocoClient({ locale, userId, previous }: Props) {
   const [cur, setCur] = useState(0)
   const [saved, setSaved] = useState(false)
   const [toast, setToast] = useState('')
+  const [pdfBusy, setPdfBusy] = useState(false)
   const lock = useRef(false)
+  const informeRef = useRef<HTMLElement>(null)
+
+  // Vuelve del registro con un resultado pendiente: se muestra y se guarda.
+  useEffect(() => {
+    if (!userId || previous) return
+    try {
+      const raw = localStorage.getItem(PENDING_KEY)
+      if (!raw) return
+      const pending = JSON.parse(raw)
+      localStorage.removeItem(PENDING_KEY)
+      if (Array.isArray(pending) && pending.length === FOCO_TOTAL && pending.every(v => typeof v === 'number' && v >= 1 && v <= 5)) {
+        setAnswers(pending)
+        setStage('result')
+        save(pending)
+      }
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId])
 
   // Teclas 1-5 para responder (como el test original).
   useEffect(() => {
@@ -72,7 +96,15 @@ export default function FocoClient({ locale, userId, previous }: Props) {
     window.scrollTo({ top: 0 })
     const r = computeFoco(final)
     trackEvent('foco_complete', { locale, profile: r.profile, integ: r.integ })
-    if (!userId) return
+    if (!userId) {
+      try { localStorage.setItem(PENDING_KEY, JSON.stringify(final)) } catch {}
+      return
+    }
+    await save(final)
+  }
+
+  async function save(final: FocoAnswers) {
+    const r = computeFoco(final)
     const { error } = await supabase.from('foco_results').upsert(
       {
         user_id: userId,
@@ -188,6 +220,19 @@ export default function FocoClient({ locale, userId, previous }: Props) {
     P.ct
   )
 
+  async function pdf() {
+    if (!informeRef.current || pdfBusy) return
+    setPdfBusy(true)
+    trackEvent('pdf_download', { tool: 'foco' })
+    try {
+      await generarFocoPdf(informeRef.current, copy.pdfFile, 'share', locale)
+    } catch {
+      try { await generarFocoPdf(informeRef.current, copy.pdfFile, 'download', locale) } catch { window.print() }
+    } finally {
+      setPdfBusy(false)
+    }
+  }
+
   async function copyResult() {
     try {
       await navigator.clipboard.writeText(summary)
@@ -199,7 +244,8 @@ export default function FocoClient({ locale, userId, previous }: Props) {
 
   return (
     <Shell userId={userId} locale={locale} footer={copy.footer} wide>
-      <article className="w-full max-w-3xl mt-4 space-y-12">
+      <style>{`.foco-print-only{display:none}`}</style>
+      <article ref={informeRef} className="w-full max-w-3xl mt-4 space-y-12 bg-[#FDFBF7]">
         <header>
           <p className="text-xs tracking-[0.3em] uppercase text-[#c2866b] mb-3">{copy.resultEyebrow}</p>
           <h1 className="font-[family-name:var(--font-cormorant)] text-5xl sm:text-6xl leading-[1.05] text-[#272727]">{P.t}</h1>
@@ -291,7 +337,29 @@ export default function FocoClient({ locale, userId, previous }: Props) {
           <p className="text-xs tracking-[0.2em] uppercase text-[#272727]/45 mt-3">{copy.practica}</p>
         </section>
 
-        <section className="grid sm:grid-cols-3 gap-3">
+        {!userId && (
+          <section className="foco-no-export rounded-xl border border-[#c2866b]/30 bg-[#c2866b]/[0.05] p-6 sm:p-8">
+            <h2 className="font-[family-name:var(--font-cormorant)] text-3xl text-[#272727]">{copy.more.title}</h2>
+            <p className="text-[15px] leading-relaxed text-[#272727]/75 mt-2 mb-5">{copy.more.text}</p>
+            <div className="grid sm:grid-cols-3 gap-3 mb-6">
+              {copy.more.items.map(n => (
+                <Link key={n.href} href={n.href} className="block rounded-lg border border-[#272727]/12 bg-[#FDFBF7] px-4 py-4 hover:border-[#c2866b] transition-colors">
+                  <span className="block font-[family-name:var(--font-cormorant)] text-xl text-[#272727]">{n.title}</span>
+                  <span className="block text-sm text-[#272727]/55 mt-1">{n.text}</span>
+                </Link>
+              ))}
+            </div>
+            <p className="text-sm leading-relaxed text-[#272727]/65 mb-4">{copy.more.account}</p>
+            <Link
+              href={`/${locale}/login?modo=registro&next=${encodeURIComponent(`/${locale}/foco`)}`}
+              className="inline-block px-6 py-3 bg-[#272727] text-[#FDFBF7] text-sm tracking-wide hover:bg-[#c2866b] transition-colors"
+            >
+              {copy.more.accountBtn}
+            </Link>
+          </section>
+        )}
+
+        <section className="foco-no-export grid sm:grid-cols-2 gap-3">
           {copy.next.map(n => {
             const cls = 'block rounded-xl border border-[#272727]/15 px-5 py-5 hover:border-[#c2866b] transition-colors'
             const inner = (
@@ -306,9 +374,19 @@ export default function FocoClient({ locale, userId, previous }: Props) {
           })}
         </section>
 
-        <div className="space-y-3 pb-8">
+        {/* Pie de marca: solo aparece en el PDF, para que quien lo reciba sepa
+            dónde hacer su propio test. */}
+        <div className="foco-print-only pt-6 border-t border-[#272727]/15 text-center">
+          <p className="text-xs tracking-[0.3em] uppercase text-[#c2866b] mb-1">{copy.pdfFooter[0]}</p>
+          <p className="font-[family-name:var(--font-cormorant)] text-lg text-[#272727]">{copy.pdfFooter[1]}</p>
+        </div>
+
+        <div className="foco-no-export space-y-3 pb-8">
           <div className="flex flex-wrap gap-3">
-            <button onClick={copyResult} className="px-5 py-2.5 bg-[#272727] text-[#FDFBF7] text-sm hover:bg-[#c2866b] transition-colors">
+            <button onClick={pdf} disabled={pdfBusy} className="px-5 py-2.5 bg-[#3F4A34] text-[#FDFBF7] text-sm hover:bg-[#c2866b] transition-colors disabled:opacity-60">
+              {pdfBusy ? copy.pdfBusy : copy.pdf}
+            </button>
+            <button onClick={copyResult} className="px-5 py-2.5 border border-[#272727]/20 text-sm text-[#272727] hover:border-[#272727]">
               {copy.copy}
             </button>
             <button onClick={start} className="px-5 py-2.5 border border-[#272727]/20 text-sm text-[#272727] hover:border-[#272727]">

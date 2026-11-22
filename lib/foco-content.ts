@@ -49,6 +49,17 @@ export interface FocoCopy {
   again: string
   saved: string
   footer: string
+  pdf: string
+  pdfBusy: string
+  pdfFile: string
+  pdfFooter: [string, string]
+  more: {
+    title: string
+    text: string
+    items: { href: string; title: string; text: string }[]
+    account: string
+    accountBtn: string
+  }
   summary: (profile: string, lines: string[], integ: string, ct: string) => string
   dims: Record<FocoDim, DimText>
   profiles: Record<FocoZone, ProfileText>
@@ -89,7 +100,6 @@ const ES: FocoCopy = {
   principio: ['No te quedes en un extremo.', 'Tu fuerza está en tu lado.', 'Para crecer, mira hacia el otro.'],
   practica: 'Práctica ikigaier',
   next: [
-    { href: '/es/paso', title: 'Test PASO', text: 'Descubre cómo caminas por la vida.' },
     { href: 'https://www.ikigaier.com/es/libros/', title: 'Los libros', text: 'Un camino en tres libros: liberar, actuar y alinear.' },
     { href: 'https://www.ikigaier.com/es/talleres/', title: 'Los talleres', text: 'Presenciales u online, para ti o para tu equipo.' },
   ],
@@ -99,6 +109,20 @@ const ES: FocoCopy = {
   again: 'Repetir el test',
   saved: 'Guardado en tu cuenta.',
   footer: 'FOCO es un test para conocerte mejor. No es un test médico.',
+  pdf: 'Descargar en PDF',
+  pdfBusy: 'Preparando el PDF…',
+  pdfFile: 'Mi resultado FOCO - IKIGAIER.pdf',
+  pdfFooter: ['Test FOCO', 'Haz tu propio test en app.ikigaier.com/es/foco'],
+  more: {
+    title: '¿Quieres seguir?',
+    text: 'Este test es una de varias herramientas gratuitas para conocerte. Puedes seguir con ellas a tu ritmo.',
+    items: [
+      { href: '/es/inventario?src=foco', title: 'Test de ikigai', text: 'Desde dónde empiezas, en 16 preguntas.' },
+        { href: '/es/programa?src=foco', title: 'Un mes conociendo tu ikigai', text: 'Un programa gratuito de cuatro semanas, sin prisas.' },
+    ],
+    account: 'Si creas una cuenta gratuita, tu resultado queda guardado y lo tienes todo en un mismo sitio.',
+    accountBtn: 'Crear mi cuenta gratuita',
+  },
   summary: (p, lines, integ, ct) =>
     `Mi resultado en el Test FOCO (práctica ikigaier): ${p}.\n${lines.map(l => `· ${l}`).join('\n')}\n· Cómo lo llevo: ${integ}\n«${ct}»`,
   dims: {
@@ -213,7 +237,6 @@ const CA: FocoCopy = {
   principio: ['No et quedis en un extrem.', 'La teva força és al teu costat.', 'Per créixer, mira cap a l’altre.'],
   practica: 'Pràctica ikigaier',
   next: [
-    { href: '/ca/paso', title: 'Test PASO', text: 'Descobreix com camines per la vida.' },
     { href: 'https://www.ikigaier.com/ca/llibres/', title: 'Els llibres', text: 'Un camí en tres llibres: alliberar, actuar i alinear.' },
     { href: 'https://www.ikigaier.com/ca/tallers/', title: 'Els tallers', text: 'Presencials o en línia, per a tu o per al teu equip.' },
   ],
@@ -223,6 +246,20 @@ const CA: FocoCopy = {
   again: 'Repetir el test',
   saved: 'Desat al teu compte.',
   footer: 'FOCO és un test per conèixer-te millor. No és un test mèdic.',
+  pdf: 'Descarregar en PDF',
+  pdfBusy: 'Preparant el PDF…',
+  pdfFile: 'El meu resultat FOCO - IKIGAIER.pdf',
+  pdfFooter: ['Test FOCO', 'Fes el teu propi test a app.ikigaier.com/ca/foco'],
+  more: {
+    title: 'Vols continuar?',
+    text: 'Aquest test és una de les diverses eines gratuïtes per conèixer-te. Pots continuar-hi al teu ritme.',
+    items: [
+      { href: '/ca/inventario?src=foco', title: 'Test d’ikigai', text: 'Des d’on comences, en 16 preguntes.' },
+        { href: '/ca/programa?src=foco', title: 'Un mes coneixent el teu ikigai', text: 'Un programa gratuït de quatre setmanes, sense presses.' },
+    ],
+    account: 'Si crees un compte gratuït, el teu resultat queda desat i ho tens tot en un mateix lloc.',
+    accountBtn: 'Crear el meu compte gratuït',
+  },
   summary: (p, lines, integ, ct) =>
     `El meu resultat al Test FOCO (pràctica ikigaier): ${p}.\n${lines.map(l => `· ${l}`).join('\n')}\n· Com ho porto: ${integ}\n«${ct}»`,
   dims: {
@@ -337,7 +374,6 @@ const EN: FocoCopy = {
   principio: ['Don’t stay at one extreme.', 'Your strength is on your side.', 'To grow, look towards the other.'],
   practica: 'The ikigaier practice',
   next: [
-    { href: '/en/paso', title: 'PASO test', text: 'Discover how you walk through life.' },
     { href: 'https://www.ikigaier.com/en/books/', title: 'The books', text: 'A path in three books: release, act and align.' },
     { href: 'https://www.ikigaier.com/en/workshops/', title: 'The workshops', text: 'In person or online, for you or your team.' },
   ],
@@ -347,6 +383,20 @@ const EN: FocoCopy = {
   again: 'Take the test again',
   saved: 'Saved to your account.',
   footer: 'FOCO is a test to get to know yourself better. It is not a medical test.',
+  pdf: 'Download as PDF',
+  pdfBusy: 'Preparing the PDF…',
+  pdfFile: 'My FOCO result - IKIGAIER.pdf',
+  pdfFooter: ['FOCO test', 'Take your own test at app.ikigaier.com/en/foco'],
+  more: {
+    title: 'Want to keep going?',
+    text: 'This test is one of several free tools to get to know yourself. You can carry on with them at your own pace.',
+    items: [
+      { href: '/en/inventario?src=foco', title: 'Ikigai test', text: 'Where you are starting from, in 16 questions.' },
+        { href: '/en/programa?src=foco', title: 'A month getting to know your ikigai', text: 'A free four-week programme, at an easy pace.' },
+    ],
+    account: 'If you create a free account, your result is saved and you have everything in one place.',
+    accountBtn: 'Create my free account',
+  },
   summary: (p, lines, integ, ct) =>
     `My result in the FOCO test (the ikigaier practice): ${p}.\n${lines.map(l => `· ${l}`).join('\n')}\n· How I handle it: ${integ}\n“${ct}”`,
   dims: {

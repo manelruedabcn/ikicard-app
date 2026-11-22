@@ -14,4 +14,12 @@ especialista ↔ multipotencial. Contenido cerrado con Manel el 01/11/2026
   zonas A < 38 ≤ M ≤ 62 < B. Perfil = zona de la media de las cuatro.
 - **Textos:** `lib/foco-content.ts` (`getFocoCopy(locale)`). CA y EN son
   traducción fiel del castellano. ⚠️ Pendiente de revisión de Manel.
+- **PDF:** `lib/foco-pdf.ts` (misma mecánica que Heridas/Máscaras: html2canvas
+  + jsPDF, compartir en móvil o descarga). Libre, sin registro. Pie de marca
+  solo en el PDF (`.foco-print-only`).
+- **Seguir explorando (sin sesión):** recuadro final con las herramientas que
+  son gratis de verdad: test de ikigai (`/inventario`), PASO y el programa de
+  un mes (`/programa`), más «Crear mi cuenta gratuita». Si se registra, el
+  resultado hecho sin cuenta (guardado en `localStorage`) se guarda al volver.
+  ⚠️ Si se añaden herramientas gratis al alta, revisar este texto.
 - **Pendiente:** que IKIBOARD lea `foco_results` en el punto de partida.
