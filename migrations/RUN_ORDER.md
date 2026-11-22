@@ -32,6 +32,11 @@ veces sin romper nada).
    políticas, solo service_role). **No necesita permiso** en `entitlements`:
    `/inventario` es pública, como PASO. Ejecutarla antes de desplegar el código.
 
+   `foco.sql` (Test FOCO, del especialista al multipotencial) es
+   independiente: registra la herramienta `foco` (ruta `/foco`), crea
+   `foco_results` (RLS por usuario) y da el permiso gratis a todos, como
+   PASO (trigger de alta + backfill). `/foco` también funciona sin cuenta.
+
    `programa.sql` («Un mes conociendo tu ikigai») va **después** de
    `inventario.sql`: crea `programa_inscripciones`, `programa_envios` y
    `programa_encuentros`. Tampoco necesita permisos. Los encuentros se dan de
