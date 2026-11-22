@@ -246,7 +246,7 @@ export default function FocoClient({ locale, userId, previous }: Props) {
     <Shell userId={userId} locale={locale} footer={copy.footer} wide>
       <style>{`.foco-print-only{display:none}`}</style>
       <article ref={informeRef} className="w-full max-w-3xl mt-4 space-y-12 bg-[#FDFBF7]">
-        <header className="foco-pdf-block">
+        <header className="foco-pdf-block pb-4">
           <p className="text-xs tracking-[0.3em] uppercase text-[#c2866b] mb-3">{copy.resultEyebrow}</p>
           <h1 className="font-[family-name:var(--font-cormorant)] text-5xl sm:text-6xl leading-[1.05] text-[#272727]">{P.t}</h1>
           <Onda />
