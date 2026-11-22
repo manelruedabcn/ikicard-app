@@ -1,28 +1,30 @@
-// Generación del PDF del resultado del test FOCO, en el propio
-// navegador. Misma mecánica que Máscaras / PASO.
+// Generación del PDF del resultado del test FOCO, en el propio navegador.
 //
-// window.print() no sirve en móvil: en Safari es confuso y en los navegadores
-// dentro de apps (Instagram, etc.) no hace nada. Aquí capturamos el informe a
-// imagen y lo montamos en un PDF A4 real, que luego se comparte con el menú
-// nativo del móvil (o se descarga como fallback). Funciona igual en iPhone,
-// Android y navegadores embebidos.
+// Misma base que Heridas / Máscaras (html2canvas + jsPDF, compartir en móvil
+// o descarga), pero en lugar de una sola captura cortada en páginas, captura
+// cada bloque del informe por separado (`.foco-pdf-block`) y los coloca en
+// A4 con márgenes. Si un bloque no cabe en lo que queda de página, pasa
+// entero a la siguiente: así ninguna tarjeta se parte por la mitad.
 //
 // Las librerías se importan de forma diferida (solo en el clic) para no cargar
 // nada en el render inicial ni romper el SSR.
 
-// Prepara el clon del informe para el PDF: enseña el pie con QR (que en
-// pantalla está oculto) y esconde lo interactivo (botones y ejercicio).
+const MARGIN = 16 // mm
+const GAP = 6 // mm entre bloques
+
+// En el clon: fuera la ikionda (html2canvas la desplaza sobre el título) y
+// todo lo interactivo; dentro el pie de marca, que en pantalla está oculto.
 function prepararClon(doc: Document) {
+  doc.querySelectorAll<HTMLElement>('.foco-onda, .foco-no-export').forEach(el => {
+    el.style.display = 'none'
+  })
   doc.querySelectorAll<HTMLElement>('.foco-print-only').forEach(el => {
     el.style.display = 'block'
-  })
-  doc.querySelectorAll<HTMLElement>('.foco-no-export').forEach(el => {
-    el.style.display = 'none'
   })
 }
 
 export async function generarFocoPdf(
-  el: HTMLElement,
+  root: HTMLElement,
   fileName = 'Test-FOCO.pdf',
   mode: 'download' | 'share' = 'download',
   locale = 'es'
@@ -32,32 +34,46 @@ export async function generarFocoPdf(
     import('jspdf'),
   ])
 
-  const canvas = await html2canvas(el, {
-    scale: 2,
-    backgroundColor: '#FDFBF7',
-    useCORS: true,
-    windowWidth: el.scrollWidth,
-    onclone: (clonedDoc: Document) => prepararClon(clonedDoc),
-  })
+  // El pie solo existe para el PDF: se enseña un momento para poder capturarlo.
+  const ocultos = Array.from(root.querySelectorAll<HTMLElement>('.foco-print-only'))
+  ocultos.forEach(el => { el.style.display = 'block' })
 
   const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
   const pageW = pdf.internal.pageSize.getWidth()
   const pageH = pdf.internal.pageSize.getHeight()
-  const imgW = pageW
-  const imgH = (canvas.height * imgW) / canvas.width
-  const imgData = canvas.toDataURL('image/jpeg', 0.92)
+  const usableW = pageW - MARGIN * 2
+  const fondo = () => {
+    pdf.setFillColor(253, 251, 247) // #FDFBF7, el crema de la app
+    pdf.rect(0, 0, pageW, pageH, 'F')
+  }
 
-  // El informe es más alto que una página: se reparte en varias A4, desplazando
-  // la misma imagen hacia arriba página a página.
-  let heightLeft = imgH
-  let position = 0
-  pdf.addImage(imgData, 'JPEG', 0, position, imgW, imgH)
-  heightLeft -= pageH
-  while (heightLeft > 0) {
-    position -= pageH
-    pdf.addPage()
-    pdf.addImage(imgData, 'JPEG', 0, position, imgW, imgH)
-    heightLeft -= pageH
+  try {
+    const blocks = Array.from(root.querySelectorAll<HTMLElement>('.foco-pdf-block'))
+    // Todos los bloques a la misma escala: la del más ancho, ajustado al A4.
+    const maxPx = Math.max(...blocks.map(b => b.offsetWidth), 1)
+    const mmPerPx = usableW / maxPx
+
+    fondo()
+    let y = MARGIN
+    for (const block of blocks) {
+      const canvas = await html2canvas(block, {
+        scale: 2,
+        backgroundColor: '#FDFBF7',
+        useCORS: true,
+        onclone: (clonedDoc: Document) => prepararClon(clonedDoc),
+      })
+      const w = block.offsetWidth * mmPerPx
+      const h = (canvas.height / canvas.width) * w
+      if (y + h > pageH - MARGIN && y > MARGIN) {
+        pdf.addPage()
+        fondo()
+        y = MARGIN
+      }
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', MARGIN, y, w, Math.min(h, pageH - MARGIN * 2))
+      y += h + GAP
+    }
+  } finally {
+    ocultos.forEach(el => { el.style.display = '' })
   }
 
   const blob = pdf.output('blob')
