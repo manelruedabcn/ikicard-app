@@ -18,6 +18,10 @@
       "programa": {
         "name": "Un mes conociendo tu ikigai",
         "description": "Tu programa de cuatro semanas: el calendario, cada semana y tu libreta"
+      },
+      "foco": {
+        "name": "Test FOCO",
+        "description": "¿Eres de una cosa o de muchas?"
       }
     }
   },

@@ -18,6 +18,10 @@
       "programa": {
         "name": "A month getting to know your ikigai",
         "description": "Your four-week programme: the calendar, each week and your notebook"
+      },
+      "foco": {
+        "name": "FOCO test",
+        "description": "Are you a one-thing or a many-things person?"
       }
     }
   },

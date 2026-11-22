@@ -108,6 +108,7 @@ Cada herramienta = una migración `migrations/<tool>.sql` + carpeta
 | **La herida dominante** | `/heridas` | de qué te proteges, antes de Máscaras (cruza con su resultado) | Bilingüe (EN = ES por ahora) |
 | **Un mes conociendo tu ikigai** | `/mes` (panel) + correos + `/programa` | programa gratuito de 4 semanas **con cuenta**: calendario, contenido semanal y libreta (`programa_respuestas`, RLS); tarea programada `/api/cron/programa`. Ver `docs/programa.md` | ES/CA/EN |
 | **Inventario honesto** | `/inventario` | test de ikigai de entrada, **sin cuenta**: Activo × Consciente, reglas fijas (cero IA). Ver `docs/inventario.md` | ES/CA/EN |
+| **Test FOCO** | `/foco` | del especialista al multipotencial, **sin cuenta** (con sesión guarda en `foco_results`). Ver `docs/foco.md` | ES/CA/EN |
 | Taller, Viaje, Oráculo, IKICARD | varios | módulos previos | En prod / activos |
 
 ### IKIBOARD = el proyecto final ("el libro de fotos de tu futuro")
