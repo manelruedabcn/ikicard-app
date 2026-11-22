@@ -66,8 +66,21 @@ export async function generarFocoPdf(
         useCORS: true,
         onclone: (clonedDoc: Document) => prepararClon(clonedDoc),
       })
-      const w = block.offsetWidth * mmPerPx
-      const h = (canvas.height / canvas.width) * w
+      let w = block.offsetWidth * mmPerPx
+      let h = (canvas.height / canvas.width) * w
+      // El pie de marca no merece una página para él solo: si no cabe, se
+      // encoge un poco y ocupa el margen inferior de la última página.
+      const esPie = block.classList.contains('foco-print-only')
+      const libre = pageH - 6 - y
+      if (esPie && y + h > pageH - MARGIN && libre >= h * 0.6) {
+        const s = Math.min(1, libre / h)
+        const x = MARGIN + (w - w * s) / 2
+        w *= s
+        h *= s
+        pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', x, y, w, h)
+        y += h + GAP
+        continue
+      }
       if (y + h > pageH - MARGIN && y > MARGIN) {
         pdf.addPage()
         fondo()
